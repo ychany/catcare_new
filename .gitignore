@@ -1,0 +1,46 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*~
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables
+*.env
+
+# Django static and media
+staticfiles/
+media/
+
+db.sqlite3
+
+# Logs
+*.log
+
+# PyCharm
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Coverage
+htmlcov/
+.coverage
+
+# Testing
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# Build
+build/
+dist/
+*.egg-info/ 

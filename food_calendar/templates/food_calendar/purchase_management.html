@@ -1,0 +1,166 @@
+{% extends 'common_app/base.html' %}
+{% load static humanize %}
+
+{% block title %}구매 관리 - 냐옹노트{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- 필터 및 총 합계 -->
+    <div class="row mb-3 align-items-center">
+        <form method="get" class="row g-2 w-100 align-items-center">
+            <div class="col-md-2">
+                <input type="month" name="month" value="{{ current_month }}" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <select name="pet" class="form-select">
+                    <option value="">전체 반려동물</option>
+                    {% for pet in pets %}
+                    <option value="{{ pet.id }}" {% if selected_pet_id == pet.id|stringformat:"i" %}selected{% endif %}>
+                        {{ pet.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="text" name="search" value="{{ search }}" placeholder="상품명 검색" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <select name="type" class="form-select">
+                    <option value="">전체 타입</option>
+                    <option value="feed" {% if selected_type == 'feed' %}selected{% endif %}>사료</option>
+                    <option value="snack" {% if selected_type == 'snack' %}selected{% endif %}>간식</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">검색</button>
+            </div>
+            <div class="col-md-3 text-end">
+                <strong>총 합계:</strong> {{ total_price|floatformat:0|intcomma }}원
+            </div>
+        </form>
+    </div>
+
+    <!-- 구매 내역 테이블 -->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>구매일</th>
+                    <th>개봉일</th>
+                    <th>반려동물</th>
+                    <th>가격</th>
+                    <th>타입</th>
+                    <th>상품명</th>
+                    <th>구매처 링크</th>
+                    <th>만족도</th>
+                    <th>무게(kg)</th>
+                    <th>메모</th>
+                    <th>일일 섭취량(kg/day)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.purchase_date|date:"Y-m-d" }}</td>
+                    <td>{{ event.start_time|date:"Y-m-d" }}</td>
+                    <td>{{ event.pet.name }}</td>
+                    <td>
+                        {{ event.price|floatformat:0|intcomma }}원
+                    </td>
+                    <td>{{ event.get_type_display }}</td>
+                    <td>{{ event.product_name }}</td>
+                    <td>
+                        {% if event.purchase_link %}
+                        <a href="{{ event.purchase_link }}" target="_blank">링크</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= event.rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ event.quantity_kg }}</td>
+                    <td>{{ event.description }}</td>
+                    <td>
+                        {% if event.type == 'feed' and not event.end_time %}
+                            <span class="text-primary">섭취중</span>
+                        {% elif event.type == 'feed' %}
+                            {{ event.daily_amount|floatformat:3 }}
+                        {% else %}
+                            <!-- 간식이면 공란 -->
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="11" class="text-center">구매 내역이 없습니다.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- /container -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.querySelector('form');
+    const tableBody = document.querySelector('table tbody');
+    const totalPriceElem = document.querySelector('.text-end strong').nextSibling;
+
+    function renderEvents(events) {
+        tableBody.innerHTML = '';
+        if (!events.length) {
+            tableBody.innerHTML = '<tr><td colspan="11" class="text-center">구매 내역이 없습니다.</td></tr>';
+            return;
+        }
+        events.forEach(e => {
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${e.purchase_date ? e.purchase_date.substr(0,10) : ''}</td>
+                    <td>${e.start_time ? e.start_time.substr(0,10) : ''}</td>
+                    <td>${e.pet && e.pet.name ? e.pet.name : ''}</td>
+                    <td>${Number(e.price).toLocaleString()}원</td>
+                    <td>${e.type === 'feed' ? '사료' : (e.type === 'snack' ? '간식' : e.type)}</td>
+                    <td>${e.product_name}</td>
+                    <td>${e.purchase_link ? `<a href="${e.purchase_link}" target="_blank">링크</a>` : ''}</td>
+                    <td>${'★'.repeat(e.rating)}${'☆'.repeat(5-e.rating)}</td>
+                    <td>${e.quantity_kg ?? ''}</td>
+                    <td>${e.description ?? ''}</td>
+                    <td>
+                        ${e.type === 'feed' && !e.end_time ? '<span class="text-primary">섭취중</span>' :
+                            (e.type === 'feed' ? (e.daily_amount ? Number(e.daily_amount).toFixed(3) : '') : '')}
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function fetchEventsAJAX() {
+        const params = new URLSearchParams(new FormData(filterForm)).toString();
+        fetch('/food/api/purchases/management/?' + params)
+            .then(res => res.json())
+            .then(data => {
+                renderEvents(data.events);
+                if (totalPriceElem) totalPriceElem.textContent = ` ${Number(data.total_price).toLocaleString()}원`;
+            });
+    }
+
+    // 필터 변경 시 AJAX
+    filterForm.querySelectorAll('input, select').forEach(function(el) {
+        el.addEventListener('change', function(e) {
+            e.preventDefault();
+            fetchEventsAJAX();
+        });
+    });
+    // 검색 버튼 클릭 시만 submit 허용
+    filterForm.addEventListener('submit', function(e) {
+        // 아무것도 입력하지 않고 엔터 등으로 submit할 때만 허용
+        // (검색 버튼 클릭 시에는 기본 동작)
+    });
+});
+</script>
+{% endblock %} 

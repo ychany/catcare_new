@@ -1,0 +1,319 @@
+{% extends 'common_app/base.html' %}
+{% load static %}
+
+{% block title %}식사 캘린더 - 냐옹노트{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <label for="petFilter" class="form-label me-2 mb-0">반려동물 선택:</label>
+                        <select class="form-select w-auto" id="petFilter">
+                            <option value="all">전체</option>
+                            {% for pet in pets %}
+                            <option value="{{ pet.id }}">{{ pet.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# 미리보기 라벨: 기본 반려동물 표시 #}
+    {% if pets %}
+    {% endif %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="calendar-wrapper">
+                <div id="calendar" data-default-pet-id="{% if pets %}{{ pets.0.id }}{% endif %}"></div>
+            </div>
+            <!-- 캘린더 하단 안내문구 -->
+            <div class="alert alert-info mt-3" role="alert">
+              <strong>사료:</strong> 개봉일부터 오늘날짜까지 <b>섭취중</b>으로 표시됩니다.<br>
+              <b>섭취 종료</b>를 누르면 하루평균 섭취량이 표시되며, 이는 <a href="/food/purchases/" class="fw-bold text-decoration-underline">구매 관리</a> 페이지에서 확인이 가능합니다.<br>
+              <strong>간식:</strong> 간식은 사료처럼 캘린더에 계속 표시되는 것이 아닌 <b>개봉일</b>만 표시됩니다.<br>
+              <span class="text-secondary">※ 일일섭취량 정보는 사료에만 제공됩니다.</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <form id="eventForm">
+                        <div class="mb-3">
+                            <label for="petSelect" class="form-label">고양이</label>
+                            <select class="form-select" id="petSelect" required>
+                                <option value="">반려동물을 선택하세요</option>
+                                {% for pet in pets %}
+                                <option value="{{ pet.id }}">{{ pet.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="openDate" class="form-label">개봉일</label>
+                            <input type="date" id="openDate" name="open_date" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="purchaseDate" class="form-label">구매일</label>
+                            <input type="date" id="purchaseDate" name="purchase_date" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label">가격</label>
+                            <input type="number" step="0.01" id="price" name="price" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="typeSelect" class="form-label">타입</label>
+                            <select class="form-select" id="typeSelect" name="type">
+                                <option value="feed">사료</option>
+                                <option value="snack">간식</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">상품명</label>
+                            <input type="text" id="productName" name="product_name" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="purchaseLink" class="form-label">구매처 링크</label>
+                            <input type="url" id="purchaseLink" name="purchase_link" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">만족도</label>
+                            <div id="ratingStars"></div>
+                            <input type="hidden" id="rating" name="rating" value="0" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantityKg" class="form-label">패키지 무게(kg)</label>
+                            <input type="number" step="0.01" id="quantityKg" name="quantity_kg" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">메모</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="submitButton">저장</button>
+                        <button type="button" id="deleteButton" class="btn btn-danger" style="display: none;">삭제</button>
+                        <button type="button" id="endButton" class="btn btn-warning" style="display: none; margin-left:0.5rem;">섭취 종료</button>
+                        <div id="stats" class="mt-2"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<style>
+    .container-fluid { padding: 0 10px; }
+    .card { margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.07); }
+    .card-body { padding: 12px; }
+    .form-label, label[for="petFilter"] { font-size: 0.97em; margin-bottom: 0; }
+    #petFilter { font-size: 0.97em; height: 32px; padding: 2px 8px; min-width: 90px; max-width: 140px; }
+    .d-flex.align-items-center { gap: 6px; }
+    .calendar-wrapper {
+        border: 1.5px solid #e0e0e0;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 18px 12px 12px 12px;
+        background: #fff;
+        margin-bottom: 10px;
+    }
+    /* 간식 이벤트 hover 상태에서도 색 변화 방지 */
+    .fc-event-snack:hover {
+        background-color: #FF9800 !important;
+        border-color: #FF9800 !important;
+        color: white !important;
+    }
+    /* 사료: 양치하기(brush) 스타일 */
+    .fc-event-brush { background-color: #4CAF50; border-color: #4CAF50; color: white; }
+    /* 간식: 발톱깎기(nail) 스타일 */
+    .fc-event-nail { background-color: #FF9800; border-color: #FF9800; color: white; }
+    .fc-daygrid-event { white-space: normal !important; align-items: normal !important; }
+    .fc-event-title { font-weight: bold !important; }
+    .fc-event-time { display: none !important; }
+    .fc-event { border-radius: 4px; padding: 2px 4px; margin: 1px 0; font-size: 0.9em; }
+    .fc-event:hover { cursor: pointer; }
+    #calendar {
+        height: 700px;
+    }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    // '전체'를 기본값으로 사용
+    const petFilter = document.getElementById('petFilter');
+    let selectedPetId = 'all';
+    petFilter.value = 'all';
+    let selectedEvent = null;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ko',
+        displayEventTime: false,
+        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listWeek' },
+        buttonText: {
+            today: '오늘',
+            month: '월간',
+            week: '주간',
+            list: '목록',
+            prev: '이전',
+            next: '다음'
+        },
+        eventDidMount: function(info) {
+            info.el.title = `${info.event.extendedProps.product_name}\n${info.event.extendedProps.description || ''}`;
+        },
+        events: function(fetchInfo, successCallback, failureCallback) {
+            let url = '/food/events/';
+            if(selectedPetId !== 'all') {
+                url += selectedPetId + '/?start=' + fetchInfo.startStr + '&end=' + fetchInfo.endStr;
+            } else {
+                url += '?start=' + fetchInfo.startStr + '&end=' + fetchInfo.endStr;
+            }
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    const mapped = data.map(ev => ({
+                        ...ev,
+                        allDay: true,
+                        className: ev.type === 'feed' ? 'fc-event-brush' : 'fc-event-nail'
+                    }));
+                    successCallback(mapped);
+                })
+                .catch(err => failureCallback(err));
+        },
+        dateClick: function(info) {
+            resetForm();
+            document.getElementById('openDate').value = info.dateStr;
+        },
+        eventClick: function(info) {
+            selectedEvent = info.event;
+            loadEventDetails(selectedEvent.id);
+        }
+    });
+    calendar.render();
+
+    document.getElementById('petFilter').addEventListener('change', function() {
+        selectedPetId = this.value;
+        calendar.refetchEvents();
+    });
+
+    function resetForm() {
+        document.getElementById('eventForm').reset();
+        document.getElementById('submitButton').textContent = '저장';
+        document.getElementById('deleteButton').style.display = 'none';
+        document.getElementById('endButton').style.display = 'none';
+        document.getElementById('stats').innerHTML = '';
+        ['openDate','purchaseDate','price','quantityKg','description'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.value = '';
+        });
+        document.querySelectorAll('#ratingStars span').forEach(s => s.textContent = '☆');
+        selectedEvent = null;
+    }
+
+    function loadEventDetails(eventId) {
+        fetch(`/food/event/${eventId}/`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('submitButton').textContent = '수정';
+                document.getElementById('eventForm').dataset.selectedEventId = eventId;
+                document.getElementById('petSelect').value = data.pet_id;
+                document.getElementById('openDate').value = data.start.substr(0,10);
+                document.getElementById('purchaseDate').value = data.purchase_date || '';
+                document.getElementById('price').value = data.price || '';
+                document.getElementById('typeSelect').value = data.type;
+                document.getElementById('productName').value = data.product_name;
+                document.getElementById('purchaseLink').value = data.purchase_link;
+                document.getElementById('quantityKg').value = data.quantity_kg;
+                document.getElementById('description').value = data.description;
+                const ratingInput = document.getElementById('rating');
+                const starElems = document.querySelectorAll('#ratingStars span');
+                ratingInput.value = data.rating;
+                starElems.forEach(s => s.textContent = s.dataset.value <= data.rating ? '★' : '☆');
+                document.getElementById('deleteButton').style.display = 'inline-block';
+                if (data.type === 'feed' && !data.end) {
+                    document.getElementById('endButton').style.display = 'inline-block';
+                    document.getElementById('stats').innerHTML = '<p>섭취중</p>';
+                } else if (data.type === 'feed') {
+                    document.getElementById('endButton').style.display = 'none';
+                    const startDate = new Date(data.start);
+                    const endDate = data.end ? new Date(data.end) : new Date();
+                    const days = Math.floor((endDate - startDate)/(1000*60*60*24))+1;
+                    const avg = data.quantity_kg ? (data.quantity_kg/days).toFixed(2) : 0;
+                    document.getElementById('stats').innerHTML = `<p>소비기간: ${days}일</p><p>총 ${data.quantity_kg}kg</p><p>일일평균: ${avg}kg</p>`;
+                } else {
+                    document.getElementById('endButton').style.display = 'none';
+                    document.getElementById('stats').innerHTML = '';
+                }
+            })
+            .catch(e => console.error(e));
+    }
+
+    document.getElementById('eventForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = {
+            pet_id: document.getElementById('petSelect').value,
+            type: document.getElementById('typeSelect').value,
+            product_name: document.getElementById('productName').value,
+            purchase_link: document.getElementById('purchaseLink').value,
+            purchase_date: document.getElementById('purchaseDate').value,
+            price: parseFloat(document.getElementById('price').value) || 0,
+            rating: parseInt(document.getElementById('rating').value)||0,
+            quantity_kg: parseFloat(document.getElementById('quantityKg').value)||0,
+            description: document.getElementById('description').value,
+            start: document.getElementById('openDate').value ? new Date(document.getElementById('openDate').value).toISOString() : new Date().toISOString(),
+            end: document.getElementById('typeSelect').value==='feed'?null:new Date().toISOString()
+        };
+        const url = selectedEvent ? `/food/event/${selectedEvent.id}/update/` : '/food/event/create/';
+        fetch(url, {
+            method: selectedEvent?'PUT':'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+            body: JSON.stringify(formData)
+        })
+        .then(r=>r.json()).then(()=>{calendar.refetchEvents();resetForm();}).catch(console.error);
+    });
+
+    document.getElementById('deleteButton').addEventListener('click', function(){
+        if (selectedEvent && confirm('삭제?')) {
+            fetch(`/food/event/${selectedEvent.id}/delete/`,{method:'DELETE',headers:{'X-CSRFToken':getCookie('csrftoken')}})
+            .then(r=>r.json()).then(()=>{calendar.refetchEvents();resetForm();}).catch(console.error);
+        }
+    });
+
+    document.getElementById('endButton').addEventListener('click', function(){
+        if (selectedEvent && confirm('종료?')) {
+            fetch(`/food/event/${selectedEvent.id}/end/`,{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}})
+            .then(r=>r.json()).then(data=>{
+                calendar.refetchEvents();
+                document.getElementById('endButton').style.display='none';
+                document.getElementById('stats').innerHTML=`<p>소비기간: ${data.days}일</p><p>총 ${data.total_kg}kg</p><p>일일평균: ${data.avg_daily}kg</p>`;
+            }).catch(console.error);
+        }
+    });
+
+    function getCookie(name){
+        let c=null;document.cookie.split(';').forEach(v=>{let kv=v.trim().split('=');if(kv[0]===name)c=decodeURIComponent(kv[1]);});return c;
+    }
+
+    // 별점 위젯 생성 (만족도)
+    const ratingContainer = document.getElementById('ratingStars');
+    const ratingInput = document.getElementById('rating');
+    const starElems = [];
+    for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('span');
+        star.textContent = '☆'; star.dataset.value = i;
+        star.style.cursor = 'pointer'; star.style.fontSize = '1.5rem';
+        ratingContainer.appendChild(star);
+        starElems.push(star);
+        star.addEventListener('click', function() {
+            const val = this.dataset.value;
+            ratingInput.value = val;
+            starElems.forEach(s => s.textContent = s.dataset.value <= val ? '★' : '☆');
+        });
+    }
+});
+</script>
+{% endblock %} 

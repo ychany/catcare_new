@@ -1,0 +1,557 @@
+{% extends 'common_app/base.html' %}
+{% load static %}
+
+{% block title %}캘린더 - 냐옹노트{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <label for="petFilter" class="form-label me-2 mb-0">반려동물 선택:</label>
+                            <select class="form-select w-auto" id="petFilter">
+                                <option value="all">전체</option>
+                                {% for pet in pets %}
+                                    <option value="{{ pet.id }}">{{ pet.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#vaccinationModal">
+                                <i class="fas fa-calendar-check"></i> 예방접종 일정
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 예방접종 일정 모달 -->
+        <div class="modal fade" id="vaccinationModal" tabindex="-1" aria-labelledby="vaccinationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title d-flex align-items-center" id="vaccinationModalLabel">
+                            다가오는 예방접종 일정
+                            <select class="form-select form-select-sm ms-3" id="modalPetFilter" style="width:auto; display:inline-block; min-width:90px; max-width:140px;">
+                                <option value="all">전체</option>
+                                {% for pet in pets %}
+                                    <option value="{{ pet.name }}">{{ pet.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="vaccinationListContainer">
+                        {% if next_vacc_list %}
+                            <div class="vaccination-list">
+                                {% for item in next_vacc_list %}
+                                    <div class="vaccination-item mb-2" data-pet="{{ item.pet_name }}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="pet-name fw-bold">{{ item.pet_name }}</span>
+                                            <span class="badge {% if item.days_left == 0 %}bg-danger{% elif item.days_left <= 7 %}bg-warning{% else %}bg-primary{% endif %}">
+                                                {% if item.days_left > 0 %}
+                                                    {{ item.days_left }}일 남음
+                                                {% elif item.days_left == 0 %}
+                                                    접종 당일
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="vaccination-date text-muted">
+                                            {{ item.next_date|date:"Y년 m월 d일" }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted">다가오는 예방접종 일정이 없습니다.</p>
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 좌측 달력 영역 -->
+            <div class="col-md-8">
+                <div class="calendar-wrapper">
+                    <div id="calendar"></div>
+                </div>
+                <div style="text-align:start; margin: 8px 0 18px 0; color: #666; font-size: 15px; padding-left: 10px;">
+                  *병원을 찾을 때는 <a href="/emergency/" style="color:#3182f6; text-decoration:underline; font-weight:bold;">동물병원</a> 메뉴를 이용해주세요
+                </div>
+            </div>
+
+            <!-- 우측 입력/상세 패널 -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="eventForm">
+                            {% csrf_token %}
+                            <input type="hidden" id="eventId" name="id">
+                            <div class="mb-3">
+                                <label for="pet" class="form-label">고양이</label>
+                                <select class="form-select" id="pet" name="pet" required>
+                                    {% for pet in pets %}
+                                        <option value="{{ pet.id }}">{{ pet.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="date" class="form-label">날짜</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">타입</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="event_type" id="med" value="med" checked>
+                                    <label class="btn btn-outline-success" for="med">진료기록</label>
+
+                                    <input type="radio" class="btn-check" name="event_type" id="vacc" value="vacc">
+                                    <label class="btn btn-outline-primary" for="vacc">예방접종</label>
+                                </div>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">설명</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">메모</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="hospital" class="form-label">병원명</label>
+                                <div class="hospital-search-container">
+                                    <input type="text" class="form-control" id="hospital" name="hospital" placeholder="병원명을 검색하세요">
+                                    <div id="hospitalList" class="hospital-list"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="nextDateContainer">
+                                <label for="next_date" class="form-label">다음 접종일</label>
+                                <input type="date" class="form-control" id="next_date" name="next_date">
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" id="saveBtn">저장</button>
+                                <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">
+                                    <i class="fas fa-trash-alt"></i> 삭제
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet'/>
+
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/ko.js'></script>
+
+    <style>
+        #calendar {
+            height: 600px;
+        }
+
+        .container-fluid {
+            padding: 0 10px;
+        }
+
+        .card {
+            margin-bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+        }
+
+        .card-body {
+            padding: 12px;
+        }
+
+        .fc-daygrid-day {
+            min-height: 120px;
+        }
+
+        .fc-daygrid-day-frame {
+            min-height: 100%;
+        }
+
+        .fc-view {
+            height: 100% !important;
+        }
+
+        .fc-event {
+            cursor: pointer;
+        }
+
+        .fc-event-vacc {
+            background-color: #2196F3;
+            border-color: #2196F3;
+        }
+
+        .fc-event-med {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .fc-daygrid-event {
+            white-space: normal !important;
+            align-items: normal !important;
+            margin: 1px 2px !important;
+            padding: 2px 4px !important;
+        }
+
+        .fc-event-title {
+            font-weight: normal !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        .fc-event-time {
+            font-size: 0.9em !important;
+        }
+
+        .fc-header-toolbar {
+            margin-bottom: 1.5em !important;
+        }
+
+        .fc-toolbar-title {
+            font-size: 1.5em !important;
+        }
+
+        .calendar-wrapper {
+            border: 1.5px solid #e0e0e0;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 18px 12px 12px 12px;
+            background: #fff;
+            margin-bottom: 10px;
+        }
+
+        .form-label, label[for="petFilter"] {
+            font-size: 0.97em;
+            margin-bottom: 0;
+        }
+
+        #petFilter {
+            font-size: 0.97em;
+            height: 32px;
+            padding: 2px 8px;
+            min-width: 90px;
+            max-width: 140px;
+        }
+
+        .d-flex.align-items-center {
+            gap: 6px;
+        }
+
+        .hospital-search-container {
+            position: relative;
+            width: 100%;
+        }
+        .hospital-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .hospital-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .hospital-item:hover {
+            background-color: #f5f5f5;
+        }
+        .hospital-item:last-child {
+            border-bottom: none;
+        }
+
+        .vaccination-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .vaccination-item {
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .vaccination-item:hover {
+            background-color: #e9ecef;
+        }
+        .pet-name {
+            color: #3182f6;
+        }
+        .vaccination-date {
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+        .modal-dialog {
+            margin-top: 100px !important;  /* 원하는 만큼 숫자 조절 (예: 100px) */
+        }
+    </style>
+
+    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=679cb0dcbdbd689c815830cfcb681150&libraries=services"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var selectedPetId = 'all';
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'ko',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+                views: {
+                    timeGrid: {
+                        dayMaxEvents: 3,
+                        eventMaxStack: 2
+                    }
+                },
+                eventDidMount: function (info) {
+                    info.el.title = `${info.event.extendedProps.petName}\n${info.event.title}\n${info.event.extendedProps.description || ''}`;
+                },
+                events: function (info, successCallback, failureCallback) {
+                    fetch('/calendar/api/events/')
+                        .then(response => response.json())
+                        .then(data => {
+                            const events = data
+                                .filter(event => selectedPetId === 'all' || event.pet == selectedPetId)
+                                .map(event => ({
+                                    id: event.id,
+                                    title: `${event.event_type === 'vacc' ? '💉' : '🏥'} ${event.description} (${event.pet_name})`,
+                                    start: event.date,
+                                    className: `fc-event-${event.event_type}`,
+                                    extendedProps: {
+                                        petName: event.pet_name,
+                                        description: event.description,
+                                        notes: event.notes,
+                                        next_date: event.next_date,
+                                        event_type: event.event_type,
+                                        pet: event.pet,
+                                        hospital: event.hospital
+                                    }
+                                }));
+                            successCallback(events);
+                        });
+                },
+                eventClick: function (info) {
+                    loadEventDetails(info.event);
+                },
+                dateClick: function (info) {
+                    resetForm();
+                    document.getElementById('date').value = info.dateStr;
+                    // 현재 선택된 event_type에 따라 다음 접종일 필드 표시/숨김
+                    const selectedType = document.querySelector('input[name="event_type"]:checked').value;
+                    document.getElementById('nextDateContainer').style.display =
+                        selectedType === 'vacc' ? 'block' : 'none';
+                }
+            });
+            calendar.render();
+
+            function resetForm() {
+                document.getElementById('eventForm').reset();
+                document.getElementById('eventId').value = '';
+                document.getElementById('deleteBtn').style.display = 'none';
+                document.getElementById('saveBtn').textContent = '저장';
+            }
+
+            // 이벤트 타입에 따른 다음 접종일 필드 표시/숨김
+            document.querySelectorAll('input[name="event_type"]').forEach(function (radio) {
+                radio.addEventListener('change', function () {
+                    document.getElementById('nextDateContainer').style.display =
+                        this.value === 'vacc' ? 'block' : 'none';
+                });
+            });
+
+            // 이벤트 저장
+            function saveEvent() {
+                const formData = new FormData(document.getElementById('eventForm'));
+                const data = {
+                    pet: formData.get('pet'),
+                    event_type: formData.get('event_type'),
+                    date: formData.get('date'),
+                    description: formData.get('description'),
+                    notes: formData.get('notes'),
+                    next_date: formData.get('next_date') || null,
+                    hospital: formData.get('hospital') || null
+                };
+
+                const eventId = formData.get('id');
+                const method = eventId ? 'PUT' : 'POST';
+                const url = eventId ? `/calendar/api/events/${eventId}/` : '/calendar/api/events/';
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => Promise.reject(err));
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        calendar.refetchEvents();
+                        resetForm();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('저장 중 오류가 발생했습니다.');
+                    });
+            }
+
+            // 폼 제출 처리
+            document.getElementById('eventForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                saveEvent();
+            });
+
+            // 이벤트 상세 로드
+            function loadEventDetails(event) {
+                document.getElementById('eventId').value = event.id;
+                document.getElementById('date').value = event.startStr;
+                document.getElementById(event.extendedProps.event_type).checked = true;
+                document.getElementById('pet').value = event.extendedProps.pet;
+                document.getElementById('description').value = event.extendedProps.description;
+                document.getElementById('notes').value = event.extendedProps.notes;
+                document.getElementById('next_date').value = event.extendedProps.next_date || '';
+                document.getElementById('hospital').value = event.extendedProps.hospital || '';
+                document.getElementById('deleteBtn').style.display = 'block';
+                document.getElementById('saveBtn').textContent = '수정';
+
+                // 이벤트 타입에 따른 다음 접종일 필드 표시/숨김
+                document.getElementById('nextDateContainer').style.display =
+                    event.extendedProps.event_type === 'vacc' ? 'block' : 'none';
+            }
+
+            // 삭제 버튼 처리
+            document.getElementById('deleteBtn').addEventListener('click', function () {
+                const eventId = document.getElementById('eventId').value;
+                if (!eventId) return;
+
+                if (confirm('정말 삭제하시겠습니까?')) {
+                    fetch(`/calendar/events/${eventId}/delete/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('삭제 중 오류가 발생했습니다.');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                calendar.refetchEvents();
+                                resetForm();
+                                alert('삭제되었습니다.');
+                            } else {
+                                throw new Error(data.message || '삭제 중 오류가 발생했습니다.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert(error.message);
+                        });
+                }
+            });
+
+            // 반려동물 필터 변경 이벤트
+            document.getElementById('petFilter').addEventListener('change', function () {
+                selectedPetId = this.value;
+                calendar.refetchEvents();
+            });
+
+            // 카카오맵 Places 서비스 초기화
+            const ps = new kakao.maps.services.Places();
+            // 병원 검색 함수
+            function searchHospitals(keyword, targetInput, targetList) {
+                if (keyword.length < 2) {
+                    targetList.style.display = 'none';
+                    return;
+                }
+                ps.keywordSearch(keyword + ' 동물병원', function(data, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        const keywords = ['동물', '애완', '반려', '펫', '캣', 'dog', 'cat', '고양이', '강아지'];
+                        const filtered = data.filter(place =>
+                            keywords.some(word => place.place_name.toLowerCase().includes(word))
+                        );
+                        let html = '';
+                        filtered.forEach(place => {
+                            html += `
+                                <div class="hospital-item" data-name="${place.place_name}" data-address="${place.road_address_name || place.address_name}">
+                                    <div><strong>${place.place_name}</strong></div>
+                                    <div style="font-size: 0.9em; color: #666;">${place.road_address_name || place.address_name}</div>
+                                </div>
+                            `;
+                        });
+                        targetList.innerHTML = html;
+                        targetList.style.display = 'block';
+                        // 병원 선택 이벤트
+                        targetList.querySelectorAll('.hospital-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                targetInput.value = this.dataset.name;
+                                targetList.style.display = 'none';
+                            });
+                        });
+                    }
+                });
+            }
+            // 병원명 자동완성 이벤트
+            const hospitalInput = document.getElementById('hospital');
+            const hospitalList = document.getElementById('hospitalList');
+            if (hospitalInput) {
+                hospitalInput.addEventListener('input', function() {
+                    searchHospitals(this.value, this, hospitalList);
+                });
+            }
+            // 외부 클릭 시 리스트 닫기
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.hospital-search-container')) {
+                    hospitalList.style.display = 'none';
+                }
+            });
+
+            // 예방접종 모달 고양이 필터링
+            const modalPetFilter = document.getElementById('modalPetFilter');
+            if (modalPetFilter) {
+                modalPetFilter.addEventListener('change', function() {
+                    const selected = this.value;
+                    document.querySelectorAll('#vaccinationListContainer .vaccination-item').forEach(function(item) {
+                        if (selected === 'all' || item.getAttribute('data-pet') === selected) {
+                            item.style.display = '';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %} 

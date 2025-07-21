@@ -1,0 +1,263 @@
+{% extends 'common_app/base.html' %}
+{% load static %}
+
+{% block title %}체중 관리 - 냐옹노트{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">체중 기록</h5>
+                    <form id="weightForm">
+                        <div class="mb-3">
+                            <label for="date" class="form-label">날짜</label>
+                            <input type="date" class="form-control" id="date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="weight" class="form-label">체중 (kg)</label>
+                            <input type="number" step="0.1" class="form-control" id="weight" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pet" class="form-label">반려동물</label>
+                            <select class="form-control" id="pet" name="pet" required>
+                                <!-- JS에서 동적으로 옵션 추가 예정 -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">저장</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">체중 변화</h5>
+                    <canvas id="weightChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">체중 기록 목록</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <select id="petFilter" class="form-select">
+                                <!-- <option value="">전체 반려동물</option> -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>날짜</th>
+                                    <th>반려동물</th>
+                                    <th>체중 (kg)</th>
+                                    <th>변화량 (kg)</th>
+                                    <th>이전 측정일</th>
+                                    <th>삭제</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weightTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 반려동물 목록을 드롭다운에 추가
+    const pets = JSON.parse('{{ user_pets|safe|escapejs }}');
+    const petSelect = document.getElementById('pet');
+    const petFilter = document.getElementById('petFilter');
+    pets.forEach(function(pet) {
+        const option1 = document.createElement('option');
+        option1.value = pet.id;
+        option1.textContent = pet.name;
+        petSelect.appendChild(option1);
+        const option2 = document.createElement('option');
+        option2.value = pet.id;
+        option2.textContent = pet.name;
+        petFilter.appendChild(option2);
+    });
+
+    const weightForm = document.getElementById('weightForm');
+    const ctx = document.getElementById('weightChart').getContext('2d');
+    const weightTableBody = document.getElementById('weightTableBody');
+    let weightChart;
+    let allData = [];
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ko-KR');
+    }
+
+    function updateTable(data) {
+        weightTableBody.innerHTML = '';
+        data.forEach(item => {
+            const row = document.createElement('tr');
+
+            const dateCell = document.createElement('td');
+            dateCell.textContent = formatDate(item.date);
+
+            const petCell = document.createElement('td');
+            petCell.textContent = item.pet_name;
+
+            const weightCell = document.createElement('td');
+            weightCell.textContent = item.weight.toFixed(1);
+
+            const changeCell = document.createElement('td');
+            if (item.change !== null) {
+                const change = item.change.toFixed(1);
+                changeCell.textContent = change > 0 ? `+${change}` : change;
+                changeCell.className = change > 0 ? 'text-danger' : 'text-success';
+            } else {
+                changeCell.textContent = '-';
+            }
+
+            const daysCell = document.createElement('td');
+            daysCell.textContent = item.days_since_last ? `${item.days_since_last}일 전` : '-';
+
+            const deleteCell = document.createElement('td');
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn btn-sm btn-danger';
+            delBtn.textContent = '삭제';
+            delBtn.onclick = function() {
+                if (confirm('정말 삭제하시겠습니까?')) {
+                    fetch(`/weight-tracker/api/weights/${item.id}/`, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                    }).then(res => {
+                        if (res.ok) {
+                            initChart();
+                        }
+                    });
+                }
+            };
+            deleteCell.appendChild(delBtn);
+
+            row.appendChild(dateCell);
+            row.appendChild(petCell);
+            row.appendChild(weightCell);
+            row.appendChild(changeCell);
+            row.appendChild(daysCell);
+            row.appendChild(deleteCell);
+
+            weightTableBody.appendChild(row);
+        });
+    }
+
+    // 차트 및 테이블 초기화
+    function initChart() {
+        fetch('/weight-tracker/api/weights/')
+            .then(response => response.json())
+            .then(data => {
+                allData = data;
+                filterAndRender();
+            });
+    }
+
+    function filterAndRender() {
+        const selectedPet = petFilter.value;
+        let filtered = allData;
+        if (selectedPet) {
+            filtered = allData.filter(item => String(item.pet) === selectedPet);
+        }
+        // 차트 데이터 준비
+        const labels = filtered.map(item => item.date).reverse();
+        const weights = filtered.map(item => item.weight).reverse();
+        if (weightChart) weightChart.destroy();
+        weightChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '체중 (kg)',
+                    data: weights,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: false } },
+                plugins: { tooltip: { callbacks: { label: function(context) { return `체중: ${context.parsed.y}kg`; } } } }
+            }
+        });
+        updateTable(filtered);
+    }
+
+    petFilter.addEventListener('change', filterAndRender);
+
+    // 체중 기록 제출
+    weightForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            date: document.getElementById('date').value,
+            weight: parseFloat(document.getElementById('weight').value),
+            pet: parseInt(document.getElementById('pet').value)
+        };
+        fetch('/weight-tracker/api/weights/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json().then(json => ({status: response.status, body: json})))
+        .then(result => {
+            if (result.status === 201 && result.body.id) {
+                weightForm.reset();
+                initChart();
+            } else if (result.status === 400 && result.body && result.body.error && result.body.error.includes('UNIQUE')) {
+                alert('이미 해당 날짜에 이 반려동물의 체중 기록이 존재합니다.');
+            } else {
+                alert('저장 중 오류가 발생했습니다.');
+            }
+        });
+    });
+
+    // 초기 차트 및 테이블 로드
+    initChart();
+
+    // 필터 기본값을 첫 번째 반려동물로 설정
+    if (pets.length > 0) {
+        petFilter.value = pets[0].id;
+        filterAndRender();
+    }
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %} 
