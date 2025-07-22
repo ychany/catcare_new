@@ -1,143 +1,650 @@
 {% extends 'common_app/base.html' %}
 
-{% block title %}회원가입 - 고양이 정보 사이트{% endblock %}
-{% block top_bar %}{% endblock %}
-{% block sidebar %}{% endblock %}
+{% block title %}회원가입 - 냥이 집사{% endblock %}
+
+{% block navigation %}{% endblock %}
 
 {% block content %}
-<style>
-.register-full-bg {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100vw;
-    height: auto;
-    min-height: 100vh;
-    background: #fff;
-    z-index: 9999;
-    display: block;
-    padding: 40px 20px;
-    overflow-y: scroll;
-}
-.register-card {
-    max-width: 800px;
-    width: 100%;
-    border-radius: 18px;
-    margin: 0 auto;
-}
-@media (max-width: 900px) {
-    .register-card { max-width: 98vw; }
-}
-</style>
-<div class="register-full-bg">
-    <div class="card shadow-lg register-card">
-        <div class="card-body p-4">
-            <div class="text-center mb-4">
-                <span style="font-size:2.5rem;">🐱</span>
-                <h2 class="fw-bold mt-2 mb-1" style="letter-spacing:2px; color:#172852;">회원가입</h2>
-                <div class="text-muted mb-2" style="font-size:1.1rem;">기본 정보와 고양이 정보를 입력해 주세요!</div>
-            </div>
-            <form method="post" enctype="multipart/form-data" id="registerForm">
-                {% csrf_token %}
-                <div class="row g-4">
-                  <div class="col-md-6">
-                    <h5 class="mb-3">사용자 정보</h5>
-                    {{ user_form.as_p }}
-                  </div>
-                  <div class="col-md-6">
-                    <h5 class="mb-3">고양이 정보</h5>
-                    <div id="pet-forms"></div>
-                    <button type="button" class="btn btn-outline-secondary mb-3 w-100" id="add-pet-btn">+ 고양이 추가</button>
-                  </div>
+<div class="auth-layout">
+<div class="auth-container">
+        <!-- 왼쪽 섹션 - 브랜딩 -->
+        <div class="auth-brand">
+            <div class="brand-content">
+                <div class="brand-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-cat"></i>
+    </div>
+                    <h1 class="brand-title">냥이 집사</h1>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mt-3" style="font-size:1.1rem;">가입하기</button>
+                <p class="brand-subtitle">
+                    새로운 고양이 집사로<br>
+                    함께해보세요!
+                </p>
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <i class="fas fa-utensils"></i>
+                        <span>급여 관리</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-heartbeat"></i>
+                        <span>건강 기록</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>케어 일정</span>
+                    </div>
+                </div>
+                    </div>
+                </div>
+
+        <!-- 오른쪽 섹션 - 회원가입 폼 -->
+        <div class="auth-form-section">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2 class="form-title">회원가입</h2>
+                    <p class="form-subtitle">계정을 만들어 시작하세요</p>
+                    </div>
+
+                <form method="post" class="auth-form">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="id_username" class="form-label">사용자명</label>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            class="form-input" 
+                            id="id_username" 
+                            placeholder="사용자명을 입력하세요"
+                            required>
+                        {% if form.username.errors %}
+                            <div class="field-error">{{ form.username.errors|first }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_email" class="form-label">이메일</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            class="form-input" 
+                            id="id_email" 
+                            placeholder="example@email.com"
+                            required>
+                        {% if form.email.errors %}
+                            <div class="field-error">{{ form.email.errors|first }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_password1" class="form-label">비밀번호</label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="password" 
+                                    name="password1" 
+                                    class="form-input" 
+                                    id="id_password1" 
+                                    placeholder="비밀번호"
+                                    required>
+                                <button type="button" class="input-action" onclick="togglePassword('id_password1')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password1.errors %}
+                                <div class="field-error">{{ form.password1.errors|first }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_password2" class="form-label">비밀번호 확인</label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="password" 
+                                    name="password2" 
+                                    class="form-input" 
+                                    id="id_password2" 
+                                    placeholder="비밀번호 확인"
+                                    required>
+                                <button type="button" class="input-action" onclick="togglePassword('id_password2')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password2.errors %}
+                                <div class="field-error">{{ form.password2.errors|first }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.non_field_errors|first }}
+                        </div>
+                    {% endif %}
+
+                    <div class="terms-section">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" name="terms" required>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">
+                                <a href="#" class="link-primary">이용약관</a> 및 
+                                <a href="#" class="link-primary">개인정보처리방침</a>에 동의합니다
+                            </span>
+                        </label>
+                </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg form-submit">
+                        <i class="fas fa-user-plus"></i>
+                        계정 만들기
+                    </button>
             </form>
-            <!-- Hidden breed template -->
-            <div id="breed-template" style="display:none;">
-                <div class="mb-3">
-                    <label class="form-label" for="{{ pet_form.breed.id_for_label }}">{{ pet_form.breed.label }}</label>
-                    {{ pet_form.breed }}
-                    {% for error in pet_form.breed.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+
+                <div class="form-footer">
+                    <p class="auth-link">
+                        이미 계정이 있으신가요?
+                        <a href="{% url 'login' %}" class="link-primary">
+                        로그인
+                    </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script>
-// DOMContentLoaded 이후 실행
-document.addEventListener('DOMContentLoaded', function() {
-    const breedTemplateHTML = document.getElementById('breed-template').innerHTML;
-    const petFormsDiv = document.getElementById('pet-forms');
-    const addPetBtn = document.getElementById('add-pet-btn');
-    let petIdx = 0;
 
-    // 고양이 폼 생성 함수
-    function createPetForm(idx) {
-        const html = breedTemplateHTML
-            .replace(/name="breed"/, `name="pet_breed_${idx}"`)
-            .replace(/id="id_breed"/, `id="pet_breed_${idx}"`)
-            .replace(/for="id_breed"/, `for="pet_breed_${idx}"`);
-        return `
-        <div class="card mb-3 pet-form" data-idx="${idx}">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0">고양이 #${idx+1}</h6>
-              <button type="button" class="btn btn-danger btn-sm remove-pet-btn">삭제</button>
-            </div>
-            <div class="mb-2">
-              <label class="form-label">이름</label>
-              <input type="text" name="pet_name_${idx}" class="form-control" required>
-            </div>
-            ${html}
-            <div class="mb-2">
-              <label class="form-label">생년월일</label>
-              <input type="date" name="pet_birth_date_${idx}" class="form-control" required>
-            </div>
-            <div class="mb-2">
-              <label class="form-label">성별</label>
-              <select name="pet_gender_${idx}" class="form-select" required>
-                <option value="male">수컷</option>
-                <option value="female">암컷</option>
-              </select>
-            </div>
-            <div class="mb-2">
-              <label class="form-label">중성화 여부</label>
-              <select name="pet_neutered_${idx}" class="form-select" required>
-                <option value="True">예</option>
-                <option value="False">아니오</option>
-              </select>
-            </div>
-            <div class="mb-2">
-              <label class="form-label">체중(kg)</label>
-              <input type="number" step="0.01" name="pet_weight_${idx}" class="form-control">
-            </div>
-            <div class="mb-2">
-              <label class="form-label">특이사항</label>
-              <input type="text" name="pet_notes_${idx}" class="form-control">
-            </div>
-            <div class="mb-2">
-              <label class="form-label">사진</label>
-              <input type="file" name="pet_image_${idx}" class="form-control">
-            </div>
-          </div>
-        </div>`;
+<style>
+/* 전체 레이아웃 */
+.auth-layout {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+    background: var(--bg-secondary);
+    overflow-y: auto;
+}
+
+.auth-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+
+/* 브랜드 섹션 */
+.auth-brand {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    padding: var(--spacing-6xl);
+    position: relative;
+        overflow: hidden;
     }
 
-    // 삭제 버튼 이벤트 위임
-    petFormsDiv.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-pet-btn')) {
-            e.target.closest('.pet-form').remove();
+.auth-brand::before {
+    content: '';
+        position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.3;
+    animation: float 20s linear infinite;
+}
+
+    @keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-50px) rotate(360deg); }
+    }
+
+.brand-content {
+    text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+.brand-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-3xl);
+    }
+
+    .logo-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-2xl);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    font-size: 36px;
+    box-shadow: var(--shadow-xl);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+.brand-title {
+    font-size: 48px;
+    font-weight: 800;
+        margin: 0;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+.brand-subtitle {
+    font-size: 18px;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin-bottom: var(--spacing-4xl);
+    }
+
+.brand-features {
+        display: flex;
+        flex-direction: column;
+    gap: var(--spacing-lg);
+        align-items: center;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.9;
+    }
+
+.feature-item i {
+    width: 20px;
+    text-align: center;
+}
+
+/* 폼 섹션 */
+.auth-form-section {
+    background: var(--bg-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    padding: var(--spacing-6xl);
+    }
+
+.form-container {
+    width: 100%;
+    max-width: 480px;
+    }
+
+.form-header {
+        text-align: center;
+    margin-bottom: var(--spacing-4xl);
+    }
+
+.form-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    }
+
+.form-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* 폼 스타일 */
+.auth-form {
+    margin-bottom: var(--spacing-3xl);
+}
+
+    .form-group {
+    margin-bottom: var(--spacing-xl);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    }
+
+    .form-label {
+    display: block;
+    font-size: 14px;
+        font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    }
+
+.input-wrapper {
+    position: relative;
+    }
+
+.form-input {
+        width: 100%;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-weight: 400;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+.form-input:focus {
+        outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+    }
+
+.form-input.error {
+    border-color: var(--danger-color);
+    }
+
+.input-action {
+        position: absolute;
+    right: var(--spacing-lg);
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+    color: var(--text-muted);
+        cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    }
+
+.input-action:hover {
+    color: var(--primary-color);
+    background: var(--bg-tertiary);
+    }
+
+.field-error {
+    color: var(--danger-color);
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: var(--spacing-xs);
+        display: flex;
+        align-items: center;
+    gap: var(--spacing-xs);
+    }
+
+.field-error::before {
+    content: '\f071';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 10px;
+    }
+
+/* 약관 동의 섹션 */
+.terms-section {
+    margin: var(--spacing-xl) 0 var(--spacing-2xl);
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+        cursor: pointer;
+    font-size: 14px;
+    line-height: 1.5;
+    }
+
+.checkbox-wrapper input[type="checkbox"] {
+    display: none;
+    }
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    }
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    }
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkmark::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--white);
+    font-size: 12px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    }
+
+.checkbox-text {
+    color: var(--text-secondary);
+    }
+
+.form-submit {
+    width: 100%;
+    margin-top: var(--spacing-lg);
+    }
+
+/* 폼 푸터 */
+.form-footer {
+        text-align: center;
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--border-light);
+    }
+
+    .auth-link {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0;
+    }
+
+.link-primary {
+    color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    margin-left: var(--spacing-xs);
+    transition: all 0.2s ease;
+    }
+
+.link-primary:hover {
+    color: #e55a2b;
+    text-decoration: none;
+    }
+
+    /* 반응형 디자인 */
+@media (max-width: 1024px) {
+        .auth-container {
+        grid-template-columns: 1fr;
+        }
+
+    .auth-brand {
+        display: none;
+    }
+    
+    .auth-form-section {
+        padding: var(--spacing-4xl) var(--spacing-3xl);
+    }
+}
+
+@media (max-width: 768px) {
+    .auth-form-section {
+        padding: var(--spacing-3xl) var(--spacing-lg);
+    }
+    
+    .form-title {
+        font-size: 24px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+        }
+
+    .form-input {
+        padding: var(--spacing-md) var(--spacing-lg);
+        }
+    }
+
+/* 로딩 상태 */
+.form-submit.loading {
+    pointer-events: none;
+    opacity: 0.7;
+    }
+
+.form-submit.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 비밀번호 토글 함수
+    window.togglePassword = function(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = input.nextElementSibling.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    };
+
+    // 폼 제출 시 로딩 효과
+    const registerForm = document.querySelector('.auth-form');
+    const submitBtn = document.querySelector('.form-submit');
+    
+    registerForm.addEventListener('submit', function(e) {
+        const termsCheckbox = document.querySelector('input[name="terms"]');
+        
+        if (!termsCheckbox.checked) {
+            e.preventDefault();
+            alert('이용약관 및 개인정보처리방침에 동의해주세요.');
+            return;
+        }
+        
+        submitBtn.classList.add('loading');
+        const icon = submitBtn.querySelector('i');
+        
+        icon.className = 'fas fa-spinner';
+        // text 노드만 변경
+        const textNode = Array.from(submitBtn.childNodes).find(node => node.nodeType === 3);
+        if (textNode) {
+            textNode.textContent = ' 계정 생성 중...';
         }
     });
 
-    // 최초 1개 폼 생성
-    petFormsDiv.insertAdjacentHTML('beforeend', createPetForm(petIdx));
-    petIdx++;
-
-    // 고양이 추가 버튼 이벤트
-    addPetBtn.addEventListener('click', function() {
-        petFormsDiv.insertAdjacentHTML('beforeend', createPetForm(petIdx));
-        petIdx++;
+    // 실시간 유효성 검사
+    const inputs = document.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateInput(this);
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                this.classList.remove('error');
+                const errorEl = this.parentElement.querySelector('.field-error');
+                if (errorEl) errorEl.remove();
+        }
+        });
     });
+
+    function validateInput(input) {
+        const value = input.value.trim();
+        let isValid = true;
+        let errorMessage = '';
+
+        switch(input.name) {
+            case 'username':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = '사용자명을 입력해주세요.';
+                } else if (value.length < 3) {
+                    isValid = false;
+                    errorMessage = '사용자명은 3자 이상이어야 합니다.';
+                }
+                break;
+                
+            case 'email':
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!value) {
+                    isValid = false;
+                    errorMessage = '이메일을 입력해주세요.';
+                } else if (!emailRegex.test(value)) {
+                    isValid = false;
+                    errorMessage = '올바른 이메일 형식이 아닙니다.';
+                }
+                break;
+                
+            case 'password1':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = '비밀번호를 입력해주세요.';
+                } else if (value.length < 8) {
+                    isValid = false;
+                    errorMessage = '비밀번호는 8자 이상이어야 합니다.';
+    }
+                break;
+                
+            case 'password2':
+                const password1 = document.getElementById('id_password1').value;
+                if (!value) {
+                    isValid = false;
+                    errorMessage = '비밀번호 확인을 입력해주세요.';
+                } else if (value !== password1) {
+                    isValid = false;
+                    errorMessage = '비밀번호가 일치하지 않습니다.';
+                }
+                break;
+        }
+
+        if (!isValid) {
+            input.classList.add('error');
+            showFieldError(input, errorMessage);
+    }
+
+        return isValid;
+    }
+
+    function showFieldError(input, message) {
+        const existingError = input.parentElement.querySelector('.field-error');
+        if (existingError) existingError.remove();
+
+        const errorEl = document.createElement('div');
+        errorEl.className = 'field-error';
+        errorEl.textContent = message;
+        input.parentElement.appendChild(errorEl);
+    }
 });
 </script>
 {% endblock %} 

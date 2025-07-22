@@ -1,81 +1,727 @@
 {% extends 'common_app/base.html' %}
 {% load static %}
 
-{% block title %}체중 관리 - 냐옹노트{% endblock %}
+{% block title %}체중관리 - 냥이 집사{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<style>
+.page-hide-nav {
+    display: none !important;
+}
+
+/* Hide default header/nav */
+.navbar, .nav-section, .header-section, .breadcrumb-section {
+    display: none !important;
+}
+
+.main-container {
+    padding: 0 !important;
+    max-width: none !important;
+    background: var(--color-background) !important;
+}
+
+/* Weight tracker page specific styles */
+.weight-page {
+    min-height: 100vh;
+    background: var(--color-background);
+    font-family: var(--font-primary);
+}
+
+.weight-header {
+    background: white;
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.weight-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-bottom: var(--spacing-lg);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+    background: var(--color-surface);
+}
+
+.weight-title {
+    font-size: 24px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.nav-right {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.nav-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.nav-btn:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.weight-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+/* Stats Section */
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-light);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--color-primary-lightest);
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-sm);
+    color: var(--color-primary);
+    font-size: 20px;
+}
+
+.stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+}
+
+.card-header {
+    background: var(--color-surface);
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.card-title i {
+    color: var(--color-primary);
+}
+
+.card-content {
+    padding: var(--spacing-xl);
+}
+
+/* Form Styles */
+.weight-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.form-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.form-label i {
+    color: var(--color-primary);
+    width: 16px;
+}
+
+.form-input {
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-md);
+    transition: all 0.2s;
+    background: white;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.btn-submit {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.btn-submit:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Chart Styles */
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.chart-filter {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-sm);
+    background: white;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+/* Records Section */
+.records-section {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+}
+
+.section-header {
+    background: var(--color-surface);
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.section-title i {
+    color: var(--color-primary);
+}
+
+.section-filters {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.filter-select {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-sm);
+    background: white;
+}
+
+.filter-info {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.records-container {
+    padding: var(--spacing-xl);
+}
+
+.records-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.record-item {
+    background: var(--color-surface);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    border-left: 4px solid var(--color-primary);
+    transition: all 0.2s;
+}
+
+.record-item:hover {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.record-pet {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.record-pet i {
+    color: var(--color-primary);
+}
+
+.record-date {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.record-weight {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.record-change {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.change-value {
+    font-weight: var(--font-weight-medium);
+    padding: 4px var(--spacing-sm);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-xs);
+}
+
+.change-positive {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.change-negative {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.change-neutral {
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+}
+
+.days-since {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+}
+
+.record-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-delete {
+    background: var(--color-danger);
+    color: white;
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+/* Empty State */
+.no-records {
+    text-align: center;
+    padding: var(--spacing-3xl);
+    color: var(--color-text-muted);
+}
+
+.no-records-icon {
+    font-size: 64px;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.3;
+}
+
+.no-records h3 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text);
+    font-weight: var(--font-weight-semibold);
+}
+
+.no-records p {
+    font-size: var(--font-size-md);
+    margin: 0;
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    color: white;
+    font-weight: var(--font-weight-medium);
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    max-width: 350px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.notification-success {
+    background: var(--color-success);
+}
+
+.notification-error {
+    background: var(--color-danger);
+}
+
+.notification-info {
+    background: var(--color-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
     
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">체중 기록</h5>
-                    <form id="weightForm">
-                        <div class="mb-3">
-                            <label for="date" class="form-label">날짜</label>
-                            <input type="date" class="form-control" id="date" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="weight" class="form-label">체중 (kg)</label>
-                            <input type="number" step="0.1" class="form-control" id="weight" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="pet" class="form-label">반려동물</label>
-                            <select class="form-control" id="pet" name="pet" required>
-                                <!-- JS에서 동적으로 옵션 추가 예정 -->
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">저장</button>
-                    </form>
-                </div>
+    .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .weight-nav {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+
+    .weight-title {
+        font-size: 20px;
+    }
+
+    .weight-main {
+        padding: var(--spacing-lg);
+    }
+
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .records-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: stretch;
+    }
+
+    .section-filters {
+        justify-content: center;
+    }
+
+    .nav-right {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .nav-btn {
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="weight-page">
+    <div class="weight-header">
+        <div class="weight-nav">
+            <div class="nav-left">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <h1 class="weight-title">
+                    <i class="fas fa-weight" style="color: var(--color-primary);"></i>
+                    체중관리
+                </h1>
             </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">체중 변화</h5>
-                    <canvas id="weightChart"></canvas>
-                </div>
+            <div class="nav-right">
+                <button class="nav-btn" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i>
+                    새로고침
+                </button>
+                <button class="nav-btn" onclick="exportData()">
+                    <i class="fas fa-download"></i>
+                    데이터 내보내기
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">체중 기록 목록</h5>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <select id="petFilter" class="form-select">
-                                <!-- <option value="">전체 반려동물</option> -->
+    <div class="weight-main">
+        <!-- Stats Section -->
+        <div class="stats-section" id="statsSection">
+            <!-- JavaScript로 동적 생성 -->
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Weight Record Form -->
+            <div class="dashboard-card record-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus-circle"></i>
+                        새 체중 기록
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <form id="weightForm" class="weight-form">
+                        <div class="form-group">
+                            <label for="pet" class="form-label">
+                                <i class="fas fa-paw"></i>
+                                반려동물
+                            </label>
+                            <select class="form-input" id="pet" name="pet" required>
+                                <option value="">선택해주세요</option>
+                                <!-- JS에서 동적으로 옵션 추가 -->
                             </select>
                         </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="date" class="form-label">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    날짜
+                                </label>
+                                <input type="date" class="form-input" id="date" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="weight" class="form-label">
+                                    <i class="fas fa-weight-hanging"></i>
+                                    체중 (kg)
+                                </label>
+                                <input type="number" step="0.1" class="form-input" id="weight" placeholder="0.0" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-save"></i>
+                            기록 저장
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Weight Chart -->
+            <div class="dashboard-card chart-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        체중 변화 추이
+                    </h3>
+                    <div class="chart-controls">
+                        <select id="chartPetFilter" class="chart-filter">
+                            <option value="">전체 보기</option>
+                            <!-- JS에서 동적으로 옵션 추가 -->
+                        </select>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>날짜</th>
-                                    <th>반려동물</th>
-                                    <th>체중 (kg)</th>
-                                    <th>변화량 (kg)</th>
-                                    <th>이전 측정일</th>
-                                    <th>삭제</th>
-                                </tr>
-                            </thead>
-                            <tbody id="weightTableBody">
-                            </tbody>
-                        </table>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="weightChart"></canvas>
                     </div>
+                    <div class="chart-legend" id="chartLegend">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records Section -->
+        <div class="records-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-history"></i>
+                    체중 기록 목록
+                </h3>
+                <div class="section-filters">
+                    <select id="petFilter" class="filter-select">
+                        <option value="">전체 반려동물</option>
+                        <!-- JS에서 동적으로 옵션 추가 -->
+                    </select>
+                    <div class="filter-info" id="filterInfo">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="records-container">
+                <div class="records-grid" id="recordsGrid">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+                <div class="no-records" id="noRecords" style="display: none;">
+                    <div class="no-records-icon">⚖️</div>
+                    <h3>아직 체중 기록이 없어요</h3>
+                    <p>첫 번째 체중 기록을 추가해보세요!</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
@@ -86,134 +732,349 @@ document.addEventListener('DOMContentLoaded', function() {
     const pets = JSON.parse('{{ user_pets|safe|escapejs }}');
     const petSelect = document.getElementById('pet');
     const petFilter = document.getElementById('petFilter');
+    const chartPetFilter = document.getElementById('chartPetFilter');
+    
     pets.forEach(function(pet) {
+        // 폼 드롭다운
         const option1 = document.createElement('option');
         option1.value = pet.id;
         option1.textContent = pet.name;
         petSelect.appendChild(option1);
+        
+        // 필터 드롭다운
         const option2 = document.createElement('option');
         option2.value = pet.id;
         option2.textContent = pet.name;
         petFilter.appendChild(option2);
+        
+        // 차트 필터 드롭다운
+        const option3 = document.createElement('option');
+        option3.value = pet.id;
+        option3.textContent = pet.name;
+        chartPetFilter.appendChild(option3);
     });
 
     const weightForm = document.getElementById('weightForm');
     const ctx = document.getElementById('weightChart').getContext('2d');
-    const weightTableBody = document.getElementById('weightTableBody');
     let weightChart;
     let allData = [];
 
+    // 오늘 날짜를 기본값으로 설정
+    document.getElementById('date').valueAsDate = new Date();
+
     function formatDate(dateString) {
         const date = new Date(dateString);
-        return date.toLocaleDateString('ko-KR');
-    }
-
-    function updateTable(data) {
-        weightTableBody.innerHTML = '';
-        data.forEach(item => {
-            const row = document.createElement('tr');
-
-            const dateCell = document.createElement('td');
-            dateCell.textContent = formatDate(item.date);
-
-            const petCell = document.createElement('td');
-            petCell.textContent = item.pet_name;
-
-            const weightCell = document.createElement('td');
-            weightCell.textContent = item.weight.toFixed(1);
-
-            const changeCell = document.createElement('td');
-            if (item.change !== null) {
-                const change = item.change.toFixed(1);
-                changeCell.textContent = change > 0 ? `+${change}` : change;
-                changeCell.className = change > 0 ? 'text-danger' : 'text-success';
-            } else {
-                changeCell.textContent = '-';
-            }
-
-            const daysCell = document.createElement('td');
-            daysCell.textContent = item.days_since_last ? `${item.days_since_last}일 전` : '-';
-
-            const deleteCell = document.createElement('td');
-            const delBtn = document.createElement('button');
-            delBtn.className = 'btn btn-sm btn-danger';
-            delBtn.textContent = '삭제';
-            delBtn.onclick = function() {
-                if (confirm('정말 삭제하시겠습니까?')) {
-                    fetch(`/weight-tracker/api/weights/${item.id}/`, {
-                        method: 'DELETE',
-                        headers: { 'X-CSRFToken': getCookie('csrftoken') }
-                    }).then(res => {
-                        if (res.ok) {
-                            initChart();
-                        }
-                    });
-                }
-            };
-            deleteCell.appendChild(delBtn);
-
-            row.appendChild(dateCell);
-            row.appendChild(petCell);
-            row.appendChild(weightCell);
-            row.appendChild(changeCell);
-            row.appendChild(daysCell);
-            row.appendChild(deleteCell);
-
-            weightTableBody.appendChild(row);
+        return date.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         });
     }
 
-    // 차트 및 테이블 초기화
-    function initChart() {
+    function updateStatsSection(data) {
+        const statsSection = document.getElementById('statsSection');
+        
+        if (data.length === 0) {
+            statsSection.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">총 기록</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-paw"></i></div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">반려동물</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">관리 일수</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-trending-up"></i></div>
+                    <div class="stat-value">-</div>
+                    <div class="stat-label">최근 변화</div>
+                </div>
+            `;
+            return;
+        }
+
+        const totalRecords = data.length;
+        const uniquePets = [...new Set(data.map(item => item.pet))].length;
+        const latestRecord = data[0];
+        const oldestRecord = data[data.length - 1];
+        const daysSinceFirst = oldestRecord ? Math.floor((new Date() - new Date(oldestRecord.date)) / (1000 * 60 * 60 * 24)) : 0;
+        
+        let recentChange = '-';
+        if (latestRecord && latestRecord.change !== null) {
+            const change = latestRecord.change;
+            recentChange = change > 0 ? `+${change.toFixed(1)}kg` : 
+                          change < 0 ? `${change.toFixed(1)}kg` : '변화없음';
+        }
+
+        statsSection.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="stat-value">${totalRecords}</div>
+                <div class="stat-label">총 기록</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-paw"></i></div>
+                <div class="stat-value">${uniquePets}</div>
+                <div class="stat-label">반려동물</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="stat-value">${daysSinceFirst}</div>
+                <div class="stat-label">관리 일수</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-trending-up"></i></div>
+                <div class="stat-value">${recentChange}</div>
+                <div class="stat-label">최근 변화</div>
+            </div>
+        `;
+    }
+
+    function updateRecordsGrid(data) {
+        const recordsGrid = document.getElementById('recordsGrid');
+        const noRecords = document.getElementById('noRecords');
+        const filterInfo = document.getElementById('filterInfo');
+        
+        if (data.length === 0) {
+            recordsGrid.style.display = 'none';
+            noRecords.style.display = 'block';
+            filterInfo.textContent = '';
+            return;
+        }
+
+        recordsGrid.style.display = 'grid';
+        noRecords.style.display = 'none';
+        
+        const selectedPet = petFilter.value;
+        let infoText = `총 ${data.length}개의 기록`;
+        if (selectedPet) {
+            const petName = pets.find(p => p.id == selectedPet)?.name;
+            infoText = `${petName}: ${data.length}개의 기록`;
+        }
+        filterInfo.textContent = infoText;
+
+        recordsGrid.innerHTML = '';
+        data.forEach(item => {
+            const recordItem = document.createElement('div');
+            recordItem.className = 'record-item';
+
+            let changeHTML = '';
+            if (item.change !== null) {
+                const change = item.change.toFixed(1);
+                const changeClass = change > 0 ? 'change-positive' : 
+                                 change < 0 ? 'change-negative' : 'change-neutral';
+                const changeText = change > 0 ? `+${change}kg` : 
+                                 change < 0 ? `${change}kg` : '변화없음';
+                changeHTML = `<span class="change-value ${changeClass}">${changeText}</span>`;
+            } else {
+                changeHTML = `<span class="change-value change-neutral">첫 기록</span>`;
+            }
+
+            const daysSince = item.days_since_last ? `${item.days_since_last}일 전 측정` : '';
+
+            recordItem.innerHTML = `
+                <div class="record-header">
+                    <div class="record-pet">
+                        <i class="fas fa-paw"></i>
+                        ${item.pet_name}
+                    </div>
+                    <div class="record-date">${formatDate(item.date)}</div>
+                </div>
+                <div class="record-weight">${item.weight.toFixed(1)}kg</div>
+                <div class="record-change">
+                    ${changeHTML}
+                    <div class="days-since">${daysSince}</div>
+                </div>
+                <div class="record-actions">
+                    <button class="btn-delete" onclick="deleteRecord(${item.id})">
+                        <i class="fas fa-trash"></i>
+                        삭제
+                    </button>
+                </div>
+            `;
+
+            recordsGrid.appendChild(recordItem);
+        });
+    }
+
+    function updateChart(data) {
+        const selectedPet = chartPetFilter.value;
+        let filtered = data;
+        
+        if (selectedPet) {
+            filtered = data.filter(item => String(item.pet) === selectedPet);
+        }
+
+        // 반려동물별로 데이터 그룹화
+        const petData = {};
+        filtered.forEach(item => {
+            if (!petData[item.pet]) {
+                petData[item.pet] = {
+                    name: item.pet_name,
+                    data: []
+                };
+            }
+            petData[item.pet].data.push(item);
+        });
+
+        // 차트용 데이터셋 생성
+        const datasets = [];
+        const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4', '#84CC16'];
+        let colorIndex = 0;
+
+        Object.values(petData).forEach(pet => {
+            const sortedData = pet.data.sort((a, b) => new Date(a.date) - new Date(b.date));
+            datasets.push({
+                label: pet.name,
+                data: sortedData.map(item => ({
+                    x: item.date,
+                    y: item.weight
+                })),
+                borderColor: colors[colorIndex % colors.length],
+                backgroundColor: colors[colorIndex % colors.length] + '20',
+                tension: 0.3,
+                fill: false,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                borderWidth: 3
+            });
+            colorIndex++;
+        });
+
+        if (weightChart) {
+            weightChart.destroy();
+        }
+
+        weightChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        cornerRadius: 8,
+                        callbacks: {
+                            title: function(context) {
+                                return formatDate(context[0].parsed.x);
+                            },
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}kg`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            displayFormats: {
+                                day: 'MM/DD'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(1) + 'kg';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+
+        // 범례 업데이트
+        updateChartLegend(datasets);
+    }
+
+    function updateChartLegend(datasets) {
+        const chartLegend = document.getElementById('chartLegend');
+        chartLegend.innerHTML = '';
+        
+        datasets.forEach(dataset => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.innerHTML = `
+                <div class="legend-color" style="background-color: ${dataset.borderColor}"></div>
+                <span>${dataset.label}</span>
+            `;
+            chartLegend.appendChild(legendItem);
+        });
+    }
+
+    // 데이터 로드 및 초기화
+    function loadData() {
         fetch('/weight-tracker/api/weights/')
             .then(response => response.json())
             .then(data => {
                 allData = data;
-                filterAndRender();
+                updateStatsSection(data);
+                updateChart(data);
+                filterAndRenderRecords();
+            })
+            .catch(error => {
+                console.error('데이터 로드 중 오류:', error);
             });
     }
 
-    function filterAndRender() {
+    function filterAndRenderRecords() {
         const selectedPet = petFilter.value;
         let filtered = allData;
+        
         if (selectedPet) {
             filtered = allData.filter(item => String(item.pet) === selectedPet);
         }
-        // 차트 데이터 준비
-        const labels = filtered.map(item => item.date).reverse();
-        const weights = filtered.map(item => item.weight).reverse();
-        if (weightChart) weightChart.destroy();
-        weightChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '체중 (kg)',
-                    data: weights,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1,
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: { y: { beginAtZero: false } },
-                plugins: { tooltip: { callbacks: { label: function(context) { return `체중: ${context.parsed.y}kg`; } } } }
-            }
-        });
-        updateTable(filtered);
+        
+        updateRecordsGrid(filtered);
     }
 
-    petFilter.addEventListener('change', filterAndRender);
+    // 이벤트 리스너
+    petFilter.addEventListener('change', filterAndRenderRecords);
+    chartPetFilter.addEventListener('change', () => updateChart(allData));
 
     // 체중 기록 제출
     weightForm.addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        const submitBtn = this.querySelector('.btn-submit');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 저장 중...';
+        submitBtn.disabled = true;
+        
         const data = {
             date: document.getElementById('date').value,
             weight: parseFloat(document.getElementById('weight').value),
             pet: parseInt(document.getElementById('pet').value)
         };
+        
         fetch('/weight-tracker/api/weights/', {
             method: 'POST',
             headers: {
@@ -226,25 +1087,127 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(result => {
             if (result.status === 201 && result.body.id) {
                 weightForm.reset();
-                initChart();
+                document.getElementById('date').valueAsDate = new Date();
+                loadData();
+                
+                // 성공 메시지
+                showNotification('체중 기록이 성공적으로 저장되었습니다!', 'success');
             } else if (result.status === 400 && result.body && result.body.error && result.body.error.includes('UNIQUE')) {
-                alert('이미 해당 날짜에 이 반려동물의 체중 기록이 존재합니다.');
+                showNotification('이미 해당 날짜에 이 반려동물의 체중 기록이 존재합니다.', 'error');
             } else {
-                alert('저장 중 오류가 발생했습니다.');
+                showNotification('저장 중 오류가 발생했습니다.', 'error');
             }
+        })
+        .catch(error => {
+            console.error('저장 중 오류:', error);
+            showNotification('저장 중 오류가 발생했습니다.', 'error');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         });
     });
 
-    // 초기 차트 및 테이블 로드
-    initChart();
+    // 초기 데이터 로드
+    loadData();
 
-    // 필터 기본값을 첫 번째 반려동물로 설정
+    // 기본 필터 설정
     if (pets.length > 0) {
-        petFilter.value = pets[0].id;
-        filterAndRender();
+        chartPetFilter.value = pets[0].id;
+        updateChart(allData);
     }
 });
 
+// 기록 삭제
+function deleteRecord(recordId) {
+    if (!confirm('정말 이 기록을 삭제하시겠습니까?')) {
+        return;
+    }
+    
+    fetch(`/weight-tracker/api/weights/${recordId}/`, {
+        method: 'DELETE',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(response => {
+        if (response.ok) {
+            showNotification('기록이 삭제되었습니다.', 'success');
+            // 데이터 다시 로드
+            fetch('/weight-tracker/api/weights/')
+                .then(response => response.json())
+                .then(data => {
+                    allData = data;
+                    updateStatsSection(data);
+                    updateChart(data);
+                    filterAndRenderRecords();
+                });
+        } else {
+            showNotification('삭제 중 오류가 발생했습니다.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('삭제 중 오류:', error);
+        showNotification('삭제 중 오류가 발생했습니다.', 'error');
+    });
+}
+
+// 데이터 내보내기
+function exportData() {
+    if (allData.length === 0) {
+        showNotification('내보낼 데이터가 없습니다.', 'info');
+        return;
+    }
+    
+    // CSV 형태로 데이터 내보내기
+    const csv = [
+        ['날짜', '반려동물', '체중(kg)', '변화량(kg)'],
+        ...allData.map(item => [
+            item.date, 
+            item.pet_name, 
+            item.weight.toFixed(1), 
+            item.change ? item.change.toFixed(1) : ''
+        ])
+    ].map(row => row.join(',')).join('\n');
+    
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `체중기록_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    
+    showNotification('데이터가 내보내기되었습니다.', 'success');
+}
+
+// 알림 메시지 표시
+function showNotification(message, type = 'info') {
+    // 기존 알림 제거
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // 애니메이션
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // 자동 제거
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// CSRF 토큰 가져오기
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

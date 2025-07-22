@@ -1,241 +1,1248 @@
 {% extends 'common_app/base.html' %}
 {% load static humanize %}
 
-{% block title %}기타 구매 관리 - 냐옹노트{% endblock %}
+{% block title %}비용관리 - 냥이 집사{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- 필터 및 총 합계 -->
-    <div class="row mb-3 align-items-center">
-        <form method="get" class="row g-2 w-100 align-items-center">
-            <div class="col-md-2">
-                <input type="month" name="month" value="{{ current_month }}" class="form-control">
+<div class="expense-management">
+    <!-- 페이지 헤더 -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="page-title">비용관리</h1>
+                <p class="page-description">우리 고양이를 위한 모든 지출을 체계적으로 관리해보세요</p>
             </div>
-            <div class="col-md-2">
-                <select name="pet" class="form-select">
-                    <option value="">전체 반려동물</option>
+            <div class="header-actions">
+                <button class="btn btn-secondary btn-sm" id="exportBtn">
+                    <i class="fas fa-download"></i>
+                    내보내기
+                </button>
+                <button class="btn btn-primary btn-sm" id="addExpenseBtn">
+                    <i class="fas fa-plus"></i>
+                    지출 추가
+                </button>
+                </div>
+                </div>
+                </div>
+
+    <!-- 대시보드 카드들 -->
+    <div class="dashboard-section">
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-icon">
+                    <i class="fas fa-wallet"></i>
+            </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ total_price|floatformat:0|intcomma }}원</div>
+                    <div class="stat-label">이번 달 총 지출</div>
+                </div>
+                <div class="stat-trend">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>지난달 대비 +12%</span>
+        </div>
+    </div>
+
+            <div class="stat-card average">
+                <div class="stat-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ average_daily|floatformat:0|intcomma }}원</div>
+                    <div class="stat-label">일 평균 지출</div>
+                </div>
+                <div class="stat-trend">
+                    <i class="fas fa-minus"></i>
+                    <span>평소와 비슷</span>
+        </div>
+    </div>
+
+            <div class="stat-card count">
+                <div class="stat-icon">
+                    <i class="fas fa-shopping-bag"></i>
+            </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ purchases.count }}건</div>
+                    <div class="stat-label">이번 달 구매</div>
+                        </div>
+                <div class="stat-trend">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+3건</span>
+                        </div>
+                        </div>
+            
+            <div class="stat-card largest">
+                <div class="stat-icon">
+                    <i class="fas fa-crown"></i>
+                        </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ largest_expense|floatformat:0|intcomma }}원</div>
+                    <div class="stat-label">최대 지출</div>
+                    </div>
+                <div class="stat-trend">
+                    <i class="fas fa-tag"></i>
+                    <span>{{ largest_category }}</span>
+            </div>
+        </div>
+    </div>
+
+        <!-- 카테고리별 지출 차트 -->
+        <div class="chart-section">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">카테고리별 지출</h3>
+                    <div class="chart-period">
+                        <select class="period-select" id="periodSelect">
+                            <option value="month">이번 달</option>
+                            <option value="quarter">최근 3개월</option>
+                            <option value="year">올해</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            </div>
+        </div>
+
+    <!-- 필터 및 검색 -->
+    <div class="filter-section">
+        <div class="filter-card">
+            <div class="filter-group">
+                <label class="filter-label">기간</label>
+                <input type="month" class="filter-input" id="monthFilter" value="{{ current_month }}">
+                        </div>
+            <div class="filter-group">
+                <label class="filter-label">고양이</label>
+                <select class="filter-input" id="petFilter">
+                    <option value="">전체 고양이</option>
                     {% for pet in pets %}
-                    <option value="{{ pet.id }}" {% if selected_pet_id == pet.id|stringformat:"i" %}selected{% endif %}>
-                        {{ pet.name }}
-                    </option>
+                    <option value="{{ pet.id }}" {% if selected_pet_id == pet.id|stringformat:"i" %}selected{% endif %}>{{ pet.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
-                <input type="text" name="search" value="{{ search }}" placeholder="상품명 검색" class="form-control">
+            <div class="filter-group">
+                <label class="filter-label">카테고리</label>
+                <select class="filter-input" id="categoryFilter">
+                    <option value="">전체 카테고리</option>
+                    <option value="장난감">🧸 장난감</option>
+                    <option value="간식">🍖 간식</option>
+                    <option value="용품">🏠 용품</option>
+                    <option value="의료">🏥 의료</option>
+                    <option value="미용">✂️ 미용</option>
+                    <option value="기타">📦 기타</option>
+                </select>
             </div>
-            <div class="col-md-1">
-                <button type="submit" class="btn btn-primary w-100">검색</button>
+            <div class="filter-group">
+                <label class="filter-label">검색</label>
+                <div class="search-input-wrapper">
+                    <input type="text" class="filter-input" id="searchFilter" placeholder="상품명 검색..." value="{{ search }}">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
             </div>
-            <div class="col-md-3 text-end">
-                <strong>총 합계:</strong> {{ total_price|floatformat:0|intcomma }}원
+                        </div>
+                    </div>
+                    
+    <!-- 지출 내역 -->
+    <div class="expenses-section">
+        <div class="section-header">
+            <h2 class="section-title">지출 내역</h2>
+            <div class="view-controls">
+                <button class="view-control active" data-view="list">
+                    <i class="fas fa-list"></i>
+                    목록
+                </button>
+                <button class="view-control" data-view="grid">
+                    <i class="fas fa-th-large"></i>
+                    카드
+                </button>
+                <button class="view-control" data-view="timeline">
+                    <i class="fas fa-chart-line"></i>
+                    타임라인
+                </button>
             </div>
-        </form>
-    </div>
+                    </div>
 
-    <!-- 추가 버튼 -->
-    <div class="mb-3">
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#otherPurchaseModal">추가</button>
-    </div>
+        <!-- 목록 뷰 -->
+        <div class="list-view" id="listView">
+            <div class="expense-table">
+                <div class="table-header">
+                    <div class="col-date">날짜</div>
+                    <div class="col-category">카테고리</div>
+                    <div class="col-product">상품명</div>
+                    <div class="col-pet">고양이</div>
+                    <div class="col-price">금액</div>
+                    <div class="col-rating">만족도</div>
+                    <div class="col-actions">작업</div>
+                </div>
+                <div class="table-body" id="expenseTableBody">
+                    {% for purchase in purchases %}
+                    <div class="table-row" data-category="{{ purchase.type }}" data-pet="{{ purchase.cat.id }}">
+                        <div class="col-date">{{ purchase.purchase_date|date:"m.d" }}</div>
+                        <div class="col-category">
+                            <span class="category-badge {{ purchase.type }}">{{ purchase.type }}</span>
+                        </div>
+                        <div class="col-product">{{ purchase.product_name }}</div>
+                        <div class="col-pet">{{ purchase.cat.name }}</div>
+                        <div class="col-price">{{ purchase.price|floatformat:0|intcomma }}원</div>
+                        <div class="col-rating">
+                        {% if purchase.rating > 0 %}
+                            <div class="rating-stars">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star {% if forloop.counter <= purchase.rating %}active{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                                    {% else %}
+                            <span class="no-rating">-</span>
+                                    {% endif %}
+                        </div>
+                        <div class="col-actions">
+                            <button class="btn btn-ghost btn-sm" onclick="editExpense({{ purchase.id }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-ghost btn-sm text-danger" onclick="deleteExpense({{ purchase.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <h3>지출 기록이 없습니다</h3>
+                        <p>첫 번째 지출을 기록해보세요!</p>
+                        <button class="btn btn-primary" id="addFirstExpenseBtn">
+                            <i class="fas fa-plus"></i>
+                            지출 추가하기
+                        </button>
+                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+        </div>
 
-    <!-- 구매 내역 테이블 -->
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>구매일</th>
-                    <th>반려동물</th>
-                    <th>가격</th>
-                    <th>타입</th>
-                    <th>상품명</th>
-                    <th>구매처 링크</th>
-                    <th>만족도</th>
-                    <th>메모</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in purchases %}
-                <tr>
-                    <td>{{ p.purchase_date|date:"Y-m-d" }}</td>
-                    <td>{{ p.cat.name }}</td>
-                    <td>{{ p.price|floatformat:0|intcomma }}원</td>
-                    <td>{{ p.type }}</td>
-                    <td>{{ p.product_name }}</td>
-                    <td>{% if p.purchase_link %}<a href="{{ p.purchase_link }}" target="_blank">링크</a>{% endif %}</td>
-                    <td>
-                        {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= p.rating %}★{% else %}☆{% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>{{ p.memo }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="8" class="text-center">기타 구매 내역이 없습니다.</td></tr>
+        <!-- 카드 뷰 -->
+        <div class="grid-view" id="gridView" style="display: none;">
+            <div class="expense-grid">
+                {% for purchase in purchases %}
+                <div class="expense-card" data-category="{{ purchase.type }}" data-pet="{{ purchase.cat.id }}">
+                    <div class="expense-header">
+                        <span class="expense-date">{{ purchase.purchase_date|date:"Y.m.d" }}</span>
+                        <span class="category-badge {{ purchase.type }}">{{ purchase.type }}</span>
+                    </div>
+                    <div class="expense-content">
+                        <h4 class="expense-title">{{ purchase.product_name }}</h4>
+                        <div class="expense-meta">
+                            <span class="expense-pet">
+                                <i class="fas fa-cat"></i>
+                                {{ purchase.cat.name }}
+                            </span>
+                            <span class="expense-price">{{ purchase.price|floatformat:0|intcomma }}원</span>
+                        </div>
+                        {% if purchase.rating > 0 %}
+                        <div class="expense-rating">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star {% if forloop.counter <= purchase.rating %}active{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="expense-actions">
+                        {% if purchase.purchase_link %}
+                        <a href="{{ purchase.purchase_link }}" target="_blank" class="btn btn-ghost btn-sm">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-ghost btn-sm" onclick="editExpense({{ purchase.id }})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-ghost btn-sm text-danger" onclick="deleteExpense({{ purchase.id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
+
+        <!-- 타임라인 뷰 -->
+        <div class="timeline-view" id="timelineView" style="display: none;">
+            <div class="timeline">
+                {% regroup purchases by purchase_date.date as expenses_by_date %}
+                {% for date_group in expenses_by_date %}
+                <div class="timeline-date">
+                    <h4>{{ date_group.grouper|date:"Y년 m월 d일" }}</h4>
+                    <div class="date-total">
+                        총 지출
+                    </div>
+                </div>
+                <div class="timeline-items">
+                    {% for expense in date_group.list %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker {{ expense.type }}"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">{{ expense.product_name }}</div>
+                            <div class="timeline-meta">
+                                <span class="timeline-price">{{ expense.price|floatformat:0|intcomma }}원</span>
+                                <span class="timeline-category">{{ expense.type }}</span>
+                                <span class="timeline-pet">{{ expense.cat.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- 모달 -->
-<div class="modal fade" id="otherPurchaseModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="otherPurchaseForm">
-        <div class="modal-header">
-          <h5 class="modal-title">기타 구매 추가</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label class="form-label">반려동물</label>
-            <select name="pet" class="form-select" required>
-              {% for pet in pets %}
-                <option value="{{ pet.id }}">{{ pet.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">구매일</label>
-            <input type="date" name="purchase_date" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">가격</label>
-            <input type="number" name="price" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">타입</label>
-            <input type="text" name="type" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">상품명</label>
-            <input type="text" name="product_name" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">구매처 링크</label>
-            <input type="url" name="purchase_link" class="form-control">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">만족도</label>
-            <div id="ratingStars" class="mb-1"></div>
-            <input type="hidden" name="rating" id="rating" value="0" />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">메모</label>
-            <textarea name="memo" class="form-control"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-          <button type="submit" class="btn btn-primary">저장</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-{% endblock %}
+<!-- 지출 추가/수정 모달 -->
+<div class="modal" id="expenseModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+                <div class="modal-header">
+                <h3 class="modal-title">지출 기록 추가</h3>
+                <button class="modal-close" onclick="closeExpenseModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                </div>
+                
+            <form id="expenseForm">
+                    {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">고양이</label>
+                            <select class="form-input" name="pet" required>
+                                <option value="">고양이를 선택하세요</option>
+                                {% for pet in pets %}
+                                <option value="{{ pet.id }}">{{ pet.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">구매일</label>
+                            <input type="date" class="form-input" name="purchase_date" required>
+                        </div>
+                        </div>
 
-{% block extra_js %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">카테고리</label>
+                            <select class="form-input" name="type" required>
+                                <option value="">카테고리를 선택하세요</option>
+                                <option value="장난감">🧸 장난감</option>
+                                <option value="간식">🍖 간식</option>
+                                <option value="용품">🏠 용품</option>
+                                <option value="의료">🏥 의료</option>
+                                <option value="미용">✂️ 미용</option>
+                                <option value="기타">📦 기타</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">금액</label>
+                            <input type="number" class="form-input" name="price" placeholder="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">상품명</label>
+                        <input type="text" class="form-input" name="product_name" placeholder="상품명을 입력하세요" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">구매처 링크</label>
+                        <input type="url" class="form-input" name="purchase_link" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">만족도</label>
+                        <div class="rating-input">
+                            {% for i in "12345" %}
+                            <button type="button" class="rating-star" data-rating="{{ i }}">
+                                <i class="fas fa-star"></i>
+                            </button>
+                            {% endfor %}
+                            <input type="hidden" name="rating" value="0">
+                            </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">메모</label>
+                        <textarea class="form-input" name="memo" rows="3" placeholder="메모를 입력하세요"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">
+                        취소
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        저장하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 페이지 기본 스타일 */
+.expense-management {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 페이지 헤더 */
+.page-header {
+    margin-bottom: 48px;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-xl);
+    }
+
+.page-title {
+    font-size: 32px;
+        font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.page-description {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-shrink: 0;
+}
+
+/* 대시보드 섹션 */
+.dashboard-section {
+    margin-bottom: var(--spacing-4xl);
+}
+
+/* 통계 카드 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-3xl);
+    }
+
+    .stat-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary-color);
+}
+
+.stat-card.total::before { background: linear-gradient(135deg, #667eea, #764ba2); }
+.stat-card.average::before { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.stat-card.count::before { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.stat-card.largest::before { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    color: var(--white);
+    font-size: 20px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.stat-card.total .stat-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+.stat-card.average .stat-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.stat-card.count .stat-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.stat-card.largest .stat-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* 차트 섹션 */
+.chart-section {
+    margin-bottom: var(--spacing-3xl);
+}
+
+.chart-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+}
+
+.chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    margin-bottom: var(--spacing-xl);
+    }
+
+.chart-title {
+    font-size: 20px;
+        font-weight: 600;
+    color: var(--text-primary);
+        margin: 0;
+}
+
+.period-select {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.chart-content {
+    height: 300px;
+}
+
+/* 필터 섹션 */
+.filter-section {
+    margin-bottom: var(--spacing-3xl);
+}
+
+.filter-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    display: flex;
+    gap: var(--spacing-3xl);
+        align-items: end;
+    }
+
+.filter-group {
+        display: flex;
+        flex-direction: column;
+    gap: var(--spacing-sm);
+    }
+
+.filter-label {
+        font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.filter-input {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    min-width: 150px;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    right: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+/* 지출 섹션 */
+.expenses-section {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .section-header {
+    padding: var(--spacing-xl);
+    border-bottom: 1px solid var(--border-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title {
+    font-size: 20px;
+        font-weight: 600;
+    color: var(--text-primary);
+        margin: 0;
+}
+
+.view-controls {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.view-control {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.view-control:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.view-control.active {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+/* 테이블 뷰 */
+.expense-table {
+    width: 100%;
+}
+
+.table-header, .table-row {
+        display: grid;
+    grid-template-columns: 80px 120px 2fr 120px 120px 100px 80px;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    align-items: center;
+}
+
+.table-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.table-row {
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+}
+
+.table-row:hover {
+    background: var(--bg-secondary);
+}
+
+.category-badge {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.category-badge.장난감 { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+.category-badge.간식 { background: rgba(245, 101, 101, 0.1); color: #f56565; }
+.category-badge.용품 { background: rgba(52, 211, 153, 0.1); color: #34d399; }
+.category-badge.의료 { background: rgba(251, 146, 60, 0.1); color: #fb923c; }
+.category-badge.미용 { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.category-badge.기타 { background: rgba(107, 114, 128, 0.1); color: #6b7280; }
+
+.rating-stars {
+        display: flex;
+    gap: 2px;
+}
+
+.rating-stars .fas.fa-star {
+    color: var(--border-medium);
+    font-size: 12px;
+}
+
+.rating-stars .fas.fa-star.active {
+    color: #fbbf24;
+}
+
+.no-rating {
+    color: var(--text-muted);
+}
+
+/* 카드 뷰 */
+.expense-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
+}
+
+.expense-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all 0.3s ease;
+}
+
+.expense-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.expense-header {
+        display: flex;
+    justify-content: space-between;
+        align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.expense-date {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.expense-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.expense-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.expense-pet {
+        display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.expense-price {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.expense-rating {
+        display: flex;
+    gap: 2px;
+    margin-bottom: var(--spacing-md);
+}
+
+.expense-actions {
+        display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+}
+
+/* 타임라인 뷰 */
+.timeline {
+    padding: var(--spacing-xl);
+}
+
+.timeline-date {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg) 0;
+    border-bottom: 2px solid var(--border-light);
+    margin-bottom: var(--spacing-lg);
+}
+
+.timeline-date h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.date-total {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.timeline-items {
+    margin-bottom: var(--spacing-3xl);
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) 0;
+    border-left: 2px solid var(--border-light);
+    padding-left: var(--spacing-xl);
+    position: relative;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -6px;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    background: var(--primary-color);
+}
+
+.timeline-content {
+    flex: 1;
+}
+
+.timeline-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.timeline-meta {
+    display: flex;
+    gap: var(--spacing-lg);
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.timeline-price {
+        font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* 빈 상태 */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-6xl) var(--spacing-3xl);
+    grid-column: 1 / -1;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-xl);
+    color: var(--text-muted);
+    font-size: 32px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* 모달 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    padding: var(--spacing-xl);
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-dialog {
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+    padding: var(--spacing-xl);
+    border-bottom: 1px solid var(--border-light);
+        display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+        cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: var(--spacing-xl);
+    }
+
+    .modal-footer {
+    padding: var(--spacing-xl);
+    border-top: 1px solid var(--border-light);
+        display: flex;
+    gap: var(--spacing-md);
+        justify-content: flex-end;
+    }
+
+/* 평점 입력 */
+.rating-input {
+        display: flex;
+    gap: var(--spacing-sm);
+}
+
+.rating-star {
+    background: none;
+    border: none;
+    color: var(--border-medium);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rating-star:hover,
+.rating-star.active {
+    color: #fbbf24;
+    }
+
+    /* 반응형 디자인 */
+@media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-card {
+            flex-direction: column;
+            align-items: stretch;
+        gap: var(--spacing-lg);
+        }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        }
+
+    .table-header, .table-row {
+            grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .table-header {
+        display: none;
+    }
+
+    .table-row {
+        display: flex;
+            flex-direction: column;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-lg);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .expense-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-function getCookie(name){let v=null;document.cookie.split(';').forEach(c=>{let p=c.trim().split('=');if(p[0]===name)v=decodeURIComponent(p[1]);});return v;}
+document.addEventListener('DOMContentLoaded', function() {
+    // 차트 초기화
+    initializeChart();
+    
+    // 뷰 컨트롤
+    const viewControls = document.querySelectorAll('.view-control');
+    viewControls.forEach(control => {
+        control.addEventListener('click', function() {
+            viewControls.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            
+            const view = this.dataset.view;
+            document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
+            document.getElementById('gridView').style.display = view === 'grid' ? 'block' : 'none';
+            document.getElementById('timelineView').style.display = view === 'timeline' ? 'block' : 'none';
+        });
+    });
+    
+    // 필터 기능
+    const filters = document.querySelectorAll('.filter-input');
+    filters.forEach(filter => {
+        filter.addEventListener('change', applyFilters);
+    });
+    
+    document.getElementById('searchFilter').addEventListener('input', debounce(applyFilters, 300));
+    
+    // 지출 추가 버튼들
+    document.getElementById('addExpenseBtn').addEventListener('click', openExpenseModal);
+    document.getElementById('addFirstExpenseBtn')?.addEventListener('click', openExpenseModal);
+    
+    // 별점 기능
+    const ratingStars = document.querySelectorAll('.rating-star');
+    const ratingInput = document.querySelector('input[name="rating"]');
+    
+    ratingStars.forEach(star => {
+            star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            ratingInput.value = rating;
+            
+            ratingStars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+                });
+            });
+            
+    // 폼 제출 처리
+    document.getElementById('expenseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveExpense();
+            });
+        });
 
-// 별점 위젯 생성 (만족도)
-const ratingContainer = document.getElementById('ratingStars');
-const ratingInput = document.getElementById('rating');
-const starElems = [];
-for (let i = 1; i <= 5; i++) {
-    const star = document.createElement('span');
-    star.textContent = '☆'; star.dataset.value = i;
-    star.style.cursor = 'pointer'; star.style.fontSize = '1.5rem';
-    star.style.marginRight = '2px';
-    ratingContainer.appendChild(star);
-    starElems.push(star);
-    star.addEventListener('click', function() {
-        const val = this.dataset.value;
-        ratingInput.value = val;
-        starElems.forEach(s => s.textContent = s.dataset.value <= val ? '★' : '☆');
+// 차트 초기화
+function initializeChart() {
+    const ctx = document.getElementById('categoryChart');
+    if (!ctx) return;
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['장난감', '간식', '용품', '의료', '미용', '기타'],
+            datasets: [{
+                data: [120000, 80000, 150000, 200000, 50000, 70000],
+                backgroundColor: [
+                    '#6366f1',
+                    '#f56565', 
+                    '#34d399',
+                    '#fb923c',
+                    '#a855f7',
+                    '#6b7280'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
     });
 }
 
-// 모달 폼 제출
-document.getElementById('otherPurchaseForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formEl = this;
-    const formDataObj = new FormData(formEl);
-    formDataObj.delete('csrfmiddlewaretoken');
-    const data = {};
-    formDataObj.forEach((v, k) => { data[k] = v; });
+// 필터 적용
+function applyFilters() {
+    const monthFilter = document.getElementById('monthFilter').value;
+    const petFilter = document.getElementById('petFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+    
+    const rows = document.querySelectorAll('.table-row');
+    const cards = document.querySelectorAll('.expense-card');
+    
+    [...rows, ...cards].forEach(item => {
+        const category = item.dataset.category;
+        const pet = item.dataset.pet;
+        const productName = item.querySelector('.col-product, .expense-title')?.textContent.toLowerCase() || '';
+        
+        let show = true;
+        
+        if (petFilter && pet !== petFilter) show = false;
+        if (categoryFilter && category !== categoryFilter) show = false;
+        if (searchFilter && !productName.includes(searchFilter)) show = false;
+        
+        item.style.display = show ? (item.classList.contains('table-row') ? 'grid' : 'block') : 'none';
+    });
+}
+
+// 디바운스 함수
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// 모달 관련 함수들
+function openExpenseModal() {
+    document.getElementById('expenseModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // 오늘 날짜 설정
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="purchase_date"]').value = today;
+}
+
+function closeExpenseModal() {
+    document.getElementById('expenseModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    document.getElementById('expenseForm').reset();
+    
+    // 별점 초기화
+    document.querySelectorAll('.rating-star').forEach(star => {
+        star.classList.remove('active');
+    });
+    document.querySelector('input[name="rating"]').value = '0';
+}
+
+// 지출 저장
+function saveExpense() {
+    const formData = new FormData(document.getElementById('expenseForm'));
+    
     fetch('/items/api/otherpurchase/', {
         method: 'POST',
+        body: formData,
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
-        credentials: 'same-origin',
-        body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(json => {
-        if (json.id) {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('otherPurchaseModal'));
-            modal.hide();
+    .then(data => {
+        if (data.success || data.id) {
+            closeExpenseModal();
             location.reload();
         } else {
-            console.error('Error saving:', json);
+            alert('저장 중 오류가 발생했습니다.');
         }
     })
-    .catch(err => console.error(err));
-});
-
-// 필터 AJAX 동적 조회
-const filterForm = document.querySelector('form');
-const tableBody = document.querySelector('table tbody');
-const totalPriceElem = document.querySelector('.text-end strong').nextSibling;
-
-function renderPurchases(purchases) {
-    tableBody.innerHTML = '';
-    if (!purchases.length) {
-        tableBody.innerHTML = '<tr><td colspan="8" class="text-center">기타 구매 내역이 없습니다.</td></tr>';
-        return;
-    }
-    purchases.forEach(p => {
-        tableBody.innerHTML += `
-            <tr>
-                <td>${p.purchase_date}</td>
-                <td>${p.cat && p.cat.name ? p.cat.name : ''}</td>
-                <td>${Number(p.price).toLocaleString()}원</td>
-                <td>${p.type}</td>
-                <td>${p.product_name}</td>
-                <td>${p.purchase_link ? `<a href="${p.purchase_link}" target="_blank">링크</a>` : ''}</td>
-                <td>${'★'.repeat(p.rating)}${'☆'.repeat(5-p.rating)}</td>
-                <td>${p.memo || ''}</td>
-            </tr>
-        `;
+    .catch(error => {
+        console.error('Error:', error);
+        alert('저장 중 오류가 발생했습니다.');
     });
 }
 
-function fetchPurchasesAJAX() {
-    const params = new URLSearchParams(new FormData(filterForm)).toString();
-    fetch('/items/api/otherpurchase/?' + params)
-        .then(res => res.json())
-        .then(data => {
-            renderPurchases(data.purchases);
-            if (totalPriceElem) totalPriceElem.textContent = ` ${Number(data.total_price).toLocaleString()}원`;
+// 지출 수정
+function editExpense(expenseId) {
+    alert('수정 기능은 준비 중입니다.');
+}
+
+// 지출 삭제
+function deleteExpense(expenseId) {
+    if (confirm('이 지출 기록을 삭제하시겠습니까?')) {
+        fetch(`/items/api/otherpurchase/${expenseId}/`, {
+        method: 'DELETE',
+        headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+    })
+    .then(response => {
+        if (response.ok) {
+                location.reload();
+        } else {
+                alert('삭제 중 오류가 발생했습니다.');
+        }
+    })
+    .catch(error => {
+            console.error('Error:', error);
+            alert('삭제 중 오류가 발생했습니다.');
         });
+    }
 }
 
-// 필터 변경 시 AJAX
-filterForm.querySelectorAll('input, select').forEach(function(el) {
-    el.addEventListener('change', function(e) {
-        e.preventDefault();
-        fetchPurchasesAJAX();
-    });
-});
-// 검색 버튼 클릭 시만 submit 허용
-filterForm.addEventListener('submit', function(e) {
-    // 아무것도 입력하지 않고 엔터 등으로 submit할 때만 허용
-    // (검색 버튼 클릭 시에는 기본 동작)
+// 모달 외부 클릭시 닫기
+document.getElementById('expenseModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeExpenseModal();
+    }
 });
 </script>
 {% endblock %} 

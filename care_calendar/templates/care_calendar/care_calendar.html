@@ -1,458 +1,1379 @@
 {% extends 'common_app/base.html' %}
 {% load static %}
 
-{% block title %}케어 캘린더 - 냐옹노트{% endblock %}
+{% block title %}케어캘린더 - 냥이 집사{% endblock %}
 
 {% block content %}
-    <div class="container-fluid">
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <label for="petFilter" class="form-label me-2 mb-0">반려동물 선택:</label>
-                            <select class="form-select w-auto" id="petFilter">
-                                <option value="all">전체</option>
+<style>
+.page-hide-nav {
+    display: none !important;
+}
+
+/* Hide default header/nav */
+.navbar, .nav-section, .header-section, .breadcrumb-section {
+    display: none !important;
+}
+
+.main-container {
+    padding: 0 !important;
+    max-width: none !important;
+    background: var(--color-background) !important;
+}
+
+/* Care calendar page specific styles */
+.care-page {
+    min-height: 100vh;
+    background: var(--color-background);
+    font-family: var(--font-primary);
+}
+
+.care-header {
+    background: white;
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.care-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+    margin-bottom: var(--spacing-lg);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+    background: var(--color-surface);
+}
+
+.care-title {
+    font-size: 24px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.nav-right {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.nav-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    cursor: pointer;
+}
+
+.nav-btn:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.care-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+/* Stats Section */
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-light);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--color-primary-lightest);
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-sm);
+    color: var(--color-primary);
+    font-size: 20px;
+}
+
+.stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Dashboard Cards */
+.dashboard-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.dashboard-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-lg);
+    transition: all 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-light);
+}
+
+.dashboard-card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: var(--spacing-md);
+}
+
+.dashboard-card-title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+}
+
+.dashboard-card-content {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-sm);
+}
+
+.dashboard-card-value {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+}
+
+/* Main Content Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: var(--spacing-xl);
+}
+
+/* Calendar Section */
+.calendar-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+}
+
+.calendar-header {
+    background: var(--color-surface);
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calendar-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.calendar-title i {
+    color: var(--color-primary);
+}
+
+.filter-select {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-sm);
+    background: white;
+    min-width: 120px;
+}
+
+.calendar-wrapper {
+    padding: var(--spacing-xl);
+}
+
+#calendar {
+    height: 500px;
+}
+
+.calendar-legend {
+    background: var(--color-surface);
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+.legend-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-md);
+}
+
+.legend-items {
+    display: flex;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.legend-color.nail { background: #ff9800; }
+.legend-color.ear { background: #2196f3; }
+.legend-color.brush { background: #4caf50; }
+.legend-color.fur { background: #9c27b0; }
+
+/* Sidebar Section */
+.sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* Form Card */
+.form-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+}
+
+.form-header {
+    background: var(--color-surface);
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.form-title i {
+    color: var(--color-primary);
+}
+
+.form-content {
+    padding: var(--spacing-xl);
+}
+
+.care-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.form-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.form-label i {
+    color: var(--color-primary);
+    width: 16px;
+}
+
+.optional {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-normal);
+    font-size: var(--font-size-xs);
+}
+
+.form-input, .form-textarea {
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-md);
+    transition: all 0.2s;
+    background: white;
+    font-family: inherit;
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.btn-submit {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    flex: 1;
+}
+
+.btn-submit:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-delete {
+    background: var(--color-danger);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    flex: 1;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+.btn-delete:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Records Card */
+.records-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    flex: 1;
+}
+
+.records-header {
+    background: var(--color-surface);
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.records-title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.records-title i {
+    color: var(--color-primary);
+}
+
+.filter-select-small {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-xs);
+    background: white;
+    min-width: 100px;
+}
+
+.records-content {
+    padding: var(--spacing-lg);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.care-records {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.care-record-item {
+    background: var(--color-surface);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-md);
+    border-left: 4px solid;
+    transition: all 0.2s;
+}
+
+.care-record-item:hover {
+    background: #f0f0f0;
+    transform: translateX(2px);
+}
+
+.care-record-item.nail { border-left-color: #ff9800; }
+.care-record-item.ear { border-left-color: #2196f3; }
+.care-record-item.brush { border-left-color: #4caf50; }
+.care-record-item.fur { border-left-color: #9c27b0; }
+
+.care-record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.care-record-title {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.care-record-days {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    padding: 2px var(--spacing-xs);
+    background: rgba(0,0,0,0.05);
+    border-radius: var(--border-radius-full);
+}
+
+.care-record-date {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.no-record {
+    color: var(--color-text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+}
+
+/* FullCalendar Custom Styles */
+.fc-event {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin: 1px 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.fc-event:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.fc-event-nail {
+    background-color: #ff9800;
+    border-color: #ff9800;
+    color: white;
+}
+
+.fc-event-ear {
+    background-color: #2196f3;
+    border-color: #2196f3;
+    color: white;
+}
+
+.fc-event-brush {
+    background-color: #4caf50;
+    border-color: #4caf50;
+    color: white;
+}
+
+.fc-event-fur {
+    background-color: #9c27b0;
+    border-color: #9c27b0;
+    color: white;
+}
+
+.fc-daygrid-event {
+    white-space: normal !important;
+    align-items: normal !important;
+}
+
+.fc-event-title {
+    font-weight: 500 !important;
+}
+
+.fc-event-time {
+    display: none !important;
+}
+
+.fc-header-toolbar {
+    margin-bottom: 1.5rem;
+}
+
+.fc-button-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.fc-button-primary:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+.fc-today-button {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+}
+
+/* Loading Styles */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-muted);
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-surface);
+    border-top: 3px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: var(--spacing-sm);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    color: white;
+    font-weight: var(--font-weight-medium);
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    max-width: 350px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.notification-success {
+    background: var(--color-success);
+}
+
+.notification-error {
+    background: var(--color-danger);
+}
+
+.notification-info {
+    background: var(--color-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .care-nav {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+
+    .care-title {
+        font-size: 20px;
+    }
+
+    .care-main {
+        padding: var(--spacing-lg);
+    }
+
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-header, .form-header, .records-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: stretch;
+    }
+
+    .form-content, .records-content, .calendar-wrapper {
+        padding: var(--spacing-lg);
+    }
+
+    #calendar {
+        height: 400px;
+    }
+
+    .legend-items {
+        justify-content: center;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .nav-right {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .nav-btn {
+        justify-content: center;
+    }
+}
+</style>
+
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet'/>
+
+<div class="care-page">
+    <div class="care-header">
+        <div class="care-nav">
+            <div class="nav-left">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <h1 class="care-title">
+                    <i class="fas fa-calendar-check" style="color: var(--color-primary);"></i>
+                    케어캘린더
+                </h1>
+            </div>
+            <div class="nav-right">
+                <button class="nav-btn" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i>
+                    새로고침
+                </button>
+                <button class="nav-btn" onclick="resetForm()">
+                    <i class="fas fa-plus"></i>
+                    새 기록
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="care-main">
+        <!-- Stats Section -->
+        <div class="stats-section" id="headerStats">
+            <!-- JavaScript로 동적 생성 -->
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-section">
+            <div class="dashboard-cards" id="dashboardCards">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Calendar Section -->
+            <div class="calendar-section">
+                <div class="calendar-card">
+                    <div class="calendar-header">
+                        <h3 class="calendar-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            케어 일정 캘린더
+                        </h3>
+                        <div class="calendar-filters">
+                            <select class="filter-select" id="petFilter">
+                                <option value="all">전체 보기</option>
                                 {% for pet in pets %}
                                     <option value="{{ pet.id }}">{{ pet.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <!-- 좌측 달력 영역 -->
-            <div class="col-md-8">
-                <div class="calendar-wrapper">
-                    <div id="calendar"></div>
+                    <div class="calendar-wrapper">
+                        <div id="calendar"></div>
+                    </div>
+                    <div class="calendar-legend">
+                        <div class="legend-title">케어 종류</div>
+                        <div class="legend-items">
+                            <div class="legend-item">
+                                <div class="legend-color nail"></div>
+                                <span>발톱깎기</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color ear"></div>
+                                <span>귀청소</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color brush"></div>
+                                <span>양치하기</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color fur"></div>
+                                <span>털정리</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 우측 입력/상세 패널 -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <form id="careForm">
+            <!-- Sidebar Section -->
+            <div class="sidebar-section">
+                <!-- Form Card -->
+                <div class="form-card">
+                    <div class="form-header">
+                        <h3 class="form-title">
+                            <i class="fas fa-plus-circle"></i>
+                            케어 기록
+                        </h3>
+                    </div>
+                    <div class="form-content">
+                        <form id="careForm" class="care-form">
                             {% csrf_token %}
                             <input type="hidden" id="eventId" name="id">
 
-                            <div class="mb-3">
-                                <label for="pet" class="form-label">고양이</label>
-                                <select class="form-select" id="pet" name="pet" required>
+                            <div class="form-group">
+                                <label for="pet" class="form-label">
+                                    <i class="fas fa-paw"></i>
+                                    반려동물
+                                </label>
+                                <select class="form-input" id="pet" name="pet" required>
                                     {% for pet in pets %}
                                         <option value="{{ pet.id }}">{{ pet.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="start_time" class="form-label">날짜</label>
-                                <input type="date" class="form-control" id="start_time" name="start_time" required>
+                            <div class="form-group">
+                                <label for="start_time" class="form-label">
+                                    <i class="fas fa-calendar-day"></i>
+                                    날짜
+                                </label>
+                                <input type="date" class="form-input" id="start_time" name="start_time" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="category" class="form-label">케어 종류</label>
-                                <select class="form-select" id="category" name="category" required>
-                                    <option value="nail">발톱깎기</option>
-                                    <option value="ear">귀청소</option>
-                                    <option value="brush">양치하기</option>
-                                    <option value="fur">털정리</option>
+
+                            <div class="form-group">
+                                <label for="category" class="form-label">
+                                    <i class="fas fa-tasks"></i>
+                                    케어 종류
+                                </label>
+                                <select class="form-input" id="category" name="category" required>
+                                    <option value="nail">🦴 발톱깎기</option>
+                                    <option value="ear">👂 귀청소</option>
+                                    <option value="brush">🦷 양치하기</option>
+                                    <option value="fur">✂️ 털정리</option>
                                 </select>
                             </div>
 
-
-                            <div class="mb-3">
-                                <label for="description" class="form-label">메모</label>
-                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                            <div class="form-group">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-sticky-note"></i>
+                                    메모
+                                    <span class="optional">(선택사항)</span>
+                                </label>
+                                <textarea class="form-textarea" id="description" name="description" rows="3" placeholder="케어 내용이나 특이사항을 적어주세요..."></textarea>
                             </div>
 
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" id="saveBtn">저장</button>
-                                <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">
-                                    <i class="fas fa-trash-alt"></i> 삭제
+                            <div class="form-actions">
+                                <button type="submit" class="btn-submit" id="saveBtn">
+                                    <i class="fas fa-save"></i>
+                                    기록 저장
+                                </button>
+                                <button type="button" class="btn-delete" id="deleteBtn" style="display: none;">
+                                    <i class="fas fa-trash"></i>
+                                    삭제
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
 
-                <!-- 마지막 케어 기록 카드 -->
-                <div class="card mt-3">
-                    <div class="card-body">
-                        <h6 class="card-title">마지막 케어 기록</h6>
-                        <div class="mb-3">
-                            <select class="form-select" id="lastEventPetFilter">
+                <!-- Records Card -->
+                <div class="records-card">
+                    <div class="records-header">
+                        <h3 class="records-title">
+                            <i class="fas fa-history"></i>
+                            최근 케어 기록
+                        </h3>
+                        <div class="records-filters">
+                            <select class="filter-select-small" id="lastEventPetFilter">
                                 {% for pet in pets %}
                                     <option value="{{ pet.id }}">{{ pet.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div id="allPreviousCareRecords"></div>
+                    </div>
+                    <div class="records-content">
+                        <div id="allPreviousCareRecords" class="care-records">
+                            <!-- JavaScript로 동적 생성 -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet'/>
+{% block extra_js %}
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/ko.js'></script>
 
-    <!-- FullCalendar JS -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/ko.js'></script>
-
-    <style>
-        #calendar {
-            height: 600px;
-        }
-
-        .calendar-wrapper {
-            border: 1.5px solid #e0e0e0;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            padding: 18px 12px 12px 12px;
-            background: #fff;
-            margin-bottom: 10px;
-        }
-
-        .fc-event {
-            cursor: pointer;
-            border-radius: 4px;
-            padding: 2px 4px;
-            margin: 1px 0;
-            font-size: 0.9em;
-        }
-
-        .fc-event-nail {
-            background-color: #FF9800;
-            border-color: #FF9800;
-            color: white;
-        }
-
-        .fc-event-ear {
-            background-color: #2196F3;
-            border-color: #2196F3;
-            color: white;
-        }
-
-        .fc-event-brush {
-            background-color: #4CAF50;
-            border-color: #4CAF50;
-            color: white;
-        }
-
-        .fc-event-fur {
-            background-color: #9C27B0;
-            border-color: #9C27B0;
-            color: white;
-        }
-
-        .fc-daygrid-event {
-            white-space: normal !important;
-            align-items: normal !important;
-        }
-
-        .fc-event-title {
-            font-weight: bold !important;
-        }
-
-        .fc-event-time {
-            display: none !important;
-        }
-
-        .container-fluid {
-            padding: 0 10px;
-        }
-
-        .card {
-            margin-bottom: 10px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
-        }
-
-        .card-body {
-            padding: 12px;
-        }
-
-        .form-label, label[for="petFilter"] {
-            font-size: 0.97em;
-            margin-bottom: 0;
-        }
-
-        #petFilter {
-            font-size: 0.97em;
-            height: 32px;
-            padding: 2px 8px;
-            min-width: 90px;
-            max-width: 140px;
-        }
-
-        .d-flex.align-items-center {
-            gap: 6px;
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
-            var selectedPetId = 'all';
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'ko',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,listWeek'
-                },
-                views: {
-                    timeGrid: {
-                        dayMaxEvents: 3,
-                        eventMaxStack: 2
-                    }
-                },
-                eventDidMount: function (info) {
-                    info.el.title = `${info.event.extendedProps.petName}\n${info.event.extendedProps.description || ''}`;
-                },
-                events: function (info, successCallback, failureCallback) {
-                    fetch('/care/events/')
-                        .then(response => response.json())
-                        .then(data => {
-                            const events = data
-                                .filter(event => selectedPetId === 'all' || event.pet_id == selectedPetId)
-                                .map(event => ({
-                                    id: event.id,
-                                    title: event.title + ` (${event.pet_name})`,
-                                    start: event.start,
-                                    className: `fc-event-${event.category}`,
-                                    extendedProps: {
-                                        petName: event.pet_name,
-                                        description: event.description,
-                                        category: event.category,
-                                        pet_id: event.pet_id
-                                    }
-                                }));
-                            successCallback(events);
-                        })
-                        .catch(error => {
-                            failureCallback(error);
-                        });
-                },
-                eventClick: function (info) {
-                    loadEventDetails(info.event);
-                    info.jsEvent.preventDefault();
-                },
-                dateClick: function (info) {
-                    resetForm();
-                    document.getElementById('start_time').value = info.dateStr;
-                }
-            });
-            calendar.render();
-
-            // 최초 로드 시에만 이전 기록 조회
-            const initialPetId = document.getElementById('pet').value;
-            fetchAllPreviousCare(initialPetId);
-
-            // 이벤트 리스너에서 fetchAllPreviousCare 호출 제거
-            document.getElementById('pet').addEventListener('change', function () {
-                // 펫 변경 시에는 이전 기록을 업데이트하지 않음
-            });
-
-            // 필터 이벤트 리스너 추가
-            document.getElementById('lastEventPetFilter').addEventListener('change', function () {
-                const selectedPetId = this.value;
-                fetchAllPreviousCare(selectedPetId); // 필터 변경 시마다 해당 고양이 기록만 불러오기
-            });
-
-            function resetForm() {
-                document.getElementById('careForm').reset();
-                document.getElementById('eventId').value = '';
-                document.getElementById('deleteBtn').style.display = 'none';
-                document.getElementById('saveBtn').textContent = '저장';
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+    var selectedPetId = 'all';
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ko',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        views: {
+            timeGrid: {
+                dayMaxEvents: 3,
+                eventMaxStack: 2
             }
-
-            document.getElementById('careForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const data = {
-                    pet_id: formData.get('pet'),
-                    category: formData.get('category'),
-                    start: formData.get('start_time'),
-                    description: formData.get('description')
-                };
-
-                const eventId = formData.get('id');
-                const method = eventId ? 'POST' : 'POST';
-                const url = eventId ? `/care/events/${eventId}/update/` : '/care/events/create/';
-
-                fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    },
-                    body: JSON.stringify(data)
+        },
+        eventDidMount: function (info) {
+            info.el.title = `${info.event.extendedProps.petName}\n${info.event.extendedProps.description || ''}`;
+        },
+        events: function (info, successCallback, failureCallback) {
+            fetch('/care/events/')
+                .then(response => response.json())
+                .then(data => {
+                    const events = data
+                        .filter(event => selectedPetId === 'all' || event.pet_id == selectedPetId)
+                        .map(event => ({
+                            id: event.id,
+                            title: event.title + ` (${event.pet_name})`,
+                            start: event.start,
+                            className: `fc-event-${event.category}`,
+                            extendedProps: {
+                                petName: event.pet_name,
+                                description: event.description,
+                                category: event.category,
+                                pet_id: event.pet_id
+                            }
+                        }));
+                    successCallback(events);
+                    updateDashboard(data);
+                    updateHeaderStats(data);
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.json().then(err => {
-                                throw new Error(err.message || '서버 오류가 발생했습니다.');
-                            });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.status === 'success') {
-                            calendar.refetchEvents();
-                            resetForm();
-                            alert(data.message || '저장되었습니다.');
-                        } else {
-                            throw new Error(data.message || '저장 중 오류가 발생했습니다.');
-                        }
-                    })
-                    .catch(error => {
-                        alert(error.message || '저장 중 오류가 발생했습니다.');
-                    });
-            });
+                .catch(error => {
+                    failureCallback(error);
+                });
+        },
+        eventClick: function (info) {
+            loadEventDetails(info.event);
+            info.jsEvent.preventDefault();
+        },
+        dateClick: function (info) {
+            resetForm();
+            document.getElementById('start_time').value = info.dateStr;
+        }
+    });
+    calendar.render();
 
-            function loadEventDetails(event) {
-                document.getElementById('eventId').value = event.id;
+    // 초기화
+    const initialPetId = document.getElementById('pet').value;
+    if (initialPetId) {
+        fetchAllPreviousCare(initialPetId);
+    }
 
-                // 펫 선택
-                const petSelect = document.getElementById('pet');
-                petSelect.value = event.extendedProps.pet_id;
+    // 오늘 날짜 설정
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('start_time').value = today;
 
-                // 카테고리 선택
-                const categorySelect = document.getElementById('category');
-                categorySelect.value = event.extendedProps.category;
+    // 헤더 통계 업데이트
+    function updateHeaderStats(events) {
+        const headerStats = document.getElementById('headerStats');
+        
+        if (!events || events.length === 0) {
+            headerStats.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">총 기록</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">이번 달</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-paw"></i></div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">관리 중인 펫</div>
+                </div>
+            `;
+            return;
+        }
 
-                // 날짜 설정 - 시간대 문제 해결
-                const startDate = new Date(event.start);
-                // UTC 시간을 현지 시간으로 변환
-                const localDate = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000));
-                const formattedDate = localDate.toISOString().split('T')[0];
-                document.getElementById('start_time').value = formattedDate;
+        const totalRecords = events.length;
+        const thisMonth = new Date().getMonth();
+        const thisYear = new Date().getFullYear();
+        const thisMonthRecords = events.filter(event => {
+            const eventDate = new Date(event.start);
+            return eventDate.getMonth() === thisMonth && eventDate.getFullYear() === thisYear;
+        }).length;
+        
+        const uniquePets = [...new Set(events.map(event => event.pet_id))].length;
 
-                // 메모 설정
-                document.getElementById('description').value = event.extendedProps.description || '';
+        headerStats.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+                <div class="stat-value">${totalRecords}</div>
+                <div class="stat-label">총 기록</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="stat-value">${thisMonthRecords}</div>
+                <div class="stat-label">이번 달</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-paw"></i></div>
+                <div class="stat-value">${uniquePets}</div>
+                <div class="stat-label">관리 중인 펫</div>
+            </div>
+        `;
+    }
 
-                // 삭제 버튼 표시
-                const deleteBtn = document.getElementById('deleteBtn');
-                deleteBtn.style.display = 'block';
-                document.getElementById('saveBtn').textContent = '수정';
+    // 대시보드 업데이트
+    function updateDashboard(events) {
+        const dashboardCards = document.getElementById('dashboardCards');
+        
+        if (!events || events.length === 0) {
+            dashboardCards.innerHTML = `
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon" style="background: rgba(var(--color-primary-rgb), 0.1);">
+                        <i class="fas fa-clipboard-list" style="color: var(--color-primary);"></i>
+                    </div>
+                    <div class="dashboard-card-title">케어 기록이 없습니다</div>
+                    <div class="dashboard-card-content">첫 번째 케어 기록을 추가해보세요!</div>
+                </div>
+            `;
+            return;
+        }
+
+        const categories = {
+            nail: { name: '발톱깎기', icon: '🦴', color: '#ff9800' },
+            ear: { name: '귀청소', icon: '👂', color: '#2196f3' },
+            brush: { name: '양치하기', icon: '🦷', color: '#4caf50' },
+            fur: { name: '털정리', icon: '✂️', color: '#9c27b0' }
+        };
+
+        let cardsHTML = '';
+        
+        Object.keys(categories).forEach(categoryKey => {
+            const category = categories[categoryKey];
+            const categoryEvents = events.filter(event => event.category === categoryKey);
+            const lastEvent = categoryEvents.length > 0 ? categoryEvents[0] : null;
+            
+            let content, value;
+            if (lastEvent) {
+                const daysSince = Math.floor((new Date() - new Date(lastEvent.start)) / (1000 * 60 * 60 * 24));
+                content = `마지막: ${daysSince}일 전`;
+                value = `${categoryEvents.length}회`;
+            } else {
+                content = '아직 기록이 없어요';
+                value = '0회';
             }
 
-            function fetchAllPreviousCare(petId) {
-                const categories = ['nail', 'ear', 'brush', 'fur'];
-                const categoryDisplay = {
-                    'nail': '발톱깎기',
-                    'ear': '귀청소',
-                    'brush': '양치하기',
-                    'fur': '털정리'
-                };
+            cardsHTML += `
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon" style="background: ${category.color}20;">
+                        <span style="color: ${category.color};">${category.icon}</span>
+                    </div>
+                    <div class="dashboard-card-title">${category.name}</div>
+                    <div class="dashboard-card-content">${content}</div>
+                    <div class="dashboard-card-value">${value}</div>
+                </div>
+            `;
+        });
+        
+        dashboardCards.innerHTML = cardsHTML;
+    }
 
-                const recordsContainer = document.getElementById('allPreviousCareRecords');
-                recordsContainer.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    // 이벤트 리스너들
+    document.getElementById('lastEventPetFilter').addEventListener('change', function () {
+        const selectedPetId = this.value;
+        fetchAllPreviousCare(selectedPetId);
+    });
 
-                Promise.all(categories.map(category =>
-                    fetch(`/care/previous-care/${petId}/${category}/`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => ({category, data}))
-                        .catch(error => {
-                            return {
-                                category,
-                                data: {status: 'error', message: error.message}
-                            };
-                        })
-                )).then(results => {
-                    recordsContainer.innerHTML = '';
+    document.getElementById('petFilter').addEventListener('change', function () {
+        selectedPetId = this.value;
+        calendar.refetchEvents();
+    });
 
-                    results.forEach(({category, data}) => {
-                        const recordDiv = document.createElement('div');
-                        recordDiv.className = 'mb-3';
-                        recordDiv.setAttribute('data-pet-id', petId); // 필터링을 위한 속성 추가
+    // 폼 리셋
+    window.resetForm = function() {
+        document.getElementById('careForm').reset();
+        document.getElementById('eventId').value = '';
+        document.getElementById('deleteBtn').style.display = 'none';
+        document.getElementById('saveBtn').innerHTML = '<i class="fas fa-save"></i> 기록 저장';
+        
+        // 오늘 날짜로 다시 설정
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start_time').value = today;
+    }
 
-                        if (data.status === 'success') {
-                            if (data.previous_care) {
-                                const lastCareDate = new Date(data.previous_care.date + 'T00:00:00');
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-                                const diffTime = lastCareDate - today;
-                                const diffDays = Math.abs(Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+    // 폼 제출 처리
+    document.getElementById('careForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            pet_id: formData.get('pet'),
+            category: formData.get('category'),
+            start: formData.get('start_time'),
+            description: formData.get('description')
+        };
 
-                                recordDiv.innerHTML = `
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <strong>${categoryDisplay[category]}</strong>
-                                    <div class="text-muted small">${data.previous_care.date} (${diffDays}일 경과)</div>
-                                </div>
-                            </div>
-                        `;
-                            } else {
-                                recordDiv.innerHTML = `
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>${categoryDisplay[category]}</strong>
-                                    <div class="text-muted small">기록 없음</div>
-                                </div>
-                            </div>
-                        `;
-                            }
-                        } else {
-                            recordDiv.innerHTML = `
-                        <div class="text-danger">
-                            <strong>${categoryDisplay[category]}</strong>: 오류 발생
-                        </div>
-                    `;
-                        }
+        const eventId = formData.get('id');
+        const method = 'POST';
+        const url = eventId ? `/care/events/${eventId}/update/` : '/care/events/create/';
+        const submitBtn = document.getElementById('saveBtn');
+        const originalHTML = submitBtn.innerHTML;
 
-                        recordsContainer.appendChild(recordDiv);
-                    });
+        // 로딩 상태
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 저장 중...';
+        submitBtn.disabled = true;
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || '서버 오류가 발생했습니다.');
                 });
             }
-
-            document.getElementById('deleteBtn').addEventListener('click', function () {
-                const eventId = document.getElementById('eventId').value;
-                if (!eventId) return;
-
-                if (confirm('정말 삭제하시겠습니까?')) {
-                    fetch(`/care/events/${eventId}/delete/`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        }
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.json().then(err => Promise.reject(err));
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.status === 'success') {
-                                calendar.refetchEvents();
-                                resetForm();
-                                alert(data.message || '삭제되었습니다.');
-                            } else {
-                                throw new Error(data.message || '삭제 중 오류가 발생했습니다.');
-                            }
-                        })
-                        .catch(error => {
-                            alert(error.message || '삭제 중 오류가 발생했습니다.');
-                        });
-
-                }
-            });
-
-            document.getElementById('petFilter').addEventListener('change', function () {
-                selectedPetId = this.value;
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
                 calendar.refetchEvents();
+                resetForm();
+                showNotification(data.message || '케어 기록이 저장되었습니다!', 'success');
+                
+                // 최근 케어 기록 새로고침
+                const selectedPetId = document.getElementById('lastEventPetFilter').value;
+                fetchAllPreviousCare(selectedPetId);
+            } else {
+                throw new Error(data.message || '저장 중 오류가 발생했습니다.');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message || '저장 중 오류가 발생했습니다.', 'error');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalHTML;
+            submitBtn.disabled = false;
+        });
+    });
+
+    // 이벤트 상세 로드
+    function loadEventDetails(event) {
+        document.getElementById('eventId').value = event.id;
+        document.getElementById('pet').value = event.extendedProps.pet_id;
+        document.getElementById('category').value = event.extendedProps.category;
+
+        const startDate = new Date(event.start);
+        const localDate = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000));
+        const formattedDate = localDate.toISOString().split('T')[0];
+        document.getElementById('start_time').value = formattedDate;
+
+        document.getElementById('description').value = event.extendedProps.description || '';
+
+        const deleteBtn = document.getElementById('deleteBtn');
+        deleteBtn.style.display = 'block';
+        document.getElementById('saveBtn').innerHTML = '<i class="fas fa-edit"></i> 기록 수정';
+    }
+
+    // 이전 케어 기록 조회
+    function fetchAllPreviousCare(petId) {
+        const categories = {
+            nail: { name: '발톱깎기', icon: '🦴' },
+            ear: { name: '귀청소', icon: '👂' },
+            brush: { name: '양치하기', icon: '🦷' },
+            fur: { name: '털정리', icon: '✂️' }
+        };
+
+        const recordsContainer = document.getElementById('allPreviousCareRecords');
+        recordsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>로딩 중...</div>';
+
+        Promise.all(Object.keys(categories).map(category =>
+            fetch(`/care/previous-care/${petId}/${category}/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => ({category, data}))
+                .catch(error => {
+                    return {
+                        category,
+                        data: {status: 'error', message: error.message}
+                    };
+                })
+        )).then(results => {
+            recordsContainer.innerHTML = '';
+
+            results.forEach(({category, data}) => {
+                const categoryInfo = categories[category];
+                const recordDiv = document.createElement('div');
+                recordDiv.className = `care-record-item ${category}`;
+
+                if (data.status === 'success' && data.previous_care) {
+                    const lastCareDate = new Date(data.previous_care.date + 'T00:00:00');
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const diffTime = today - lastCareDate;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                    recordDiv.innerHTML = `
+                        <div class="care-record-header">
+                            <div class="care-record-title">
+                                ${categoryInfo.icon} ${categoryInfo.name}
+                            </div>
+                            <div class="care-record-days">${diffDays}일 전</div>
+                        </div>
+                        <div class="care-record-date">${formatDate(data.previous_care.date)}</div>
+                    `;
+                } else {
+                    recordDiv.innerHTML = `
+                        <div class="care-record-header">
+                            <div class="care-record-title">
+                                ${categoryInfo.icon} ${categoryInfo.name}
+                            </div>
+                        </div>
+                        <div class="no-record">아직 기록이 없어요</div>
+                    `;
+                }
+
+                recordsContainer.appendChild(recordDiv);
             });
         });
-    </script>
+    }
+
+    // 삭제 버튼 처리
+    document.getElementById('deleteBtn').addEventListener('click', function () {
+        const eventId = document.getElementById('eventId').value;
+        if (!eventId) return;
+
+        if (confirm('정말 이 케어 기록을 삭제하시겠습니까?')) {
+            const deleteBtn = this;
+            const originalHTML = deleteBtn.innerHTML;
+            
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 삭제 중...';
+            deleteBtn.disabled = true;
+
+            fetch(`/care/events/${eventId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    calendar.refetchEvents();
+                    resetForm();
+                    showNotification(data.message || '케어 기록이 삭제되었습니다.', 'success');
+                    
+                    // 최근 케어 기록 새로고침
+                    const selectedPetId = document.getElementById('lastEventPetFilter').value;
+                    fetchAllPreviousCare(selectedPetId);
+                } else {
+                    throw new Error(data.message || '삭제 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                showNotification(error.message || '삭제 중 오류가 발생했습니다.', 'error');
+            })
+            .finally(() => {
+                deleteBtn.innerHTML = originalHTML;
+                deleteBtn.disabled = false;
+            });
+        }
+    });
+
+    // 유틸리티 함수들
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    function showNotification(message, type = 'info') {
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+        
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+});
+</script>
 {% endblock %}
