@@ -9,7 +9,7 @@
       <div class="card border-0" style="box-shadow:none;">
         <div class="card-body p-4">
           <h2 class="mb-4 text-center fw-bold" style="letter-spacing:1px;">{{ pet.name }} 정보 수정</h2>
-          <form method="post" action="{% url 'pets:pet_edit' pet.id %}" enctype="multipart/form-data">
+          <form method="post" action="{% url 'common_app:pet_edit' pet.id %}" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" name="breed" value="{{ pet.breed }}">
             {% if pet.image %}
@@ -69,7 +69,7 @@
               <a href="{% url 'index' %}" class="btn btn-outline-secondary px-4">취소</a>
             </div>
           </form>
-          <form method="post" action="{% url 'pets:pet_delete' pet.id %}" style="display:inline;">
+          <form method="post" action="{% url 'common_app:pet_delete' pet.id %}" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger mt-3" onclick="return confirm('정말로 이 고양이 정보를 삭제하시겠습니까?');">삭제</button>
           </form>

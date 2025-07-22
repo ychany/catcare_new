@@ -5,6 +5,64 @@
 
 {% block content %}
 <style>
+body {
+    background: #f5f7fa;
+    color: #222;
+}
+
+.community-card, .card {
+    background: #fff;
+    border: 1px solid #e3e8f0;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(49,130,246,0.08);
+    color: #222;
+}
+
+.btn-primary, .btn-write {
+    background: #3182f6;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(49,130,246,0.10);
+    transition: background 0.18s, color 0.18s;
+}
+.btn-primary:hover, .btn-write:hover {
+    background: #2563c6;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #fff;
+    color: #3182f6;
+    border: 2px solid #3182f6;
+    font-weight: bold;
+    border-radius: 999px;
+}
+.btn-secondary:hover {
+    background: #3182f6;
+    color: #fff;
+}
+
+/* 텍스트 강조 */
+.community-title, .card-title, .heading-2 {
+    color: #222;
+    font-weight: 700;
+}
+
+/* 안내 메시지 */
+.empty-message, .no-posts-message {
+    color: #666;
+    background: #fff;
+    border: 1px solid #e3e8f0;
+    border-radius: 12px;
+    padding: 32px 0;
+    margin: 32px 0;
+    text-align: center;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(49,130,246,0.06);
+}
+
 .page-hide-nav {
     display: none !important;
 }
@@ -109,6 +167,25 @@
     background: var(--color-primary-dark);
     border-color: var(--color-primary-dark);
     color: white !important;
+}
+
+.btn-write, .btn-primary.btn-write {
+    background: #222 !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: bold !important;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 8px rgba(49,130,246,0.10) !important;
+    font-size: 16px !important;
+    padding: 12px 28px !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+.btn-write:hover, .btn-primary.btn-write:hover {
+    background: #111 !important;
+    color: #fff !important;
 }
 
 .community-main {
@@ -542,15 +619,9 @@
             </div>
             <div class="nav-right">
             {% if user.is_authenticated %}
-                <a href="{% url 'community_app:create' %}" class="nav-btn btn-write">
-                <i class="fas fa-pen"></i>
-                새 글 쓰기
-            </a>
-            {% else %}
-                <a href="{% url 'login' %}" class="nav-btn btn-write">
-                <i class="fas fa-sign-in-alt"></i>
-                로그인하여 글쓰기
-            </a>
+                <a href="{% url 'community_app:create' %}" class="btn btn-primary btn-write" style="margin-bottom: 20px;">
+                    <i class="fas fa-pen"></i> 글쓰기
+                </a>
             {% endif %}
                 <button class="nav-btn" onclick="location.reload()">
                     <i class="fas fa-sync-alt"></i>
