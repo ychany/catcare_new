@@ -1,5 +1,6 @@
 {% extends 'common_app/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}의료기록 - 냥이 집사{% endblock %}
 
@@ -91,7 +92,7 @@
                     <i class="fas fa-won-sign"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-number">{{ total_cost|default:0|floatformat:0 }}원</div>
+                    <div class="stat-number">{{ total_cost|default:0|floatformat:0|intcomma }}원</div>
                     <div class="stat-label">이번 달 의료비</div>
                 </div>
             </div>
@@ -216,11 +217,11 @@
                 </h3>
                 
                 <div class="vaccination-schedule">
-                    {% for vacc in upcoming_vaccinations %}
-                    <div class="schedule-item {{ vacc.urgency }}">
+                    {% for vacc in next_vacc_list %}
+                    <div class="schedule-item {% if vacc.days_left <= 3 %}urgent{% elif vacc.days_left <= 7 %}warning{% else %}normal{% endif %}">
                         <div class="schedule-pet">{{ vacc.pet_name }}</div>
                         <div class="schedule-date">{{ vacc.next_date|date:"m.d" }}</div>
-                        <div class="schedule-badge {{ vacc.urgency }}">
+                        <div class="schedule-badge {% if vacc.days_left == 0 %}urgent{% elif vacc.days_left == 1 %}warning{% else %}normal{% endif %}">
                             {% if vacc.days_left == 0 %}
                                 오늘
                             {% elif vacc.days_left == 1 %}
@@ -1082,6 +1083,20 @@ function closeRecordModal() {
     document.getElementById('nextDateGroup').style.display = 'none';
 }
 
+// FormData를 JSON으로 변환 (빈 문자열은 null로)
+function formDataToJson(formData) {
+    const obj = {};
+    for (const [key, value] of formData.entries()) {
+        // 날짜 필드는 빈 문자열이면 null, 값이 있으면 YYYY-MM-DD만 허용
+        if (["next_date", "date"].includes(key)) {
+            obj[key] = value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
+        } else {
+            obj[key] = value === "" ? null : value;
+        }
+    }
+    return obj;
+}
+
 // 기록 저장
 function saveRecord() {
     const form = document.getElementById('recordForm');
@@ -1091,12 +1106,12 @@ function saveRecord() {
     let method = 'POST';
     if (editId) {
         url = `/calendar/api/events/${editId}/`;
-        method = 'PUT';
+        method = 'PATCH';
         form.removeAttribute('data-edit-id');
     }
     fetch(url, {
         method: method,
-        body: method === 'POST' ? formData : JSON.stringify(Object.fromEntries(formData)),
+        body: method === 'POST' ? formData : JSON.stringify(formDataToJson(formData)),
         headers: method === 'POST' ? {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         } : {

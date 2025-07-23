@@ -1034,6 +1034,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+window.categoryLabels = {{ category_labels|safe }};
+window.categoryTotals = {{ category_totals|safe }};
+</script>
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     // 차트 초기화
     initializeChart();
@@ -1094,20 +1098,14 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeChart() {
     const ctx = document.getElementById('categoryChart');
     if (!ctx) return;
-    
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['장난감', '간식', '용품', '의료', '미용', '기타'],
+            labels: window.categoryLabels,
             datasets: [{
-                data: [120000, 80000, 150000, 200000, 50000, 70000],
+                data: window.categoryTotals,
                 backgroundColor: [
-                    '#6366f1',
-                    '#f56565', 
-                    '#34d399',
-                    '#fb923c',
-                    '#a855f7',
-                    '#6b7280'
+                    '#6366f1','#f56565','#34d399','#fb923c','#a855f7','#6b7280'
                 ],
                 borderWidth: 0
             }]
@@ -1172,24 +1170,48 @@ function openExpenseModal() {
     document.querySelector('input[name="purchase_date"]').value = today;
 }
 
-function closeExpenseModal() {
-    document.getElementById('expenseModal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-    document.getElementById('expenseForm').reset();
-    
-    // 별점 초기화
-    document.querySelectorAll('.rating-star').forEach(star => {
-        star.classList.remove('active');
-    });
-    document.querySelector('input[name="rating"]').value = '0';
+let editingExpenseId = null;
+
+function editExpense(expenseId) {
+    fetch(`/items/api/otherpurchase/${expenseId}/`)
+        .then(response => response.json())
+        .then(data => {
+            editingExpenseId = expenseId;
+            openExpenseModal(); // 모달 먼저 연다!
+            setTimeout(() => {
+                const form = document.getElementById('expenseForm');
+                if (!form) return;
+                form.querySelector('select[name="pet"]').value = data.cat.id || '';
+                form.querySelector('input[name="purchase_date"]').value = data.purchase_date || '';
+                form.querySelector('select[name="type"]').value = data.type || '';
+                form.querySelector('input[name="price"]').value = data.price || '';
+                form.querySelector('input[name="product_name"]').value = data.product_name || '';
+                form.querySelector('input[name="purchase_link"]').value = data.purchase_link || '';
+                form.querySelector('input[name="rating"]').value = data.rating || '';
+                form.querySelector('textarea[name="memo"]').value = data.memo || '';
+                // 별점 UI 갱신
+                const rating = parseInt(data.rating || '0');
+                document.querySelectorAll('.rating-star').forEach((star, idx) => {
+                    if (idx < rating) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+            }, 50);
+        });
 }
 
-// 지출 저장
 function saveExpense() {
     const formData = new FormData(document.getElementById('expenseForm'));
-    
-    fetch('/items/api/otherpurchase/', {
-        method: 'POST',
+    let url = '/food/api/purchases/other/';
+    let method = 'POST';
+    if (editingExpenseId) {
+        url = `/items/api/otherpurchase/${editingExpenseId}/`;
+        method = 'PUT';
+    }
+    fetch(url, {
+        method: method,
         body: formData,
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -1198,6 +1220,7 @@ function saveExpense() {
     .then(response => response.json())
     .then(data => {
         if (data.success || data.id) {
+            alert(editingExpenseId ? '수정되었습니다.' : '등록되었습니다.');
             closeExpenseModal();
             location.reload();
         } else {
@@ -1208,11 +1231,20 @@ function saveExpense() {
         console.error('Error:', error);
         alert('저장 중 오류가 발생했습니다.');
     });
+    editingExpenseId = null;
 }
 
-// 지출 수정
-function editExpense(expenseId) {
-    alert('수정 기능은 준비 중입니다.');
+// 모달 닫을 때 editingExpenseId 초기화
+function closeExpenseModal() {
+    document.getElementById('expenseModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    document.getElementById('expenseForm').reset();
+    editingExpenseId = null;
+    // 별점 초기화
+    document.querySelectorAll('.rating-star').forEach(star => {
+        star.classList.remove('active');
+    });
+    document.querySelector('input[name="rating"]').value = '0';
 }
 
 // 지출 삭제

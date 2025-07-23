@@ -45,6 +45,19 @@ def other_purchase_management(request):
     # 총 합계
     total_price = qs.aggregate(total_price=Coalesce(Sum('price'), Value(0), output_field=DecimalField()))['total_price']
     
+    category_labels = ['장난감', '간식', '용품', '의료', '미용', '기타']
+    category_totals = []
+    for label in category_labels:
+        total = qs.filter(type=label).aggregate(sum=Sum('price'))['sum'] or 0
+        category_totals.append(int(total))
+    
+    # 일 평균 지출
+    days = (end_date - start_date).days or 1
+    average_daily = int(total_price // days) if total_price else 0
+    # 최대 지출
+    largest = qs.order_by('-price').first()
+    largest_expense = largest.price if largest else 0
+    largest_category = largest.type if largest else ''
     context = {
         'purchases': qs.order_by('-purchase_date'),
         'current_month': start_date.strftime('%Y-%m'),
@@ -53,6 +66,13 @@ def other_purchase_management(request):
         'pets': pets,
         'selected_pet_id': selected_pet_id,
     }
+    context.update({
+        'category_labels': category_labels,
+        'category_totals': category_totals,
+        'average_daily': average_daily,
+        'largest_expense': largest_expense,
+        'largest_category': largest_category,
+    })
     return render(request, 'item_purchase_app/other_purchase_management.html', context)
 
 @login_required

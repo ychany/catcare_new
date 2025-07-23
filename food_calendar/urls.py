@@ -14,4 +14,5 @@ urlpatterns = [
     path('event/<int:event_id>/end/', views.end_event, name='end_event'),
     path('purchases/', views.purchase_management, name='purchase_management'),
     path('api/purchases/management/', views.purchase_management_api, name='purchase_management_api'),
+    path('api/purchases/other/', views.create_other_purchase_api, name='create_other_purchase_api'),
 ] 

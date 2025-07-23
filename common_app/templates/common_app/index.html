@@ -216,19 +216,19 @@
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
-                <div class="activity-grid">
+                <div class="activity-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;">
                     {% for post in recent_posts|slice:":4" %}
-                    <div class="activity-item">
+                    <a href="{% url 'photo_board_app:detail' post.id %}" class="activity-item" style="background:#fff; border-radius:16px; box-shadow:0 2px 8px 0 rgb(0 0 0 / 6%); overflow:hidden; text-decoration:none; color:inherit;">
                         {% if post.image %}
-                        <div class="activity-image">
-                            <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                        <div class="activity-image" style="width:100%; aspect-ratio:1/1; background:#f5f6fa; display:flex; align-items:center; justify-content:center;">
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width:100%; height:100%; object-fit:cover; max-height:160px;">
                         </div>
                         {% endif %}
-                        <div class="activity-info">
-                            <h4>{{ post.title|truncatechars:20 }}</h4>
-                            <p>{{ post.created_at|timesince }} 전</p>
+                        <div class="activity-info" style="padding:12px 14px;">
+                            <h4 style="font-size:1rem; font-weight:600; margin-bottom:4px;">{{ post.title|truncatechars:20 }}</h4>
+                            <p style="font-size:0.92rem; color:#888; margin:0;">{{ post.created_at|timesince }} 전</p>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
             </section>
@@ -733,6 +733,48 @@
     .hero-description {
         font-size: 16px;
     }
+}
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.activity-item {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px 0 rgb(0 0 0 / 6%);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.activity-item:hover {
+  box-shadow: 0 4px 16px 0 rgb(37 99 235 / 12%);
+}
+.activity-image {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #f5f6fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.activity-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-height: 160px;
+}
+.activity-info {
+  padding: 12px 14px;
+}
+@media (max-width: 992px) {
+  .activity-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 {% endblock %} 

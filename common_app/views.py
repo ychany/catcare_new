@@ -6,6 +6,7 @@ from .models import Pet
 from photo_board_app.models import Post
 from weight_tracker_app.models import Weight
 from django.contrib.auth import logout
+from insurance_app.models import PetProfile
 
 # Create your views here.
 
@@ -40,7 +41,7 @@ def register(request):
                 image = request.FILES.get(f'pet_image_{pet_idx}')
                 if not name:
                     break
-                Pet.objects.create(
+                pet = Pet.objects.create(
                     owner=user,
                     name=name,
                     pet_type='cat',
@@ -49,6 +50,18 @@ def register(request):
                     weight=weight or None,
                     image=image,
                 )
+                # PetProfile 자동 생성
+                if not PetProfile.objects.filter(user=user, name=name, breed=breed, birth_date=birth_date).exists():
+                    PetProfile.objects.create(
+                        user=user,
+                        name=name,
+                        pet_type='cat',
+                        breed=breed,
+                        birth_date=birth_date,
+                        weight=weight or None,
+                        gender=gender or 'male',
+                        is_neutered=neutered == 'on',
+                    )
                 pet_idx += 1
             messages.success(request, '회원가입이 완료되었습니다!')
             return redirect('login')
@@ -72,7 +85,18 @@ def pet_edit(request, pet_id):
     if request.method == 'POST':
         form = PetForm(request.POST, request.FILES, instance=pet)
         if form.is_valid():
-            form.save()
+            pet = form.save()
+            if not PetProfile.objects.filter(user=request.user, name=pet.name, breed=pet.breed, birth_date=pet.birth_date).exists():
+                PetProfile.objects.create(
+                    user=request.user,
+                    name=pet.name,
+                    pet_type='cat',
+                    breed=pet.breed,
+                    birth_date=pet.birth_date,
+                    weight=pet.weight,
+                    gender=pet.gender,
+                    is_neutered=pet.neutered,
+                )
             messages.success(request, '반려동물 정보가 수정되었습니다.')
             return redirect('index')
     else:
@@ -101,7 +125,7 @@ def pet_register(request):
         weight = request.POST.get('weight')
         notes = request.POST.get('notes')
         image = request.FILES.get('image')
-        Pet.objects.create(
+        pet = Pet.objects.create(
             owner=request.user,
             name=name,
             pet_type='cat',
@@ -110,6 +134,18 @@ def pet_register(request):
             weight=weight or None,
             image=image,
         )
+        # PetProfile 자동 생성
+        if not PetProfile.objects.filter(user=request.user, name=name, breed=breed, birth_date=birth_date).exists():
+            PetProfile.objects.create(
+                user=request.user,
+                name=name,
+                pet_type='cat',
+                breed=breed,
+                birth_date=birth_date,
+                weight=weight or None,
+                gender=gender or 'male',
+                is_neutered=neutered == 'on',
+            )
         messages.success(request, '반려동물이 등록되었습니다.')
         return redirect('index')
     else:

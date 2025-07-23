@@ -12,6 +12,9 @@ from django.db.models.functions import Coalesce
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .serializers import FoodEventSerializer
+from item_purchase_app.models import OtherPurchase
+
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
@@ -537,3 +540,25 @@ def purchase_management_api(request):
         'events': serializer.data,
         'total_price': float(total_price) if total_price is not None else 0
     })
+
+@csrf_exempt
+@login_required
+@require_http_methods(['POST'])
+def create_other_purchase_api(request):
+    import json
+    if request.content_type.startswith('application/json'):
+        data = json.loads(request.body)
+    else:
+        data = request.POST
+    purchase = OtherPurchase.objects.create(
+        user=request.user,
+        cat_id=data.get('pet'),
+        purchase_date=data.get('purchase_date'),
+        price=data.get('price', 0),
+        type=data.get('type', ''),
+        product_name=data.get('product_name', ''),
+        purchase_link=data.get('purchase_link', ''),
+        rating=data.get('rating', 0),
+        memo=data.get('memo', ''),
+    )
+    return JsonResponse({'id': purchase.id})

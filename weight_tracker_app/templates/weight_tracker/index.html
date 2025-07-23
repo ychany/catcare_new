@@ -726,7 +726,10 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <script>
+let weightChart = null; // 최상단 전역 선언
+
 document.addEventListener('DOMContentLoaded', function() {
     // 반려동물 목록을 드롭다운에 추가
     const pets = JSON.parse('{{ user_pets|safe|escapejs }}');
@@ -756,7 +759,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const weightForm = document.getElementById('weightForm');
     const ctx = document.getElementById('weightChart').getContext('2d');
-    let weightChart;
     let allData = [];
 
     // 오늘 날짜를 기본값으로 설정
@@ -950,6 +952,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (weightChart) {
             weightChart.destroy();
+            weightChart = null;
         }
 
         weightChart = new Chart(ctx, {
@@ -985,7 +988,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         time: {
                             unit: 'day',
                             displayFormats: {
-                                day: 'MM/DD'
+                                day: 'MM/dd' // 소문자 dd로 수정
                             }
                         },
                         grid: {

@@ -591,14 +591,21 @@ def choose_insurance(request, pet_profile_id, product_id):
         'message': '보험이 성공적으로 선택되었습니다.'
     })
 
+@csrf_exempt
+@login_required
+@require_POST
+def api_save_preference(request, pet_profile_id):
+    import json
+    pet_profile = get_object_or_404(PetProfile, id=pet_profile_id, owner=request.user)
+    data = json.loads(request.body)
+    pet_profile.preference_dict = data.get('preference_dict', {})
+    pet_profile.save()
+    return JsonResponse({'success': True})
+
 @login_required
 def api_get_preference(request, pet_profile_id):
-    try:
-        pet_profile = PetProfile.objects.get(id=pet_profile_id, user=request.user)
-        preference_dict = pet_profile.preference_dict or {}
-        return JsonResponse({'success': True, 'preference_dict': preference_dict})
-    except PetProfile.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'PetProfile not found'})
+    pet_profile = get_object_or_404(PetProfile, id=pet_profile_id, owner=request.user)
+    return JsonResponse({'preference_dict': pet_profile.preference_dict or {}})
 
 def make_sure_score(company_score, price_score, matching_score, breed_disease_bonus=0):
     base_score = (company_score * 0.3) + (price_score * 0.3) + (matching_score * 0.4)  # 합계 100%
