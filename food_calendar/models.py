@@ -15,7 +15,7 @@ class FoodEvent(models.Model):
     type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='feed', verbose_name='타입')
     # 상품 정보
     product_name = models.CharField(max_length=200, verbose_name='상품명')
-    purchase_link = models.URLField(verbose_name='구매처 링크', blank=True)
+    purchase_link = models.URLField(verbose_name='구매처 링크', blank=True, max_length=1000)
     rating = models.PositiveSmallIntegerField(
         verbose_name='만족도',
         validators=[MinValueValidator(0), MaxValueValidator(5)],
@@ -27,7 +27,7 @@ class FoodEvent(models.Model):
     start_time = models.DateTimeField(verbose_name='시작 시간')
     end_time = models.DateTimeField(verbose_name='종료 시간', null=True, blank=True)
     purchase_date = models.DateField(null=True, blank=True)
-    price = models.DecimalField(verbose_name='가격', max_digits=10, decimal_places=2, default=0)
+    price = models.FloatField(verbose_name='가격', default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
 

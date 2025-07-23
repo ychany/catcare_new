@@ -8,6 +8,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils import timezone
 from datetime import date
+from django.db.models import Sum
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 
 # Create your views here.
 
@@ -41,6 +44,13 @@ def calendar_view(request):
     pets = Pet.objects.filter(owner=request.user)
     next_vacc_list = []
     today = date.today()
+    events = Event.objects.filter(pet__owner=request.user)
+
+    total_medical = events.filter(event_type='med').count()
+    total_vaccination = events.filter(event_type='vacc').count()
+    upcoming_vacc = events.filter(event_type='vacc', next_date__gte=today).count()
+    total_cost = events.filter(date__year=today.year, date__month=today.month).aggregate(total=Sum('cost'))['total'] or 0
+
     for pet in pets:
         # 미래의 모든 next_date
         next_vaccs = Event.objects.filter(
@@ -64,8 +74,33 @@ def calendar_view(request):
                 'event_type': event.get_event_type_display(),
                 'description': event.description
             })
+    medical_records = events.order_by('-date')
     return render(request, 'calendar_app/calendar.html', {
         'pets': pets,
         'last_events': last_events,
         'next_vacc_list': next_vacc_list,
+        'medical_records': medical_records,
+        'total_medical': total_medical,
+        'total_vaccination': total_vaccination,
+        'upcoming_vacc': upcoming_vacc,
+        'total_cost': total_cost,
+    })
+
+@require_GET
+@login_required
+def calendar_stats(request):
+    pet_id = request.GET.get('pet_id')
+    today = date.today()
+    events = Event.objects.filter(pet__owner=request.user)
+    if pet_id and pet_id != 'all':
+        events = events.filter(pet_id=pet_id)
+    total_medical = events.filter(event_type='med').count()
+    total_vaccination = events.filter(event_type='vacc').count()
+    upcoming_vacc = events.filter(event_type='vacc', next_date__gte=today).count()
+    total_cost = events.filter(date__year=today.year, date__month=today.month).aggregate(total=Sum('cost'))['total'] or 0
+    return JsonResponse({
+        'total_medical': total_medical,
+        'total_vaccination': total_vaccination,
+        'upcoming_vacc': upcoming_vacc,
+        'total_cost': total_cost,
     })

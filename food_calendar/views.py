@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from .models import FoodEvent
 from common_app.models import Pet
 from django.utils import timezone
@@ -18,7 +18,46 @@ from .serializers import FoodEventSerializer
 @login_required
 def food_calendar(request):
     pets = Pet.objects.filter(owner=request.user)
-    return render(request, 'food_calendar/food_calendar.html', {'pets': pets})
+    foods = FoodEvent.objects.filter(user=request.user).order_by('-start_time')
+
+    # 통계
+    total_feeds = foods.filter(type='feed').count()
+    total_snacks = foods.filter(type='snack').count()
+    today = date.today()
+    this_month_count = foods.filter(start_time__year=today.year, start_time__month=today.month).count()
+    print(f"[DEBUG] 현재 로그인 user id: {request.user.id}, username: {request.user.username}")
+    # user 조건 없이 집계 (테스트)
+    cost_qs = FoodEvent.objects.filter(
+        start_time__year=today.year,
+        start_time__month=today.month
+    )
+    agg = cost_qs.aggregate(total=Sum('price'))
+    total_cost = float(agg['total'] or 0)
+    # 디버깅용: 실제 price, 날짜, 타입, 집계 포함 여부 출력 (운영시 삭제)
+    print(f"[DEBUG] 오늘: {today}")
+    for food in foods:
+        print(f"[DEBUG] id={food.id}, price={food.price}, type={food.type}, user={food.user}, start_time={food.start_time}, year={food.start_time.year}, month={food.start_time.month}")
+        if food.start_time.year == today.year and food.start_time.month == today.month:
+            print(f"[DEBUG]  -> 집계 포함!")
+    print(f"[DEBUG] total_cost 집계 결과: {total_cost}")
+
+    # foods에 가상 필드 추가
+    for food in foods:
+        food.open_date = food.start_time
+        food.end_date = food.end_time
+        if food.end_time:
+            food.days_since_open = (food.end_time.date() - food.start_time.date()).days + 1
+        else:
+            food.days_since_open = (today - food.start_time.date()).days + 1
+
+    return render(request, 'food_calendar/food_calendar.html', {
+        'pets': pets,
+        'foods': foods,
+        'total_feeds': total_feeds,
+        'total_snacks': total_snacks,
+        'this_month_count': this_month_count,
+        'total_cost': total_cost,
+    })
 
 @login_required
 def get_events(request, pet_id):
@@ -84,9 +123,18 @@ def get_events(request, pet_id):
 @require_http_methods(['POST'])
 def create_event(request):
     try:
-        data = json.loads(request.body)
-        pet = get_object_or_404(Pet, id=data.get('pet_id'), owner=request.user)
-        
+        if request.content_type.startswith('application/json'):
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+        pet_id = data.get('pet_id') or data.get('pet')
+        pet = get_object_or_404(Pet, id=pet_id, owner=request.user)
+        # price 값 보정
+        price_val = data.get('price', 0)
+        if price_val in [None, '']:
+            price_val = 0
+        else:
+            price_val = float(price_val)
         event = FoodEvent.objects.create(
             user=request.user,
             pet=pet,
@@ -98,13 +146,30 @@ def create_event(request):
             previous_food=data.get('previous_food', ''),
             quantity_kg=data.get('quantity_kg', 0),
             duration_days=data.get('duration_days', 0),
-            purchase_date=datetime.fromisoformat(data.get('purchase_date')).date() if data.get('purchase_date') else None,
-            price=data.get('price', 0),
-            start_time=datetime.fromisoformat(data.get('start').replace('Z', '+00:00')),
-            end_time=datetime.fromisoformat(data.get('end').replace('Z', '+00:00')) if data.get('end') else None
+            purchase_date=data.get('purchase_date') if data.get('purchase_date') else None,
+            price=price_val,
+            start_time=data.get('open_date') or data.get('start') or None,
+            end_time=data.get('end_date') or data.get('end') or None
         )
-        
+        # 날짜 필드 보정 (FormData는 문자열로 오므로)
+        if isinstance(event.purchase_date, str):
+            try:
+                event.purchase_date = datetime.fromisoformat(event.purchase_date).date()
+            except Exception:
+                event.purchase_date = None
+        if isinstance(event.start_time, str):
+            try:
+                event.start_time = datetime.fromisoformat(event.start_time)
+            except Exception:
+                event.start_time = None
+        if isinstance(event.end_time, str):
+            try:
+                event.end_time = datetime.fromisoformat(event.end_time)
+            except Exception:
+                event.end_time = None
+        event.save()
         return JsonResponse({
+            'success': True,
             'id': event.id,
             'type': event.type,
             'product_name': event.product_name,
@@ -114,14 +179,14 @@ def create_event(request):
             'quantity_kg': event.quantity_kg,
             'duration_days': event.duration_days,
             'purchase_date': event.purchase_date.isoformat() if event.purchase_date else None,
-            'price': event.price,
-            'start': event.start_time.isoformat(),
+            'price': str(event.price),
+            'start': event.start_time.isoformat() if event.start_time else None,
             'end': event.end_time.isoformat() if event.end_time else None,
             'pet_id': event.pet.id,
             'description': event.description,
         })
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 @login_required
 def get_event_details(request, event_id):
@@ -156,7 +221,12 @@ def update_food_event(request, event_id):
     try:
         event = get_object_or_404(FoodEvent, id=event_id, user=request.user)
         data = json.loads(request.body)
-        
+        # price 값 보정
+        price_val = data.get('price', 0)
+        if price_val in [None, '']:
+            price_val = 0
+        else:
+            price_val = float(price_val)
         if 'description' in data:
             event.description = data['description']
         if 'type' in data:
@@ -176,7 +246,7 @@ def update_food_event(request, event_id):
         if 'purchase_date' in data:
             event.purchase_date = datetime.fromisoformat(data['purchase_date']).date() if data['purchase_date'] else None
         if 'price' in data:
-            event.price = data['price']
+            event.price = price_val
         if 'start_time' in data:
             event.start_time = datetime.fromisoformat(data['start_time'].replace('Z', '+00:00'))
         if 'end_time' in data:
@@ -185,7 +255,6 @@ def update_food_event(request, event_id):
             event.pet_id = data['pet_id']
         if 'start' in data:
             event.start_time = datetime.fromisoformat(data['start'].replace('Z', '+00:00'))
-            
         event.save()
         return JsonResponse({
             'id': event.id,

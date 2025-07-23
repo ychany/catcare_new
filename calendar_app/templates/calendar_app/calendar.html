@@ -1028,6 +1028,18 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         saveRecord();
     });
+
+    document.getElementById('petFilter').addEventListener('change', function() {
+        const petId = this.value;
+        fetch(`/calendar/stats/?pet_id=${petId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.stat-card.health .stat-number').textContent = data.total_medical;
+                document.querySelector('.stat-card.vaccination .stat-number').textContent = data.total_vaccination;
+                document.querySelector('.stat-card.upcoming .stat-number').textContent = data.upcoming_vacc;
+                document.querySelector('.stat-card.cost .stat-number').textContent = data.total_cost.toLocaleString() + '원';
+            });
+    });
 });
 
 // 필터링 함수
@@ -1072,53 +1084,82 @@ function closeRecordModal() {
 
 // 기록 저장
 function saveRecord() {
-    const formData = new FormData(document.getElementById('recordForm'));
-    
-    fetch('/calendar/add/', {
-        method: 'POST',
-        body: formData,
-        headers: {
+    const form = document.getElementById('recordForm');
+    const formData = new FormData(form);
+    const editId = form.getAttribute('data-edit-id');
+    let url = '/calendar/api/events/';
+    let method = 'POST';
+    if (editId) {
+        url = `/calendar/api/events/${editId}/`;
+        method = 'PUT';
+        form.removeAttribute('data-edit-id');
+    }
+    fetch(url, {
+        method: method,
+        body: method === 'POST' ? formData : JSON.stringify(Object.fromEntries(formData)),
+        headers: method === 'POST' ? {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        } : {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
         },
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
+        if (data.success || data.id) {
+            alert('저장 되었습니다!');
             closeRecordModal();
             location.reload();
-            } else {
-            alert('저장 중 오류가 발생했습니다.');
+        } else {
+            alert('저장 중 오류가 발생했습니다.\n' + (data.error || ''));
         }
     })
     .catch(error => {
         console.error('Error:', error);
         alert('저장 중 오류가 발생했습니다.');
-            });
+    });
 }
 
 // 기록 수정
 function editRecord(recordId) {
-    alert('수정 기능은 준비 중입니다.');
+    fetch(`/calendar/api/events/${recordId}/`)
+        .then(response => response.json())
+        .then(data => {
+            openRecordModal();
+            document.getElementById('recordForm').setAttribute('data-edit-id', recordId);
+            document.querySelector('[name="pet"]').value = data.pet;
+            document.querySelector(`input[name="event_type"][value="${data.event_type}"]`).checked = true;
+            document.querySelector('input[name="date"]').value = data.date;
+            document.querySelector('input[name="hospital"]').value = data.hospital || '';
+            document.querySelector('input[name="cost"]').value = data.cost || '';
+            document.querySelector('input[name="next_date"]').value = data.next_date || '';
+            document.querySelector('textarea[name="description"]').value = data.description || '';
+            document.querySelector('textarea[name="notes"]').value = data.notes || '';
+            if (data.event_type === 'vacc') {
+                document.getElementById('nextDateGroup').style.display = 'block';
+            } else {
+                document.getElementById('nextDateGroup').style.display = 'none';
+            }
+        });
 }
 
 // 기록 삭제
 function deleteRecord(recordId) {
-    if (confirm('이 의료 기록을 삭제하시겠습니까?')) {
-        fetch(`/calendar/delete/${recordId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-                        } else {
-                alert('삭제 중 오류가 발생했습니다.');
-                        }
-                    });
-    }
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    fetch(`/calendar/api/events/${recordId}/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('삭제되었습니다!');
+            location.reload();
+        } else {
+            alert('삭제 중 오류가 발생했습니다.');
+        }
+    });
 }
 
 // 모달 외부 클릭시 닫기

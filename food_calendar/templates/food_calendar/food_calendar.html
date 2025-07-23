@@ -973,76 +973,103 @@ function closeFoodModal() {
     document.getElementById('foodForm').reset();
 }
 
-// 급여 기록 저장
-function saveFoodRecord() {
-    const formData = new FormData(document.getElementById('foodForm'));
-    
-    fetch('/food-calendar/add/', {
+// 급여 수정
+function editFood(id) {
+    fetch(`/food/event/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            // 모달 열기
+            openFoodModal();
+            // 폼 값 채우기
+            document.getElementById('modalPetSelect').value = data.pet_id;
+            document.querySelector(`input[name="type"][value="${data.type}"]`).checked = true;
+            document.querySelector('input[name="product_name"]').value = data.product_name;
+            document.querySelector('input[name="brand"]').value = data.brand || '';
+            document.querySelector('input[name="purchase_date"]').value = data.purchase_date || '';
+            document.querySelector('input[name="open_date"]').value = data.start ? data.start.substr(0,10) : '';
+            document.querySelector('input[name="quantity_kg"]').value = data.quantity_kg;
+            document.querySelector('input[name="price"]').value = data.price;
+            document.querySelector('input[name="purchase_link"]').value = data.purchase_link;
+            document.querySelector('input[name="rating"]').value = data.rating;
+            document.querySelector('textarea[name="description"]').value = data.description;
+            // 수정 모드 표시
+            document.getElementById('foodForm').setAttribute('data-edit-id', id);
+        });
+}
+
+// 종료
+function endFood(id) {
+    if (!confirm('정말 종료하시겠습니까?')) return;
+    fetch(`/food/event/${id}/end/`, {
         method: 'POST',
-        body: formData,
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            closeFoodModal();
-            location.reload(); // 페이지 새로고침
+        if (data.error) {
+            alert('종료 중 오류가 발생했습니다.\n' + data.error);
         } else {
-            alert('저장 중 오류가 발생했습니다.');
+            location.reload();
+        }
+    });
+}
+
+// 삭제
+function deleteFood(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    fetch(`/food/event/${id}/delete/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('삭제 중 오류가 발생했습니다.\n' + data.error);
+        } else {
+            location.reload();
+        }
+    });
+}
+
+// 저장 함수 보완: 수정 모드일 때 update API 호출
+function saveFoodRecord() {
+    const form = document.getElementById('foodForm');
+    const formData = new FormData(form);
+    const editId = form.getAttribute('data-edit-id');
+    let url = '/food/event/create/';
+    let method = 'POST';
+    if (editId) {
+        url = `/food/event/${editId}/update/`;
+        method = 'PUT';
+        form.removeAttribute('data-edit-id');
+    }
+    fetch(url, {
+        method: method,
+        body: method === 'POST' ? formData : JSON.stringify(Object.fromEntries(formData)),
+        headers: method === 'POST' ? {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        } : {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success || data.id) {
+            closeFoodModal();
+            location.reload();
+        } else {
+            alert('저장 중 오류가 발생했습니다.\n' + (data.error || ''));
         }
     })
     .catch(error => {
         console.error('Error:', error);
         alert('저장 중 오류가 발생했습니다.');
     });
-}
-
-// 급여 수정
-function editFood(foodId) {
-    // 구현 필요
-    alert('수정 기능은 준비 중입니다.');
-}
-
-// 급여 종료
-function endFood(foodId) {
-    if (confirm('이 사료의 섭취를 종료하시겠습니까?')) {
-        fetch(`/food-calendar/end/${foodId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('종료 처리 중 오류가 발생했습니다.');
-            }
-        });
-    }
-}
-
-// 급여 삭제
-function deleteFood(foodId) {
-    if (confirm('이 급여 기록을 삭제하시겠습니까?')) {
-        fetch(`/food-calendar/delete/${foodId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('삭제 중 오류가 발생했습니다.');
-            }
-        });
-    }
 }
 
 // 모달 외부 클릭시 닫기

@@ -6,6 +6,7 @@ from weight_tracker_app.models import Weight
 import os
 import json
 from pathlib import Path
+from datetime import date, timedelta
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
@@ -15,6 +16,7 @@ class UserRegisterForm(UserCreationForm):
         fields = ['username', 'email', 'password1', 'password2']
 
 class PetForm(forms.ModelForm):
+    # species 필드 제거
     breed = forms.ChoiceField(
         choices=[],
         required=True,
@@ -27,15 +29,13 @@ class PetForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        pet_type = self.data.get('pet_type') if self.data else (self.instance.pet_type if self.instance else None)
-        
+        pet_type = 'cat'  # 항상 고양이로 고정
         if pet_type == 'cat':
             self.fields['breed'].choices = Pet.CAT_BREEDS
         elif pet_type == 'dog':
             self.fields['breed'].choices = Pet.DOG_BREEDS
         else:
             self.fields['breed'].choices = [('', '동물 종류를 먼저 선택해주세요')]
-
         # breed.json 경로 설정
         breed_path = Path(__file__).resolve().parent.parent / 'insurance_app' / 'fixtures' / 'breed.json'
         breed_choices = [('', '품종을 선택하세요')]
@@ -47,6 +47,7 @@ class PetForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
+        instance.pet_type = 'cat'  # 항상 고양이로 저장
         # 폼에서 빈 값/0이 들어오면 최근 체중 기록에서 자동 입력
         weight_val = self.cleaned_data.get('weight')
         if weight_val in [None, '', 0]:
@@ -61,7 +62,7 @@ class PetForm(forms.ModelForm):
 
     class Meta:
         model = Pet
-        fields = ['name', 'pet_type', 'breed', 'birth_date', 'gender', 'neutered', 'weight', 'notes', 'image']
+        fields = ['name', 'breed', 'birth_date', 'gender', 'neutered', 'weight', 'notes', 'image']
         widgets = {
             'birth_date': forms.DateInput(attrs={'type': 'date'}),
         } 
