@@ -3,225 +3,637 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}냐옹노트{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <title>{% block title %}냥이 집사 - Cat Care{% endblock %}</title>
+    
+    <!-- Inter Font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    {% load static %}
+    
     <style>
-        /* 전체 배경을 부드러운 그라데이션으로 변경 */
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Figma Design Colors */
+            --primary-color: #FF6B35;
+            --secondary-color: #004E89;
+            --accent-color: #FF9F1C;
+            --success-color: #2ECC71;
+            --danger-color: #E74C3C;
+            --warning-color: #F39C12;
+            --info-color: #3498DB;
+            
+            /* Neutral Colors */
+            --white: #FFFFFF;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            
+            /* Text Colors */
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            
+            /* Background Colors */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            
+            /* Border Colors */
+            --border-light: #E5E7EB;
+            --border-medium: #D1D5DB;
+            --border-dark: #9CA3AF;
+            
+            /* Shadow */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
+            --radius-3xl: 24px;
+            --radius-full: 9999px;
+            
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            --spacing-3xl: 32px;
+            --spacing-4xl: 40px;
+            --spacing-5xl: 48px;
+            --spacing-6xl: 64px;
+        }
+
         body {
-            font-family: 'Jua', sans-serif;
-            background: linear-gradient(135deg, #f0f2f5 0%, #d9e2ec 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        .top-bar {
-            /* 상단바를 흰색으로 변경 */
-            background-color: #ffffff;
-            padding: 8px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+        .figma-container {
+            min-height: 100vh;
+            position: relative;
         }
-        .sidebar {
-            /* 메인 컬러를 #172852로 변경 */
-            margin-top: 25px;
+
+        /* Navigation Bar */
+        .figma-nav {
             position: fixed;
-            top: 40px;
+            top: 0;
             left: 0;
-            bottom: 0;
-            width: 250px;
-            background-color: #172852;
-            padding-top: 20px;
-            color: #ffffff;
-            border-right: 1px solid rgba(0,0,0,0.1);
+            right: 0;
+            z-index: 1000;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.95);
         }
-        .main-content {
-            /* 메인 콘텐츠를 카드 형태로 띄워 세련된 느낌 부여 */
-            margin-left: 250px;
-            margin-top: 80px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+
+        .nav-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-2xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
         }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-brand:hover {
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 16px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2xl);
+            list-style: none;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
         .nav-link {
-            color: #ffffff;
-            font-size: 1.1em;
-            transition: all 0.3s ease;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
         }
+
         .nav-link:hover {
-            color: #172852;
-            background-color: #ffffff;
-            transform: scale(1.05);
-        }
-        .top-bar-text {
-            /* 상단바 텍스트를 메인 컬러로 변경 */
-            color: #172852;
-        }
-        .d-flex.align-items-center.top-bar-text {
-            gap: 9px;
-        }
-        .logout-btn {
-            /* 로그아웃 버튼 색상 변경 */
-            color: #172852;
+            color: var(--primary-color);
+            background-color: var(--bg-tertiary);
             text-decoration: none;
-            margin-left: 15px;
-            padding: 4px 15px;
-            border: 2px solid #172852;
-            border-radius: 20px;
-            transition: all 0.3s ease;
         }
-        .logout-btn:hover {
-            color: #ffffff;
-            background-color: #172852;
-            transform: scale(1.05);
+
+        .nav-link.active {
+            color: var(--primary-color);
+            background-color: rgba(255, 107, 53, 0.1);
         }
-        .sidebar h3 {
-            text-align: center;
-            color: #ffffff;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-            font-size: 1.8em;
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
         }
-        .sidebar h3::before,
-        .sidebar h3::after {
-            content: '🐱';
-            margin: 0 10px;
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
         }
-        .alert {
-            border-radius: 15px;
+
+        .nav-user:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 64px;
+            min-height: calc(100vh - 64px);
+            background: var(--bg-secondary);
+        }
+
+        .content-wrapper {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: var(--spacing-3xl) var(--spacing-2xl);
+        }
+
+        /* Typography */
+        .heading-1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.25;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-lg) 0;
+        }
+
+        .heading-2 {
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.33;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-md) 0;
+        }
+
+        .heading-3 {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.44;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-sm) 0;
+        }
+
+        .body-text {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .body-text-sm {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.33;
+            color: var(--text-muted);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md) var(--spacing-lg);
             border: none;
-            background-color: #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .navbar-brand {
-            color: #172852;
-            font-size: 2rem;
-            font-weight: bold;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
             text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--white);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            background: #e55a2b;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .btn-sm {
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 12px;
+            border-radius: var(--radius-sm);
+        }
+
+        .btn-lg {
+            padding: var(--spacing-lg) var(--spacing-2xl);
+            font-size: 16px;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: var(--spacing-lg) var(--spacing-xl);
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-primary);
+        }
+
+        .card-body {
+            padding: var(--spacing-xl);
+        }
+
+        .card-footer {
+            padding: var(--spacing-lg) var(--spacing-xl);
+            border-top: 1px solid var(--border-light);
+            background: var(--bg-secondary);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            border: 1px solid;
+            margin-bottom: var(--spacing-lg);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-color: var(--success-color);
+            color: #27ae60;
+        }
+
+        .alert-error {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-color: var(--danger-color);
+            color: #c0392b;
+        }
+
+        .alert-warning {
+            background-color: rgba(243, 156, 18, 0.1);
+            border-color: var(--warning-color);
+            color: #d68910;
+        }
+
+        .alert-info {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-color: var(--info-color);
+            color: #2980b9;
+        }
+
+        /* Utilities */
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+
+        .flex { display: flex; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+        .flex-between { display: flex; align-items: center; justify-content: space-between; }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+
+        .gap-xs { gap: var(--spacing-xs); }
+        .gap-sm { gap: var(--spacing-sm); }
+        .gap-md { gap: var(--spacing-md); }
+        .gap-lg { gap: var(--spacing-lg); }
+        .gap-xl { gap: var(--spacing-xl); }
+
+        .mb-sm { margin-bottom: var(--spacing-sm); }
+        .mb-md { margin-bottom: var(--spacing-md); }
+        .mb-lg { margin-bottom: var(--spacing-lg); }
+        .mb-xl { margin-bottom: var(--spacing-xl); }
+        .mb-2xl { margin-bottom: var(--spacing-2xl); }
+
+        .mt-sm { margin-top: var(--spacing-sm); }
+        .mt-md { margin-top: var(--spacing-md); }
+        .mt-lg { margin-top: var(--spacing-lg); }
+        .mt-xl { margin-top: var(--spacing-xl); }
+        .mt-2xl { margin-top: var(--spacing-2xl); }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 var(--spacing-lg);
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .content-wrapper {
+                padding: var(--spacing-2xl) var(--spacing-lg);
+            }
+
+            .heading-1 {
+                font-size: 24px;
+            }
+
+            .heading-2 {
+                font-size: 20px;
+            }
+
+            .btn {
+                padding: var(--spacing-sm) var(--spacing-lg);
+                font-size: 13px;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-light);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-medium);
+            border-radius: var(--radius-full);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--border-dark);
         }
     </style>
+
+    {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-    {% block top_bar %}
-    <div class="top-bar fixed-top">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center">
-                <!-- 브랜드 로고 (상단) -->
-                <a class="navbar-brand" href="{% url 'index' %}">🐱 냐옹노트</a>
-                <!-- 로그인 사용자 정보 -->
-                {% if user.is_authenticated %}
-                <div class="d-flex align-items-center top-bar-text">
-                    <span id="current-date"></span>
-                    <span id="current-time"></span>
-                    {% if user.pets.exists %}
-                        <span class="ms-3">
-                            {% for pet in user.pets.all %}{{ pet.name }}{% if not forloop.last %}, {% endif %}{% endfor %} 보호자님
-                        </span>
-                    {% endif %}
-                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-btn">로그아웃</button>
-                    </form>
-                </div>
-                {% else %}
-                <button class="btn btn-outline-primary ms-3" data-bs-toggle="modal" data-bs-target="#loginModal">로그인</button>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endblock %}
-
-    {% block sidebar %}
-    <div class="sidebar">
-        <div class="container">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'community_app:list' %}">커뮤니티</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'photo_board_app:list' %}">고양이 사진 게시판</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'calendar' %}">건강 캘린더</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'care_calendar:care_calendar' %}">케어 캘린더</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'food_calendar:food_calendar' %}">식사 캘린더</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'food_calendar:purchase_management' %}">구매 관리</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'item_purchase_app:management' %}">기타 구매</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'weight_tracker' %}">체중 관리</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'emergency_app:hospital_list' %}">동물병원</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseInsurance"
-                        aria-expanded="false" aria-controls="collapseInsurance">
-                        <i class="fas fa-shield-alt me-2"></i>
-                        <span>펫보험</span>
-                        <i class="fas fa-chevron-down ms-auto"></i>
-                    </a>
-                    <div id="collapseInsurance" class="collapse" aria-labelledby="headingInsurance">
-                        <ul class="list-group bg-white border rounded mt-2">
-                            <li class="list-group-item d-flex align-items-center">
-                                <i class="fas fa-home me-2 text-primary"></i>
-                                <a href="{% url 'insurance:main' %}" class="text-decoration-none text-dark">메인</a>
-                            </li>
-                            <li class="list-group-item d-flex align-items-center">
-                                <i class="fas fa-list me-2 text-primary"></i>
-                                <a href="{% url 'insurance:product_list' %}" class="text-decoration-none text-dark">보험 상품</a>
-                            </li>
-                        </ul>
+    <div class="figma-container">
+        <!-- Navigation -->
+        {% block navigation %}
+        <nav class="figma-nav">
+            <div class="nav-container">
+                <!-- Brand -->
+                <a href="{% url 'index' %}" class="nav-brand">
+                    <div class="brand-icon">
+                        <i class="fas fa-cat"></i>
                     </div>
-                </li>
-                {% if not user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">로그인</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">회원가입</a>
-                </li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-    {% endblock %}
+                    <span>냥이 집사</span>
+                </a>
 
-    <div class="main-content">
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
+                <!-- Navigation Menu -->
+                <ul class="nav-menu">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a href="{% url 'photo_board_app:list' %}" class="nav-link">
+                                <i class="fas fa-camera"></i>
+                                추억 저장
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'index' %}" class="nav-link">
+                                <i class="fas fa-home"></i>
+                                홈으로
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'index' %}" class="nav-link">
+                                <i class="fas fa-tachometer-alt"></i>
+                                대시보드
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
 
-        {% block content %}
+                <!-- User Actions -->
+                <div class="nav-actions">
+                    {% if user.is_authenticated %}
+                        <a href="#" class="nav-user">
+                            <div class="user-avatar">
+                                {{ user.username|first|upper }}
+                            </div>
+                            <span>{{ user.username }}</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">
+                            <i class="fas fa-sign-in-alt"></i>
+                            로그인
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-user-plus"></i>
+                            회원가입
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
         {% endblock %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Page Content -->
+                {% block content %}{% endblock %}
+            </div>
+        </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JavaScript -->
     <script>
-        function updateDateTime() {
-            const now = new Date();
-            const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            
-            document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', dateOptions).replace(/\. ?/g, '-').replace(/-$/, '') + ' ';
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('ko-KR', timeOptions);
-        }
-
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
+        // Mobile menu toggle (if needed)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add any global JavaScript here
+            console.log('Figma-inspired Cat Care app loaded');
+        });
     </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

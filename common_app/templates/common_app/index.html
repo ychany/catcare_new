@@ -1,207 +1,738 @@
 {% extends 'common_app/base.html' %}
 
-{% block title %}홈 - 냐옹노트{% endblock %}
+{% block title %}냥이 집사 - 반려묘와 함께하는 일상{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <h1 class="mb-4">냐옹노트에 오신 것을 환영합니다</h1>
-        {% if user.is_authenticated %}
-            <div class="mb-3 text-end">
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPetModal">+ 고양이 추가</button>
-            </div>
-            {% if pets %}
-                <div class="row">
-                    {% for pet in pets %}
-                        <div class="col-md-4 mb-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="pet-avatar me-3">
-                                            <a href="{% url 'pets:pet_edit' pet.id %}" class="text-decoration-none">
-                                                {% if pet.image %}
-                                                    <img src="{{ pet.image.url }}" alt="{{ pet.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
-                                                {% else %}
-                                                    <div class="avatar-circle">
-                                                        <span class="avatar-emoji">🐱</span>
-                                                    </div>
-                                                {% endif %}
-                                            </a>
-                                        </div>
-                                        <div>
-                                            <h5 class="card-title mb-0">
-                                                <a href="{% url 'pets:pet_edit' pet.id %}" class="text-decoration-none text-dark">
-                                                    {{ pet.name }}
-                                                </a>
-                                            </h5>
-                                            <small class="text-muted">{{ pet.get_breed_display }}</small>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span>Lv {{ pet.get_age }}</span>
-                                            <span>생일까지 {{ pet.days_until_birthday }}일</span>
-                                        </div>
-                                        <div class="progress">
-                                            <div class="progress-bar bg-info" role="progressbar" 
-                                                data-progress="{{ pet.birthday_progress }}"
-                                                aria-valuenow="{{ pet.birthday_progress }}" 
-                                                aria-valuemin="0" 
-                                                aria-valuemax="100">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="pet-stats">
-                                        <div class="d-flex justify-content-between text-muted">
-                                            <small>나이: {{ pet.get_age }}살</small>
-                                            <small>생일: {{ pet.birth_date|date:"Y년 m월 d일" }}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
+<div class="homepage">
+    {% if user.is_authenticated %}
+        <!-- 인증된 사용자용 대시보드 -->
+        <section class="dashboard-section">
+            <!-- 웰컴 헤더 -->
+            <div class="welcome-header">
+                <div class="welcome-content">
+                    <h1 class="welcome-title">안녕하세요, {{ user.username }}님!</h1>
+                    <p class="welcome-subtitle">오늘도 우리 고양이와 함께 행복한 하루 보내세요 🐾</p>
                 </div>
-            {% else %}
-                <p class="lead">등록된 고양이가 없습니다.</p>
-            {% endif %}
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-cat"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number">{{ pets.count|default:0 }}</div>
+                            <div class="stat-label">등록된 고양이</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number">{{ recent_posts.count|default:0 }}</div>
+                            <div class="stat-label">최근 사진</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <!-- 최근 게시글 사진 섹션 -->
-            {% if recent_posts %}
-            <div class="mt-4">
-                <h4 class="mb-3">최근 올라온 고양이 사진</h4>
-                <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-2">
-                    {% for post in recent_posts %}
-                        {% if post.image %}
-                        <div class="col">
-                            <a href="{% url 'photo_board_app:detail' post.id %}" class="text-decoration-none">
-                                <div class="card h-100 border-0">
-                                    <img src="{{ post.image.url }}" class="card-img-top rounded" alt="{{ post.title }}" 
-                                         style="height: 120px; object-fit: cover;">
+            <!-- 내 고양이 리스트 섹션 -->
+            <section class="my-pets-section card" style="margin-bottom: 32px;">
+                <div class="card-header flex-between">
+                    <h2 class="heading-2">내 고양이</h2>
+                    <a href="{% url 'common_app:pet_register' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> 고양이 추가
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if pets %}
+                        <div class="pet-list flex gap-lg" style="flex-wrap: wrap;">
+                            {% for pet in pets %}
+                                <div class="pet-card card" style="min-width:200px; max-width:260px; margin-bottom:16px;">
+                                    {% if pet.image %}
+                                        <img src="{{ pet.image.url }}" alt="{{ pet.name }}" style="width:100%; height:140px; object-fit:cover; border-radius:12px 12px 0 0;">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h3 class="heading-3">{{ pet.name }}</h3>
+                                        <div class="body-text-sm">품종: {{ pet.breed }}</div>
+                                        <div class="body-text-sm">생일: {{ pet.birth_date }}</div>
+                                        <div class="body-text-sm">몸무게: {{ pet.weight }}kg</div>
+                                        <div class="flex gap-sm mt-md">
+                                            <a href="{% url 'common_app:pet_edit' pet.id %}" class="btn btn-secondary btn-sm">
+                                                <i class="fas fa-edit"></i> 수정
+                                            </a>
+                                            <form method="post" action="{% url 'common_app:pet_delete' pet.id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('정말 삭제하시겠습니까?');">
+                                                    <i class="fas fa-trash"></i> 삭제
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
-                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="body-text">아직 등록된 고양이가 없습니다.</div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- 메인 네비게이션 카드 -->
+            <div class="main-nav-grid">
+                <!-- 급여관리 → 식사캘린더 -->
+                <a href="{% url 'food_calendar:food_calendar' %}" class="nav-card nav-food">
+                    <div class="card-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>급여관리</h3>
+                        <p>식사 시간과 양 관리</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- 의료기록 → 건강캘린더 -->
+                <a href="{% url 'calendar_app:calendar' %}" class="nav-card nav-health">
+                    <div class="card-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>의료기록</h3>
+                        <p>건강 관리 및 진료 기록</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- 비용관리 → 기타구매 -->
+                <a href="{% url 'item_purchase_app:management' %}" class="nav-card nav-cost">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>비용관리</h3>
+                        <p>용품 구매 및 비용 추적</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- 병원찾기 → 동물병원 -->
+                <a href="{% url 'emergency_app:hospital_list' %}" class="nav-card nav-hospital">
+                    <div class="card-icon">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>병원찾기</h3>
+                        <p>가까운 동물병원 정보</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- 보험관리 → 펫보험 -->
+                <a href="{% url 'insurance:main' %}" class="nav-card nav-insurance">
+                    <div class="card-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>보험관리</h3>
+                        <p>펫보험 비교 및 관리</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- 추억저장 → 사진게시판 -->
+                <a href="{% url 'photo_board_app:list' %}" class="nav-card nav-memory">
+                    <div class="card-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>추억저장</h3>
+                        <p>소중한 순간들을 기록</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- 커뮤니티 -->
+                <a href="{% url 'community_app:list' %}" class="nav-card nav-community">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>커뮤니티</h3>
+                        <p>집사들과의 소통</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- 체중관리 -->
+                <a href="{% url 'weight_tracker_app:weight_tracker' %}" class="nav-card nav-weight">
+                    <div class="card-icon">
+                        <i class="fas fa-weight"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>체중관리</h3>
+                        <p>건강한 체중 유지</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- 케어캘린더 -->
+                <a href="{% url 'care_calendar:care_calendar' %}" class="nav-card nav-care">
+                    <div class="card-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>케어캘린더</h3>
+                        <p>돌봄 일정 관리</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 최근 활동 미리보기 -->
+            {% if recent_posts %}
+            <section class="recent-activity">
+                <div class="section-header">
+                    <h2 class="section-title">최근 추억들</h2>
+                    <a href="{% url 'photo_board_app:list' %}" class="view-all-btn">
+                        전체보기
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="activity-grid">
+                    {% for post in recent_posts|slice:":4" %}
+                    <div class="activity-item">
+                        {% if post.image %}
+                        <div class="activity-image">
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}">
                         </div>
                         {% endif %}
+                        <div class="activity-info">
+                            <h4>{{ post.title|truncatechars:20 }}</h4>
+                            <p>{{ post.created_at|timesince }} 전</p>
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
-            </div>
+            </section>
             {% endif %}
-        {% else %}
-            <p class="lead">로그인하시면 고양이 정보를 관리할 수 있습니다.</p>
-        {% endif %}
-    </div>
-</div>
+        </section>
 
-<!-- 고양이 추가 모달 -->
-<div class="modal fade" id="addPetModal" tabindex="-1" aria-labelledby="addPetModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="post" enctype="multipart/form-data" action="{% url 'pets:pet_register' %}">
-        {% csrf_token %}
-        <div class="modal-header">
-          <h5 class="modal-title" id="addPetModalLabel">고양이 추가</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">이름</label>
-            <input type="text" name="name" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="{{ pet_form.breed.id_for_label }}">{{ pet_form.breed.label }}</label>
-            {{ pet_form.breed }}
-            {% for error in pet_form.breed.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-          </div>
-          <div class="mb-3">
-            <label class="form-label">생년월일</label>
-            <input type="date" name="birth_date" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">성별</label>
-            <select name="gender" class="form-select" required>
-              <option value="male">수컷</option>
-              <option value="female">암컷</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">중성화 여부</label>
-            <select name="neutered" class="form-select" required>
-              <option value="True">예</option>
-              <option value="False">아니오</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">체중(kg)</label>
-            <input type="number" step="0.01" name="weight" class="form-control">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">특이사항</label>
-            <input type="text" name="notes" class="form-control">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">사진</label>
-            <input type="file" name="image" class="form-control">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-          <button type="submit" class="btn btn-primary">추가하기</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    {% else %}
+        <!-- 비인증 사용자용 랜딩 페이지 -->
+        <section class="landing-section">
+            <!-- 히어로 섹션 -->
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="title-highlight">냥이 집사</span>
+                            <br>반려묘와 함께하는 일상
+                        </h1>
+                        <p class="hero-description">
+                            고양이의 건강, 일상, 추억을 체계적으로 관리하고<br>
+                            다른 집사들과 소통할 수 있는 종합 플랫폼입니다
+                        </p>
+                        <div class="hero-actions">
+                            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-rocket"></i>
+                                지금 시작하기
+                            </a>
+                            <a href="{% url 'login' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i>
+                                로그인
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="visual-card">
+                            <i class="fas fa-cat visual-icon"></i>
+                            <p>우리 고양이의<br>모든 것을 한 곳에서</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 기능 소개 -->
+            <div class="features-section">
+                <h2 class="section-title">주요 기능</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h3>급여관리</h3>
+                        <p>식사 시간과 양을 체계적으로 관리하여 건강한 식습관을 만들어보세요</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h3>건강기록</h3>
+                        <p>예방접종, 진료 기록 등 건강 관련 정보를 체계적으로 관리해보세요</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <h3>추억저장</h3>
+                        <p>소중한 순간들을 사진으로 기록하고 다른 집사들과 공유해보세요</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>커뮤니티</h3>
+                        <p>다른 집사들과 정보를 공유하고 고민을 나눠보세요</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
 </div>
 
 <style>
-.card {
-    border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* 홈페이지 기본 스타일 */
+.homepage {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.progress {
-    background-color: #e9ecef;
-    border-radius: 10px;
-    overflow: hidden;
-    height: 10px;
+/* 대시보드 섹션 */
+.dashboard-section {
+    padding: 0;
 }
 
-.progress-bar {
-    transition: width 0.6s ease;
+.welcome-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-4xl) var(--spacing-3xl);
+    color: var(--white);
+    margin-bottom: var(--spacing-3xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.progress-bar[data-progress] {
-    width: attr(data-progress);
+.welcome-content h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
 }
 
-.pet-avatar {
-    background-color: #f8f9fa;
-    border-radius: 50%;
-    padding: 10px;
+.welcome-content p {
+    font-size: 16px;
+    opacity: 0.9;
 }
 
-.avatar-circle {
-    width: 60px;
-    height: 60px;
-    background-color: #f8f9fa;
-    border-radius: 50%;
+.quick-stats {
+    display: flex;
+    gap: var(--spacing-xl);
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(8px);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 18px;
 }
 
-.avatar-emoji {
+.stat-number {
     font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* 메인 네비게이션 그리드 */
+.main-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-4xl);
+}
+
+.nav-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    text-decoration: none;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-card:hover {
+    text-decoration: none;
+    color: var(--text-primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.nav-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--card-accent, var(--primary-color));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.nav-card:hover::before {
+    transform: scaleX(1);
+}
+
+.nav-card .card-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--card-bg, rgba(255, 107, 53, 0.1));
+    color: var(--card-accent, var(--primary-color));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.nav-card .card-content {
+    flex: 1;
+}
+
+.nav-card .card-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.nav-card .card-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.nav-card .card-arrow {
+    color: var(--text-muted);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.nav-card:hover .card-arrow {
+    color: var(--card-accent, var(--primary-color));
+    transform: translateX(4px);
+}
+
+/* 개별 카드 스타일 */
+.nav-food { --card-accent: #38a169; --card-bg: rgba(56, 161, 105, 0.1); }
+.nav-health { --card-accent: #e53e3e; --card-bg: rgba(229, 62, 62, 0.1); }
+.nav-cost { --card-accent: #3182ce; --card-bg: rgba(49, 130, 206, 0.1); }
+.nav-hospital { --card-accent: #d69e2e; --card-bg: rgba(214, 158, 46, 0.1); }
+.nav-insurance { --card-accent: #805ad5; --card-bg: rgba(128, 90, 213, 0.1); }
+.nav-memory { --card-accent: #ed64a6; --card-bg: rgba(237, 100, 166, 0.1); }
+.nav-community { --card-accent: #38b2ac; --card-bg: rgba(56, 178, 172, 0.1); }
+.nav-weight { --card-accent: #4299e1; --card-bg: rgba(66, 153, 225, 0.1); }
+.nav-care { --card-accent: #48bb78; --card-bg: rgba(72, 187, 120, 0.1); }
+
+/* 최근 활동 섹션 */
+.recent-activity {
+    margin-bottom: var(--spacing-4xl);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.view-all-btn {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    transition: all 0.2s ease;
+}
+
+.view-all-btn:hover {
+    color: #e55a2b;
+    text-decoration: none;
+    transform: translateX(2px);
+}
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.activity-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.activity-image {
+    aspect-ratio: 16/10;
+    overflow: hidden;
+}
+
+.activity-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.activity-info {
+    padding: var(--spacing-lg);
+}
+
+.activity-info h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.activity-info p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* 랜딩 페이지 */
+.landing-section {
+    padding: var(--spacing-4xl) 0;
+}
+
+.hero-section {
+    margin-bottom: var(--spacing-6xl);
+}
+
+.hero-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--spacing-6xl);
+    align-items: center;
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: var(--spacing-xl);
+    color: var(--text-primary);
+}
+
+.title-highlight {
+    color: var(--primary-color);
+}
+
+.hero-description {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-4xl);
+}
+
+.hero-actions {
+    display: flex;
+    gap: var(--spacing-lg);
+}
+
+.hero-visual {
+    display: flex;
+    justify-content: center;
+}
+
+.visual-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: var(--white);
+    padding: var(--spacing-4xl) var(--spacing-3xl);
+    border-radius: var(--radius-2xl);
+    text-align: center;
+    box-shadow: var(--shadow-xl);
+}
+
+.visual-icon {
+    font-size: 64px;
+    margin-bottom: var(--spacing-lg);
+    display: block;
+}
+
+.visual-card p {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* 기능 소개 */
+.features-section {
+    text-align: center;
+    margin-bottom: var(--spacing-6xl);
+}
+
+.features-section .section-title {
+    text-align: center;
+    margin-bottom: var(--spacing-4xl);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-3xl);
+}
+
+.feature-card {
+    text-align: center;
+    padding: var(--spacing-3xl) var(--spacing-xl);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: var(--white);
+    border-radius: var(--radius-2xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto var(--spacing-lg);
+}
+
+.feature-card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .welcome-header {
+        flex-direction: column;
+        gap: var(--spacing-xl);
+        text-align: center;
+    }
+
+    .quick-stats {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .main-nav-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-3xl);
+        text-align: center;
+    }
+
+    .hero-title {
+        font-size: 36px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .activity-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-2xl);
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-header {
+        padding: var(--spacing-2xl);
+    }
+
+    .nav-card {
+        padding: var(--spacing-lg);
+    }
+
+    .activity-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-title {
+        font-size: 28px;
+    }
+
+    .hero-description {
+        font-size: 16px;
+    }
 }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.progress-bar').forEach(function(bar) {
-        const progress = bar.getAttribute('data-progress');
-        bar.style.width = progress + '%';
-    });
-});
-</script>
 {% endblock %} 

@@ -1,178 +1,46 @@
 {% extends 'common_app/base.html' %}
 
-{% block title %}고양이 사진 게시판 - 냐옹노트{% endblock %}
+{% block title %}사진게시판 - 냥이 집사{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>
-            <span class="cat-emoji">🐱</span> 
-            냐옹노트 게시판 
-            <span class="cat-emoji">🐾</span>
-        </h2>
-        <a href="{% url 'photo_board_app:create' %}" class="btn btn-create">
-            <span class="cat-emoji">✨</span> 새 글 쓰기
+<div class="container" style="max-width: 900px; margin: 0 auto;">
+    <div class="flex flex-between mb-xl">
+        <h2 class="heading-2">사진게시판</h2>
+        {% if user.is_authenticated %}
+        <a href="{% url 'photo_board_app:create' %}" class="btn btn-primary btn-upload">
+            <i class="fas fa-upload"></i> 사진 올리기
         </a>
+        {% endif %}
     </div>
-
-    <style>
-        .btn-create {
-            background-color: #7ac7d1;
-            color: white;
-            border-radius: 20px;
-            padding: 8px 20px;
-            font-size: 1.1em;
-            border: 2px solid #c5e4f3;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-create:hover {
-            background-color: #5ba3b0;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .cat-emoji {
-            display: inline-block;
-            animation: bounce 1s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        .post-card {
-            background-color: white;
-            border-radius: 15px;
-            border: 2px solid #c5e4f3;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .post-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(122, 199, 209, 0.3);
-        }
-
-        .post-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .post-content {
-            padding: 15px;
-        }
-
-        .post-title {
-            color: #5ba3b0;
-            font-size: 1.2em;
-            margin-bottom: 10px;
-        }
-
-        .post-text {
-            font-size: 1em;
-            line-height: 1.5;
-            color: #333;
-        }
-
-        .post-info {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .likes-count {
-            color: #5ba3b0;
-        }
-
-        .pagination .page-link {
-            color: #5ba3b0;
-            border-color: #c5e4f3;
-            margin: 0 3px;
-            border-radius: 10px;
-            font-size: 1em;
-        }
-
-        .pagination .page-link:hover {
-            background-color: #7ac7d1;
-            color: white;
-        }
-
-        .pagination .active .page-link {
-            background-color: #7ac7d1;
-            border-color: #7ac7d1;
-        }
-
-        .no-posts {
-            font-size: 1.2em;
-            color: #5ba3b0;
-        }
-    </style>
-
+    <p class="body-text mb-lg">우리 고양이들의 귀여운 순간들을 공유해보세요!</p>
     {% if post_list %}
-        <div class="row">
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px;">
             {% for post in post_list %}
-                <div class="col-md-4">
-                    <div class="post-card">
-                        <a href="{% url 'photo_board_app:detail' post.id %}">
-                            {% if post.image %}
-                                <img src="{{ post.image.url }}" alt="{{ post.title }}" class="post-image">
-                            {% endif %}
-                        </a>
-                        <div class="post-content">
-                            <h3 class="post-title">
-                                <a href="{% url 'photo_board_app:detail' post.id %}" style="color: #5ba3b0; text-decoration: none;">
-                                    {{ post.title }}
-                                </a>
-                            </h3>
-                            <p class="post-text">{{ post.content|truncatechars:100 }}</p>
-                            <div class="post-info">
-                                <span>🐱 {{ post.author }}</span>
-                                <span class="ms-2 likes-count">❤️ {{ post.likes.count }}</span>
-                                <span class="ms-2">📅 {{ post.created_at|date:"Y.m.d" }}</span>
-                            </div>
-                        </div>
+            <div class="card community-card" style="overflow: hidden;">
+                <a href="{% url 'photo_board_app:detail' post.id %}" style="text-decoration: none; color: inherit;">
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width:100%; height:180px; object-fit:cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h3 class="heading-3">{{ post.title|truncatechars:20 }}</h3>
+                        <div class="body-text-sm mt-sm">{{ post.created_at|date:'Y-m-d H:i' }}</div>
+                        <div class="body-text-sm mt-xs">작성자: {{ post.author.username }}</div>
                     </div>
-                </div>
+                </a>
+            </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="text-center my-5 no-posts">
-            <h3>아직 게시물이 없어요 😿</h3>
-            <p>첫 번째 게시물의 주인공이 되어보세요!</p>
+        <div class="empty-message mt-2xl mb-2xl">
+            <i class="fas fa-camera fa-3x mb-lg" style="color:#bbb;"></i>
+            <div class="heading-3 mb-md">아직 사진이 없어요</div>
+            <div class="body-text mb-lg">첫 번째 사진의 주인공이 되어보세요!</div>
+            {% if user.is_authenticated %}
+            <a href="{% url 'photo_board_app:create' %}" class="btn btn-primary btn-upload">
+                <i class="fas fa-upload"></i> 사진 올리기
+            </a>
+            {% endif %}
         </div>
-    {% endif %}
-
-    {% if is_paginated %}
-        <nav aria-label="Page navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">이전</a>
-                    </li>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ num }}</span>
-                        </li>
-                    {% else %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">다음</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
     {% endif %}
 </div>
 {% endblock %} 

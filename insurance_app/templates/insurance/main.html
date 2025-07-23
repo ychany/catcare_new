@@ -1,88 +1,798 @@
 {% extends 'common_app/base.html' %}
+{% load static %}
 
-{% block title %}펫보험 서비스 - 냐옹노트{% endblock %}
+{% block title %}펫보험 - 냥이 집사{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">펫보험 서비스</h1>
+<style>
+.page-hide-nav {
+    display: none !important;
+}
+
+/* Hide default header/nav */
+.navbar, .nav-section, .header-section, .breadcrumb-section {
+    display: none !important;
+}
+
+.main-container {
+    padding: 0 !important;
+    max-width: none !important;
+    background: var(--color-background) !important;
+}
+
+/* Insurance page specific styles */
+.insurance-page {
+    min-height: 100vh;
+    background: var(--color-background);
+    font-family: var(--font-primary);
+}
+
+.insurance-header {
+    background: white;
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.insurance-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-bottom: var(--spacing-lg);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+    background: var(--color-surface);
+}
+
+.insurance-title {
+    font-size: 24px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+}
+
+.nav-right {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.nav-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.nav-btn:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.insurance-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+/* Pet Selection Card */
+.pet-selection-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.pet-selection-header {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.pet-selection-content {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.pet-select {
+    flex: 1;
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    background: white;
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-md) center;
+    background-size: 16px;
+    padding-right: 48px;
+}
+
+.preference-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.preference-btn:hover {
+    background: var(--color-primary-dark);
+}
+
+.insurance-tip {
+    background: var(--color-primary-lightest);
+    border: 1px solid var(--color-primary-light);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.insurance-tip strong {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* No Pet Alert */
+.no-pet-alert {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-3xl);
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.no-pet-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-lg);
+    background: var(--color-surface);
+    border-radius: var(--border-radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-light);
+    font-size: 32px;
+}
+
+.no-pet-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+}
+
+.no-pet-description {
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-xl);
+}
+
+.no-pet-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.no-pet-btn:hover {
+    background: var(--color-primary-dark);
+    color: white;
+}
+
+/* Services Grid */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-xl);
+}
+
+.service-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-xl);
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary-light);
+}
+
+.service-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-lg);
+    border-radius: var(--border-radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+}
+
+.service-icon.recommend {
+    background: #e8f4fd;
+    color: #2563eb;
+}
+
+.service-icon.compare {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.service-icon.guide {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.service-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+}
+
+.service-description {
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.5;
+}
+
+.service-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.service-btn.recommend {
+    background: #2563eb;
+    color: white;
+}
+
+.service-btn.recommend:hover {
+    background: #1d4ed8;
+    color: white;
+}
+
+.service-btn.compare {
+    background: #16a34a;
+    color: white;
+}
+
+.service-btn.compare:hover {
+    background: #15803d;
+    color: white;
+}
+
+.service-btn.guide {
+    background: #d97706;
+    color: white;
+}
+
+.service-btn.guide:hover {
+    background: #b45309;
+    color: white;
+}
+
+/* Modal Styles */
+.modal-content {
+    border: none;
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-2xl);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-xl);
+}
+
+.modal-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.modal-body {
+    padding: var(--spacing-xl);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-xl);
+}
+
+/* Preference Form */
+.preference-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.preference-label {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+    display: block;
+}
+
+.preference-options {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.preference-radio {
+    flex: 1;
+}
+
+.preference-radio input[type="radio"] {
+    display: none;
+}
+
+.preference-radio label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    background: white;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.preference-radio input[type="radio"]:checked + label {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-dark);
+}
+
+.btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+    background: var(--color-border);
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--color-text-light);
+    cursor: pointer;
+    padding: 0;
+}
+
+.btn-close:hover {
+    color: var(--color-text);
+}
+
+@media (max-width: 768px) {
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
     
-    {% if user_pets %}
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">내 반려동물</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3 d-flex align-items-center">
-                                <select class="form-select" id="petSelect" required>
-                                    <option value="">반려동물 선택</option>
-                                    {% for pet in user_pets %}
-                                    <option value="{% url 'insurance:recommend' pet.id %}" data-pet-id="{{ pet.id }}">{{ pet.name }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="button" class="btn btn-outline-secondary ms-2 flex-grow-1" style="min-width:140px;" data-bs-toggle="modal" data-bs-target="#preferenceModal">
-                                    보장 선호도 설정
-                                </button>
-                            </div>
-                            <div class="col-12">
-                                <div class="alert alert-info py-2 px-3 mb-3" style="max-width:600px;">
-                                    <b>Tip!</b> 보장 선호도를 설정하면 보험 추천에 더 도움이 됩니다.<br>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    (정확한 추천을 위해 보장 선호도를 항상 재설정 해주세요, 최초 1회는 필수)
-                                </div>
-                            </div>
+    .pet-selection-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .preference-btn {
+        justify-content: center;
+    }
+    
+    .insurance-main {
+        padding: var(--spacing-lg);
+    }
+    
+    .preference-options {
+        flex-wrap: wrap;
+    }
+    
+    .preference-radio {
+        flex: none;
+        min-width: 60px;
+    }
+}
+</style>
+
+<div class="insurance-page">
+    <div class="insurance-header">
+        <div class="insurance-nav">
+            <div class="nav-left">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <h1 class="insurance-title">펫보험</h1>
+            </div>
+            <div class="nav-right">
+                <button class="nav-btn" data-bs-toggle="modal" data-bs-target="#insuranceGuideModal">
+                    <i class="fas fa-info-circle"></i>
+                    가이드
+                </button>
+                <a href="{% url 'insurance:compare' %}" class="nav-btn">
+                    <i class="fas fa-balance-scale"></i>
+                    상품 비교
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="insurance-main">
+        {% if user_pets %}
+            <div class="pet-selection-card">
+                <h2 class="pet-selection-header">
+                    <i class="fas fa-paw" style="color: var(--color-primary);"></i>
+                    내 반려동물
+                </h2>
+                <div class="pet-selection-content">
+                    <select class="pet-select" id="petSelect" required>
+                        <option value="">반려동물을 선택하세요</option>
+                        {% for pet in user_pets %}
+                        <option value="{% url 'insurance:recommend' pet.id %}" data-pet-id="{{ pet.id }}">{{ pet.name }} ({{ pet.species }})</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="preference-btn" data-bs-toggle="modal" data-bs-target="#preferenceModal">
+                        <i class="fas fa-sliders-h"></i>
+                        보장 선호도 설정
+                    </button>
+                </div>
+                <div class="insurance-tip">
+                    <strong>💡 Tip!</strong> 보장 선호도를 설정하면 더 정확한 보험 추천을 받을 수 있습니다.<br>
+                    반려동물의 품종, 나이, 건강 상태에 따라 선호도를 조정해주세요.
+                </div>
+            </div>
+        {% else %}
+            <div class="no-pet-alert">
+                <div class="no-pet-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h2 class="no-pet-title">반려동물 프로필이 필요해요</h2>
+                <p class="no-pet-description">맞춤형 펫보험 추천을 받으려면 먼저 반려동물을 등록해주세요.</p>
+                <a href="{% url 'common_app:pet_register' %}" class="no-pet-btn">
+                    <i class="fas fa-plus"></i>
+                    반려동물 등록하기
+                </a>
+            </div>
+        {% endif %}
+
+        <div class="services-grid">
+            <div class="service-card" onclick="goToRecommend()">
+                <div class="service-icon recommend">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3 class="service-title">맞춤 보험 추천</h3>
+                <p class="service-description">반려동물의 특성에 맞는 최적의 보험 상품을 추천해드립니다.</p>
+                <button type="button" class="service-btn recommend">
+                    <i class="fas fa-arrow-right"></i>
+                    추천받기
+                </button>
+            </div>
+            
+            <div class="service-card" onclick="goToCompare()">
+                <div class="service-icon compare">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <h3 class="service-title">보험 상품 비교</h3>
+                <p class="service-description">다양한 펫보험 상품을 한눈에 비교하고 최선의 선택을 하세요.</p>
+                <button type="button" class="service-btn compare">
+                    <i class="fas fa-arrow-right"></i>
+                    비교하기
+                </button>
+            </div>
+            
+            <div class="service-card" data-bs-toggle="modal" data-bs-target="#insuranceGuideModal">
+                <div class="service-icon guide">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h3 class="service-title">펫보험 가이드</h3>
+                <p class="service-description">펫보험에 대한 기본 지식과 선택 요령을 알아보세요.</p>
+                <button type="button" class="service-btn guide">
+                    <i class="fas fa-arrow-right"></i>
+                    가이드 보기
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 보장 선호도 설정 모달 -->
+<div class="modal fade" id="preferenceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-sliders-h" style="color: var(--color-primary); margin-right: var(--spacing-sm);"></i>
+                    보장 선호도 설정
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-xl); line-height: 1.5;">
+                    각 보장 항목별로 중요도를 선택해주세요. 높은 점수일수록 해당 보장을 더 중요하게 고려합니다.<br>
+                    <small><strong>1점:</strong> 낮음 &nbsp;|&nbsp; <strong>3점:</strong> 보통 &nbsp;|&nbsp; <strong>5점:</strong> 높음</small>
+                </p>
+                
+                <div class="preference-group">
+                    <label class="preference-label">
+                        <i class="fas fa-stethoscope" style="margin-right: var(--spacing-xs); color: var(--color-primary);"></i>
+                        외래진료비
+                    </label>
+                    <div class="preference-options">
+                        {% for i in "12345" %}
+                        <div class="preference-radio">
+                            <input type="radio" name="outpatient" value="{{ i }}" id="outpatient{{ i }}" {% if i == "3" %}checked{% endif %}>
+                            <label for="outpatient{{ i }}">{{ i }}</label>
                         </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="preference-group">
+                    <label class="preference-label">
+                        <i class="fas fa-bed" style="margin-right: var(--spacing-xs); color: var(--color-primary);"></i>
+                        입원진료비
+                    </label>
+                    <div class="preference-options">
+                        {% for i in "12345" %}
+                        <div class="preference-radio">
+                            <input type="radio" name="inpatient" value="{{ i }}" id="inpatient{{ i }}" {% if i == "3" %}checked{% endif %}>
+                            <label for="inpatient{{ i }}">{{ i }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="preference-group">
+                    <label class="preference-label">
+                        <i class="fas fa-cut" style="margin-right: var(--spacing-xs); color: var(--color-primary);"></i>
+                        수술비
+                    </label>
+                    <div class="preference-options">
+                        {% for i in "12345" %}
+                        <div class="preference-radio">
+                            <input type="radio" name="surgery" value="{{ i }}" id="surgery{{ i }}" {% if i == "3" %}checked{% endif %}>
+                            <label for="surgery{{ i }}">{{ i }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="preference-group">
+                    <label class="preference-label">
+                        <i class="fas fa-shield-alt" style="margin-right: var(--spacing-xs); color: var(--color-primary);"></i>
+                        배상책임
+                    </label>
+                    <div class="preference-options">
+                        {% for i in "12345" %}
+                        <div class="preference-radio">
+                            <input type="radio" name="liability" value="{{ i }}" id="liability{{ i }}" {% if i == "3" %}checked{% endif %}>
+                            <label for="liability{{ i }}">{{ i }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="preference-group">
+                    <label class="preference-label">
+                        <i class="fas fa-bone" style="margin-right: var(--spacing-xs); color: var(--color-primary);"></i>
+                        관절질환
+                    </label>
+                    <div class="preference-options">
+                        {% for i in "12345" %}
+                        <div class="preference-radio">
+                            <input type="radio" name="joint" value="{{ i }}" id="joint{{ i }}" {% if i == "3" %}checked{% endif %}>
+                            <label for="joint{{ i }}">{{ i }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="preference-group">
+                    <label class="preference-label">
+                        <i class="fas fa-eye" style="margin-right: var(--spacing-xs); color: var(--color-primary);"></i>
+                        피부질환
+                    </label>
+                    <div class="preference-options">
+                        {% for i in "12345" %}
+                        <div class="preference-radio">
+                            <input type="radio" name="skin" value="{{ i }}" id="skin{{ i }}" {% if i == "3" %}checked{% endif %}>
+                            <label for="skin{{ i }}">{{ i }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="preference-group">
+                    <label class="preference-label">
+                        <i class="fas fa-tooth" style="margin-right: var(--spacing-xs); color: var(--color-primary);"></i>
+                        구강질환
+                    </label>
+                    <div class="preference-options">
+                        {% for i in "12345" %}
+                        <div class="preference-radio">
+                            <input type="radio" name="oral" value="{{ i }}" id="oral{{ i }}" {% if i == "3" %}checked{% endif %}>
+                            <label for="oral{{ i }}">{{ i }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="preference-group">
+                    <label class="preference-label">
+                        <i class="fas fa-tint" style="margin-right: var(--spacing-xs); color: var(--color-primary);"></i>
+                        비뇨기질환
+                    </label>
+                    <div class="preference-options">
+                        {% for i in "12345" %}
+                        <div class="preference-radio">
+                            <input type="radio" name="urinary" value="{{ i }}" id="urinary{{ i }}" {% if i == "3" %}checked{% endif %}>
+                            <label for="urinary{{ i }}">{{ i }}</label>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-        </div>
-    {% else %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            반려동물 프로필을 먼저 등록해주세요.
-            <a href="{% url 'pets:pet_register' %}" class="alert-link">등록하러 가기</a>
-        </div>
-    {% endif %}
-    
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-search fa-3x mb-3 text-primary"></i>
-                    <h5 class="card-title">보험 추천받기</h5>
-                    <p class="card-text">내 반려동물에게 맞는 보험을 찾아보세요.</p>
-                    <button type="button" class="btn btn-outline-primary" onclick="goToRecommend()">
-                        추천받기
-                    </button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="savePreference()">
+                    <i class="fas fa-save"></i>
+                    저장하기
+                </button>
             </div>
         </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-balance-scale fa-3x mb-3 text-success"></i>
-                    <h5 class="card-title">상품 비교하기</h5>
-                    <p class="card-text">보험 상품을 비교해보세요.</p>
-                    <button type="button" class="btn btn-outline-success" onclick="goToCompare()">
-                        상품 비교하기
-                    </button>
+    </div>
+</div>
+
+<!-- 보험 가이드 모달 -->
+<div class="modal fade" id="insuranceGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-book-open" style="color: var(--color-primary); margin-right: var(--spacing-sm);"></i>
+                    펫보험 완전 가이드
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="line-height: 1.6;">
+                    <div style="margin-bottom: var(--spacing-xl);">
+                        <h6 style="color: var(--color-primary); font-weight: var(--font-weight-semibold); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-question-circle"></i> 펫보험이란?
+                        </h6>
+                        <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-md);">
+                            반려동물의 질병, 상해로 인한 치료비를 보상해주는 보험으로, 
+                            예상치 못한 의료비 부담을 줄여주는 중요한 안전장치입니다.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-bottom: var(--spacing-xl);">
+                        <h6 style="color: var(--color-primary); font-weight: var(--font-weight-semibold); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-list-ul"></i> 주요 보장내용
+                        </h6>
+                        <ul style="color: var(--color-text-muted); padding-left: var(--spacing-lg);">
+                            <li style="margin-bottom: var(--spacing-xs);"><strong>외래진료비:</strong> 병원 방문 시 발생하는 진료비</li>
+                            <li style="margin-bottom: var(--spacing-xs);"><strong>입원진료비:</strong> 입원 치료 시 발생하는 모든 비용</li>
+                            <li style="margin-bottom: var(--spacing-xs);"><strong>수술비:</strong> 수술 및 마취비용</li>
+                            <li style="margin-bottom: var(--spacing-xs);"><strong>배상책임:</strong> 반려동물이 타인에게 손해를 입힌 경우</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-bottom: var(--spacing-xl);">
+                        <h6 style="color: var(--color-primary); font-weight: var(--font-weight-semibold); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-exclamation-triangle"></i> 가입 전 필수 확인사항
+                        </h6>
+                        <ul style="color: var(--color-text-muted); padding-left: var(--spacing-lg);">
+                            <li style="margin-bottom: var(--spacing-xs);"><strong>면책기간:</strong> 가입 후 일정 기간(보통 30일) 동안은 보상받지 못함</li>
+                            <li style="margin-bottom: var(--spacing-xs);"><strong>보상한도:</strong> 연간 또는 사고당 보상 한도액 확인</li>
+                            <li style="margin-bottom: var(--spacing-xs);"><strong>자기부담금:</strong> 치료비 중 본인이 부담해야 할 비율 또는 금액</li>
+                            <li style="margin-bottom: var(--spacing-xs);"><strong>갱신조건:</strong> 매년 갱신 시 보험료 인상 여부</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: var(--color-primary-lightest); padding: var(--spacing-md); border-radius: var(--border-radius-lg); border-left: 4px solid var(--color-primary);">
+                        <p style="color: var(--color-text); margin: 0; font-weight: var(--font-weight-medium);">
+                            <i class="fas fa-lightbulb" style="color: var(--color-primary); margin-right: var(--spacing-xs);"></i>
+                            <strong>꿀팁:</strong> 반려동물이 어릴 때 가입할수록 보험료가 저렴하고, 
+                            기존 질병에 대한 면책사항도 적습니다!
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-question-circle fa-3x mb-3 text-info"></i>
-                    <h5 class="card-title">보험 가이드</h5>
-                    <p class="card-text">펫보험에 대해 알아보세요.</p>
-                    <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#insuranceGuideModal">
-                        가이드 보기
-                    </button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                    닫기
+                </button>
             </div>
         </div>
     </div>
@@ -98,202 +808,74 @@ function savePreference() {
         pref[key] = checked ? checked.value : 3;
     });
     localStorage.setItem('insurance_preference', JSON.stringify(pref));
-}
-function loadPreference() {
-    const keys = ["outpatient","inpatient","surgery","liability","joint","skin","oral","urinary"];
-    let pref = localStorage.getItem('insurance_preference');
-    if (pref) {
-        pref = JSON.parse(pref);
-        keys.forEach(function(key) {
-            let val = pref[key] || 3;
-            let radio = document.getElementById('modal_'+key+'_'+val);
-            if (radio) radio.checked = true;
-        });
-    }
-}
-document.getElementById('preferenceModal').addEventListener('show.bs.modal', function() {
-    // 현재 선택된 반려동물 id
-    var petId = $('#petSelect').find('option:selected').data('pet-id');
-    if (!petId) return;
-    $.ajax({
-        url: '/insurance/api/get_preference/' + petId + '/',
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            if (data.success) {
-                var pref = data.preference_dict;
-                const keys = ["outpatient","inpatient","surgery","liability","joint","skin","oral","urinary"];
-                keys.forEach(function(key) {
-                    // 1. 모든 라디오 버튼 해제
-                    $("input[name='"+key+"']").prop('checked', false);
-                    // 2. 서버 값만 체크
-                    let val = pref[key] || 3;
-                    let radio = document.getElementById('modal_'+key+'_'+val);
-                    if (radio) radio.checked = true;
-                });
-            }
-        }
-    });
-});
-
-// 추천/비교 버튼 클릭 시 선호도 값 form에 추가
-function appendPreferenceToForm(form) {
-    let pref = localStorage.getItem('insurance_preference');
-    if (pref) {
-        pref = JSON.parse(pref);
-        Object.keys(pref).forEach(function(key) {
-            let input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = pref[key];
-            form.appendChild(input);
-        });
-    }
-}
-function goToRecommend() {
-    var select = document.getElementById('petSelect');
-    if (!select.value) {
-        alert('반려동물을 선택해주세요.');
-        return;
-    }
-    var petId = select.value.match(/(\d+)\/?$/);
-    if (petId) {
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "/insurance/recommend/" + petId[1] + "/";
-        appendPreferenceToForm(form);
-        var csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = 'csrfmiddlewaretoken';
-        csrf.value = '{{ csrf_token }}';
-        form.appendChild(csrf);
-        document.body.appendChild(form);
-        form.submit();
-    } else {
-        alert('반려동물을 올바르게 선택해주세요.');
-    }
-}
-function goToCompare() {
-    var select = document.getElementById('petSelect');
-    if (!select.value) {
-        alert('반려동물을 선택해주세요.');
-        return;
-    }
-    var petId = select.value.match(/(\d+)\/?$/);
-    if (petId) {
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "{% url 'insurance:compare' %}?pet_id=" + petId[1];
-        appendPreferenceToForm(form);
-        var csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = 'csrfmiddlewaretoken';
-        csrf.value = '{{ csrf_token }}';
-        form.appendChild(csrf);
-        document.body.appendChild(form);
-        form.submit();
-    } else {
-        alert('반려동물을 올바르게 선택해주세요.');
-    }
-}
-</script>
-
-<!-- 보험 가이드 모달 -->
-<div class="modal fade" id="insuranceGuideModal" tabindex="-1" aria-labelledby="insuranceGuideModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="insuranceGuideModalLabel">펫보험 가이드</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
-        <h4 class="mb-3">1. 맞춤형 보장 선호도 기반 펫보험 추천</h4>
-        <ul>
-          <li><b>보장 선호도</b>를 직접 설정하여 우리 아이에게 꼭 필요한 보장 항목에 가중치를 줄 수 있습니다.</li>
-          <li>설정한 선호도는 반려동물별로 저장되어, 여러 마리의 아이도 각각 맞춤 추천이 가능합니다.</li>
-          <li>각 품종별로 특정 질병을 가지고 있을 수 있으며, 해당 질병을 보장하는 보험 상품에 대한 추천이 가능합니다.</li>
-          <li>추천/비교 시 <b>내가 중요하게 생각한 보장 항목</b>을 더 잘 충족하는 상품이 상위에 노출됩니다.</li>
-        </ul>
-        <h4 class="mb-3">2. SURE지수란?</h4>
-        <ul>
-          <li><b>SURE지수</b>는 보험 상품의 <b>보험사 평점</b>, <b>가격 점수</b>, <b>보장 유사도(선호도 반영)</b>를 가중합하여 산출하는 종합 추천 점수입니다.</li>
-          <li>각 요소의 반영 비율은 <b>보험사 평점 30%</b>, <b>가격 점수 30%</b>, <b>보장 유사도 40%</b>입니다.</li>
-          <li>보장 유사도는 <b>내가 설정한 보장 선호도</b>와 상품의 실제 보장 항목이 얼마나 일치하는지 <b>코사인 유사도</b>로 계산합니다.</li>
-          <li>이렇게 계산된 SURE지수가 높을수록 내 반려동물과 내 니즈에 더 적합한 보험 상품으로 추천됩니다.</li>
-          <li>이용자의 고양이가 가지고 있는 질병을 보장하는 보험 상품에 대해 추가 가중치를 적용했습니다.</li>
-          <li><b>품종별 취약 질병 보장</b> 시 최대 <b>20%</b> 가산점이 제공됩니다.</li>
-        </ul>
-        <hr>
-        <h4 class="mb-3">3. 고양이 건강관리 꿀팁</h4>
-        <b>고양이 건강관리</b>
-        <ul>
-          <li>정기적인 예방접종과 건강검진을 챙기세요.</li>
-          <li>실내 생활 시에도 적절한 운동과 놀이가 필요합니다.</li>
-          <li>스트레스 관리와 깨끗한 화장실 환경 유지가 중요합니다.</li>
-          <li>비만 예방을 위해 적정량의 사료와 간식만 급여하세요.</li>
-          <li>구강 건강(치석, 치은염 등)도 신경 써주세요.</li>
-        </ul>
-        <hr>
-        <h4 class="mb-3">4. 펫보험 활용 꿀팁</h4>
-        <ul>
-          <li>내 반려동물의 건강상태와 생활습관, <b>보장 선호도</b>를 고려해 보장 항목을 꼼꼼히 비교하세요.</li>
-          <li>특별 보장(슬관절, 피부병, 비뇨기 등)도 꼭 확인하세요.</li>
-          <li>보험 가입 전 면책기간, 자기부담금, 보장 한도 등도 체크!</li>
-          <li>보험 가입 후에는 정기적으로 보장 내역을 확인하고, 필요시 상품을 변경하세요.</li>
-        </ul>
-        <hr>
-        <h4 class="mb-3">5. 이런 기능도 있어요!</h4>
-        <ul>
-          <li><b>보장 선호도</b>를 지정해, 각 고양이 별 맞춤 추천이 가능합니다.</li>
-          <li>구매·건강·체중 등 다양한 기록을 한 번에 관리할 수 있어요.</li>
-          <li>보험 상품별 상세 정보가 제공됩니다.</li>
-        </ul>
-        <hr>
-        <div class="alert alert-info mt-3">
-          <b>Tip!</b> 펫보험은 갑작스러운 질병·사고에 대비하는 든든한 안전망입니다. 우리 아이의 건강과 가족의 경제적 안정을 위해 꼭 비교·가입해보세요!
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 보장 선호도 설정 모달 -->
-<div class="modal fade" id="preferenceModal" tabindex="-1" aria-labelledby="preferenceModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="preferenceModalLabel">보장 선호도 설정</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-info mb-3">
-          <b>안내:</b> 4점 이상 선택 시 '중시하는 보장 항목'으로 추천 근거에 반영됩니다.
-        </div>
-        <form id="preferenceForm">
-          <div class="row">
-            {% for label, key in preference_fields %}
-            <div class="col-6 col-md-6 mb-2">
-              <label><b>{{ label }}</b></label>
-              <div class="d-flex align-items-center flex-wrap">
-                {% for i in "12345" %}
-                <div class="form-check form-check-inline ms-2">
-                  <input class="form-check-input" type="radio" name="{{ key }}" value="{{ forloop.counter }}" id="modal_{{ key }}_{{ forloop.counter }}">
-                  <label class="form-check-label" for="modal_{{ key }}_{{ forloop.counter }}">{{ forloop.counter }}</label>
+    
+    // 성공 메시지와 함께 모달 닫기
+    const toastHtml = `
+        <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; top: 20px; right: 20px; z-index: 1055;">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    보장 선호도가 저장되었습니다!
                 </div>
-                {% endfor %}
-              </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
-            {% endfor %}
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="savePreference()" data-bs-dismiss="modal">저장</button>
-      </div>
-    </div>
-  </div>
-</div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', toastHtml);
+    const toast = new bootstrap.Toast(document.querySelector('.toast:last-child'));
+    toast.show();
+    
+    var modal = bootstrap.Modal.getInstance(document.getElementById('preferenceModal'));
+    modal.hide();
+}
+
+function loadPreference() {
+    let pref = localStorage.getItem('insurance_preference');
+    if (pref) {
+        pref = JSON.parse(pref);
+        const keys = ["outpatient","inpatient","surgery","liability","joint","skin","oral","urinary"];
+        keys.forEach(function(key) {
+            if (pref[key]) {
+                let radio = document.querySelector('input[name="'+key+'"][value="'+pref[key]+'"]');
+                if (radio) radio.checked = true;
+            }
+        });
+    }
+}
+
+function goToRecommend() {
+    let petSelect = document.getElementById('petSelect');
+    if (!petSelect) {
+        // 반려동물이 없는 경우
+        window.location.href = "{% url 'common_app:pet_register' %}";
+        return;
+    }
+    
+    let petId = petSelect.value;
+    if (!petId) {
+        alert('반려동물을 먼저 선택해주세요.');
+        return;
+    }
+    window.location.href = petId;
+}
+
+function goToCompare() {
+    window.location.href = "{% url 'insurance:compare' %}";
+}
+
+// 페이지 로드 시 선호도 불러오기
+document.addEventListener('DOMContentLoaded', function() {
+    loadPreference();
+    
+    // 반려동물 선택 시 자동으로 추천 페이지로 이동하는 옵션
+    const petSelect = document.getElementById('petSelect');
+    if (petSelect) {
+        petSelect.addEventListener('change', function() {
+            if (this.value) {
+                // 선택한 경우 자동으로 추천 버튼 활성화 등의 UI 개선 가능
+            }
+        });
+    }
+});
+</script>
 {% endblock %} 

@@ -1,166 +1,876 @@
 {% extends 'common_app/base.html' %}
 {% load static %}
 
-{% block title %}커뮤니티{% endblock %}
+{% block title %}커뮤니티 - 냥이 집사{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>커뮤니티</h2>
-        {% if user.is_authenticated %}
-        <a href="{% url 'community_app:create' %}" class="btn btn-primary">새 게시글 작성</a>
-        {% endif %}
-    </div>
+<style>
+body {
+    background: #f5f7fa;
+    color: #222;
+}
 
-    <form method="get" class="mb-4">
-        <div class="row g-2 align-items-center">
-            <div class="col-md-3">
-                <label class="form-label mb-1" for="periodSelect">기간</label>
-                <select name="period" class="form-select" id="periodSelect">
-                    <option value="">전체 기간</option>
-                    <option value="1" {% if period == '1' %}selected{% endif %}>1일</option>
-                    <option value="7" {% if period == '7' %}selected{% endif %}>1주일</option>
-                    <option value="30" {% if period == '30' %}selected{% endif %}>1개월</option>
-                    <option value="180" {% if period == '180' %}selected{% endif %}>6개월</option>
-                    <option value="365" {% if period == '365' %}selected{% endif %}>1년</option>
-                </select>
+.community-card, .card {
+    background: #fff;
+    border: 1px solid #e3e8f0;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(49,130,246,0.08);
+    color: #222;
+}
+
+.btn-primary, .btn-write {
+    background: #3182f6;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(49,130,246,0.10);
+    transition: background 0.18s, color 0.18s;
+}
+.btn-primary:hover, .btn-write:hover {
+    background: #2563c6;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #fff;
+    color: #3182f6;
+    border: 2px solid #3182f6;
+    font-weight: bold;
+    border-radius: 999px;
+}
+.btn-secondary:hover {
+    background: #3182f6;
+    color: #fff;
+}
+
+/* 텍스트 강조 */
+.community-title, .card-title, .heading-2 {
+    color: #222;
+    font-weight: 700;
+}
+
+/* 안내 메시지 */
+.empty-message, .no-posts-message {
+    color: #666;
+    background: #fff;
+    border: 1px solid #e3e8f0;
+    border-radius: 12px;
+    padding: 32px 0;
+    margin: 32px 0;
+    text-align: center;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(49,130,246,0.06);
+}
+
+.page-hide-nav {
+    display: none !important;
+}
+
+/* Hide default header/nav */
+.navbar, .nav-section, .header-section, .breadcrumb-section {
+    display: none !important;
+}
+
+.main-container {
+    padding: 0 !important;
+    max-width: none !important;
+    background: var(--color-background) !important;
+}
+
+/* Community page specific styles */
+.community-page {
+    min-height: 100vh;
+    background: var(--color-background);
+    font-family: var(--font-primary);
+}
+
+.community-header {
+    background: white;
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.community-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-bottom: var(--spacing-lg);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+    background: var(--color-surface);
+}
+
+.community-title {
+    font-size: 24px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.nav-right {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.nav-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.nav-btn:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-write {
+    background: var(--color-primary);
+    color: white !important;
+    border-color: var(--color-primary);
+}
+
+.btn-write:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: white !important;
+}
+
+.btn-write, .btn-primary.btn-write {
+    background: #222 !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: bold !important;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 8px rgba(49,130,246,0.10) !important;
+    font-size: 16px !important;
+    padding: 12px 28px !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+.btn-write:hover, .btn-primary.btn-write:hover {
+    background: #111 !important;
+    color: #fff !important;
+}
+
+.community-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+/* Search Section */
+.search-section {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: 200px 300px 1fr;
+    gap: var(--spacing-lg);
+    align-items: end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.filter-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.filter-label i {
+    color: var(--color-primary);
+    width: 16px;
+}
+
+.filter-select, .search-input, .date-input {
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-md);
+    transition: all 0.2s;
+    background: white;
+}
+
+.filter-select:focus, .search-input:focus, .date-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.date-range {
+    grid-column: span 1;
+}
+
+.date-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.date-separator {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+}
+
+.date-input {
+    flex: 1;
+}
+
+.search-input-group {
+    display: flex;
+    position: relative;
+}
+
+.search-input {
+    flex: 1;
+    padding-right: 48px;
+}
+
+.search-btn {
+    position: absolute;
+    right: var(--spacing-xs);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-btn:hover {
+    background: var(--color-primary-dark);
+}
+
+/* Posts Section */
+.posts-stats {
+    margin-bottom: var(--spacing-lg);
+    padding: 0 var(--spacing-xs);
+}
+
+.stats-text {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-3xl);
+}
+
+.post-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary-light);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.post-author {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-full);
+    background: var(--color-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    font-size: 18px;
+}
+
+.author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.author-name {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+}
+
+.post-date {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+}
+
+.post-id {
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    padding: 4px var(--spacing-sm);
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+}
+
+.post-content {
+    padding: var(--spacing-lg);
+}
+
+.post-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.post-excerpt {
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-bottom: var(--spacing-md);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: var(--font-size-sm);
+}
+
+.post-image {
+    margin-top: var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    max-height: 200px;
+}
+
+.post-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.post-card:hover .post-image img {
+    transform: scale(1.05);
+}
+
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-surface);
+}
+
+.post-stats {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+}
+
+.stat-item i {
+    color: var(--color-primary);
+}
+
+.read-more {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    transition: all 0.2s;
+}
+
+.post-card:hover .read-more {
+    transform: translateX(2px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-3xl);
+    color: var(--color-text-muted);
+}
+
+.empty-icon {
+    font-size: 80px;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.3;
+}
+
+.empty-state h3 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text);
+    font-weight: var(--font-weight-semibold);
+}
+
+.empty-state p {
+    font-size: var(--font-size-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.btn-empty-action {
+    background: var(--color-primary);
+    color: white;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: all 0.2s;
+}
+
+.btn-empty-action:hover {
+    background: var(--color-primary-dark);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+/* Pagination */
+.pagination-nav {
+    margin-top: var(--spacing-3xl);
+    display: flex;
+    justify-content: center;
+}
+
+.custom-pagination {
+    display: flex;
+    gap: var(--spacing-xs);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.custom-pagination .page-item .page-link {
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    background: white;
+}
+
+.custom-pagination .page-item .page-link:hover {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.custom-pagination .page-item.active .page-link {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .search-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .posts-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .community-nav {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+
+    .community-title {
+        font-size: 20px;
+    }
+
+    .community-main {
+        padding: var(--spacing-lg);
+    }
+
+    .search-section {
+        padding: var(--spacing-lg);
+    }
+
+    .posts-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .date-inputs {
+        flex-direction: column;
+    }
+
+    .date-separator {
+        display: none;
+    }
+
+    .nav-right {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .nav-btn {
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="community-page">
+    <div class="community-header">
+        <div class="community-nav">
+            <div class="nav-left">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <h1 class="community-title">
+                    <i class="fas fa-comments" style="color: var(--color-primary);"></i>
+                    커뮤니티
+                </h1>
             </div>
-            <div class="col-md-5">
-                <label class="form-label mb-1">날짜 범위</label>
-                <div class="input-group">
-                    <input type="date" name="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}" id="startDate">
-                    <span class="input-group-text">~</span>
-                    <input type="date" name="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}" id="endDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label mb-1">검색</label>
-                <input type="text" name="search" class="form-control" placeholder="제목 + 내용" value="{{ search }}">
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">검색</button>
+            <div class="nav-right">
+            {% if user.is_authenticated %}
+                <a href="{% url 'community_app:create' %}" class="btn btn-primary btn-write" style="margin-bottom: 20px;">
+                    <i class="fas fa-pen"></i> 글쓰기
+                </a>
+            {% endif %}
+                <button class="nav-btn" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i>
+                    새로고침
+                </button>
             </div>
         </div>
-    </form>
-
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th style="width: 10%">번호</th>
-                    <th style="width: 40%">제목</th>
-                    <th style="width: 15%">작성자</th>
-                    <th style="width: 15%">작성일</th>
-                    <th style="width: 10%">조회수</th>
-                    <th style="width: 10%">좋아요</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for post in posts %}
-                <tr>
-                    <td>{{ post.id }}</td>
-                    <td>
-                        <a href="{% url 'community_app:detail' post.id %}" class="text-decoration-none">
-                            {{ post.title }}
-                            {% if post.comments.count > 0 %}
-                            <span class="text-muted">[{{ post.comments.count }}]</span>
-                            {% endif %}
-                        </a>
-                    </td>
-                    <td>{{ post.get_author_name }}</td>
-                    <td>{{ post.created_at|date:'Y-m-d' }}</td>
-                    <td>{{ post.views }}</td>
-                    <td>{{ post.likes.count }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center">게시글이 없습니다.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 
-    {% if posts.has_other_pages %}
-    <nav aria-label="Page navigation" class="mt-4">
-        <ul class="pagination justify-content-center">
-            {% if posts.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search %}&search={{ search }}{% endif %}">처음</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ posts.previous_page_number }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search %}&search={{ search }}{% endif %}">이전</a>
-            </li>
-            {% endif %}
+    <div class="community-main">
+    <!-- 검색 및 필터 섹션 -->
+    <div class="search-section">
+        <form method="get" class="search-form">
+            <div class="search-grid">
+                <!-- 기간 필터 -->
+                <div class="form-group">
+                    <label class="filter-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        기간
+                    </label>
+                    <select name="period" class="filter-select" id="periodSelect">
+                        <option value="">전체 기간</option>
+                        <option value="1d" {% if period == '1d' %}selected{% endif %}>1일</option>
+                        <option value="1w" {% if period == '1w' %}selected{% endif %}>1주일</option>
+                        <option value="1m" {% if period == '1m' %}selected{% endif %}>1개월</option>
+                        <option value="6m" {% if period == '6m' %}selected{% endif %}>6개월</option>
+                        <option value="1y" {% if period == '1y' %}selected{% endif %}>1년</option>
+                    </select>
+                </div>
 
-            {% for num in posts.paginator.page_range %}
-            {% if posts.number == num %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ num }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search %}&search={{ search }}{% endif %}">{{ num }}</a>
-            </li>
-            {% endif %}
-            {% endfor %}
+                <!-- 날짜 범위 -->
+                <div class="form-group date-range">
+                    <label class="filter-label">
+                        <i class="fas fa-calendar-range"></i>
+                        날짜 범위
+                    </label>
+                    <div class="date-inputs">
+                        <input type="date" name="start_date" class="date-input" value="{{ start_date|date:'Y-m-d' }}" id="startDate">
+                        <span class="date-separator">~</span>
+                        <input type="date" name="end_date" class="date-input" value="{{ end_date|date:'Y-m-d' }}" id="endDate">
+                    </div>
+                </div>
 
-            {% if posts.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ posts.next_page_number }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search %}&search={{ search }}{% endif %}">다음</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ posts.paginator.num_pages }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search %}&search={{ search }}{% endif %}">마지막</a>
-            </li>
+                <!-- 검색어 -->
+                <div class="form-group">
+                    <label class="filter-label">
+                        <i class="fas fa-search"></i>
+                        검색
+                    </label>
+                    <div class="search-input-group">
+                        <input type="text" name="search" class="search-input" placeholder="제목 및 내용으로 검색..." value="{{ search_query }}">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 게시물 목록 -->
+        {% if posts %}
+            <div class="posts-stats">
+                <span class="stats-text">
+                    <i class="fas fa-list"></i>
+                    총 {{ posts|length }}개의 게시물
+                </span>
+            </div>
+            
+            <div class="posts-grid">
+                {% for post in posts %}
+                <article class="post-card" data-url="{% url 'community_app:detail' post.id %}">
+                    <div class="post-header">
+                        <div class="post-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="author-info">
+                                <span class="author-name">{{ post.get_author_name }}</span>
+                                <span class="post-date">{{ post.created_at|timesince }} 전</span>
+                            </div>
+                        </div>
+                        <div class="post-id">#{{ post.id }}</div>
+                    </div>
+                    
+                    <div class="post-content">
+                        <h3 class="post-title">{{ post.title }}</h3>
+                        <p class="post-excerpt">{{ post.content|truncatechars:100 }}</p>
+                        
+                        {% if post.image %}
+                        <div class="post-image">
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="post-footer">
+                        <div class="post-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-eye"></i>
+                                {{ post.views|default:0 }}
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-heart"></i>
+                                {{ post.likes.count|default:0 }}
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-comment"></i>
+                                {{ post.comments.count|default:0 }}
+                            </span>
+                        </div>
+                        <div class="read-more">
+                            자세히 보기
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
+            <!-- 페이지네이션 -->
+            {% if is_paginated %}
+            <nav aria-label="페이지 네비게이션" class="pagination-nav">
+                <ul class="custom-pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
             {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">💬</div>
+                <h3>아직 게시물이 없어요</h3>
+                <p>커뮤니티의 첫 번째 글을 작성해보세요!</p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'community_app:create' %}" class="btn-empty-action">
+                    <i class="fas fa-pen"></i>
+                    첫 글 쓰기
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn-empty-action">
+                    <i class="fas fa-sign-in-alt"></i>
+                    로그인하여 글쓰기
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // 게시물 카드 클릭 이벤트
+    const postCards = document.querySelectorAll('.post-card');
+    postCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const url = this.dataset.url;
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    });
+
+    // 기간 선택과 날짜 입력 연동
     const periodSelect = document.getElementById('periodSelect');
     const startDate = document.getElementById('startDate');
     const endDate = document.getElementById('endDate');
 
-    function pad(num) {
-        return num < 10 ? '0' + num : num;
-    }
     function formatDate(date) {
-        return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+        return date.getFullYear() + '-' + 
+               String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+               String(date.getDate()).padStart(2, '0');
     }
 
+    if (periodSelect && startDate && endDate) {
     periodSelect.addEventListener('change', function() {
         if (this.value) {
-            // 오늘 날짜
             const today = new Date();
-            let days = parseInt(this.value);
-            if (!isNaN(days)) {
-                // 시작일: 오늘 - (days-1)
-                const start = new Date(today);
-                start.setDate(today.getDate() - (days - 1));
-                startDate.value = formatDate(start);
-                endDate.value = formatDate(today);
-            } else {
-                startDate.value = '';
-                endDate.value = '';
+            let startCalc = new Date(today);
+            
+            switch(this.value) {
+                case '1d':
+                    startCalc = new Date(today);
+                    break;
+                case '1w':
+                    startCalc.setDate(today.getDate() - 7);
+                    break;
+                case '1m':
+                    startCalc.setMonth(today.getMonth() - 1);
+                    break;
+                case '6m':
+                    startCalc.setMonth(today.getMonth() - 6);
+                    break;
+                case '1y':
+                    startCalc.setFullYear(today.getFullYear() - 1);
+                    break;
             }
+            
+            startDate.value = formatDate(startCalc);
+            endDate.value = formatDate(today);
         } else {
             startDate.value = '';
             endDate.value = '';
         }
     });
 
-    startDate.addEventListener('change', function() {
-        if (this.value) {
-            periodSelect.value = '';
-        }
+    [startDate, endDate].forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.value) {
+                periodSelect.value = '';
+            }
+        });
     });
-
-    endDate.addEventListener('change', function() {
-        if (this.value) {
-            periodSelect.value = '';
-        }
-    });
+    }
 });
 </script>
 {% endblock %} 

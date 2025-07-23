@@ -47,15 +47,22 @@ class Pet(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     gender = models.CharField(max_length=10, choices=[('male', '수컷'), ('female', '암컷')], verbose_name='성별', default='male')
     neutered = models.BooleanField(verbose_name='중성화 여부', default=False)
-    notes = models.CharField(max_length=255, verbose_name='특이사항', blank=True, null=True)
+    notes = models.TextField(verbose_name='특이사항', blank=True)
+    preference_dict = models.JSONField(verbose_name='보험 선호도', default=dict, blank=True)
+
+    class Meta:
+        verbose_name = '반려동물'
+        verbose_name_plural = '반려동물들'
+        ordering = ['name']
 
     def __str__(self):
         return f"{self.name} ({self.get_pet_type_display()})"
 
     def get_age(self):
+        """나이 계산"""
         today = date.today()
         age = today.year - self.birth_date.year
-        if (today.month, today.day) < (self.birth_date.month, self.birth_date.day):
+        if today.month < self.birth_date.month or (today.month == self.birth_date.month and today.day < self.birth_date.day):
             age -= 1
         return age
 
@@ -72,3 +79,19 @@ class Pet(models.Model):
         # 1년을 100%로 보고 남은 날짜의 비율을 계산
         progress = ((365 - days_until) / 365) * 100
         return round(progress, 1)
+
+    def get_breed_choices(self):
+        """펫 타입에 따른 품종 선택지 반환"""
+        if self.pet_type == 'dog':
+            return self.DOG_BREEDS
+        elif self.pet_type == 'cat':
+            return self.CAT_BREEDS
+        return []
+
+    def get_breed_display_custom(self):
+        """품종 한글명 반환"""
+        breed_choices = self.get_breed_choices()
+        for choice_value, choice_label in breed_choices:
+            if self.breed == choice_value:
+                return choice_label
+        return self.breed
