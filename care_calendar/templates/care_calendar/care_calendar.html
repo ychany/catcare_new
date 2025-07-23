@@ -38,15 +38,29 @@
 .care-header {
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-light);
-    padding: var(--spacing-2xl) var(--spacing-3xl);
+    padding: var(--spacing-2xl) var(--spacing-3xl) var(--spacing-lg) var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
 }
 .care-nav {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-    margin-bottom: var(--spacing-xl);
+    gap: 16px;
+}
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.back-btn {
+    font-size: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 8px;
+    color: var(--color-primary);
 }
 .care-title {
     font-size: 32px;
@@ -57,13 +71,19 @@
     align-items: center;
     gap: var(--spacing-md);
 }
+.pet-global-filter {
+    margin-top: 8px;
+    margin-bottom: 0;
+    width: 220px;
+}
 
 /* --- 통계/대시보드 카드 --- */
 .stats-section, .dashboard-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-xl);
-    margin-bottom: var(--spacing-2xl);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+    width: 100%;
 }
 .stat-card, .dashboard-card {
     background: var(--bg-primary);
@@ -73,9 +93,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: 8px;
     box-shadow: var(--shadow-sm);
     transition: box-shadow 0.2s, transform 0.2s;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
 }
 .stat-card:hover, .dashboard-card:hover {
     box-shadow: var(--shadow-md);
@@ -105,22 +128,48 @@
 }
 
 /* --- 캘린더/폼/리스트/사이드바 --- */
+/* 최대 너비 확장 및 중앙 정렬, 좌우 여백 최소화 */
 .care-main {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: var(--spacing-2xl);
+    padding: 40px;
 }
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 500px 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
 .main-content {
     display: flex;
-    gap: var(--spacing-2xl);
+    gap: 48px;
     align-items: flex-start;
+    width: 100%;
 }
+
+.calendar-section {
+    flex: 0 0 65%;
+    min-width: 400px;
+    max-width: 100%;
+}
+
+.sidebar-section {
+    flex: 0 0 35%;
+    min-width: 320px;
+    max-width: 600px;
+}
+
 .calendar-card, .form-card, .records-card {
     background: var(--bg-primary);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+    width: 100%;
+    min-width: 320px;
+    max-width: 100%;
 }
 .calendar-header, .form-header, .records-header {
     background: var(--bg-tertiary);
@@ -267,15 +316,24 @@
     transform: scale(1.05);
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
-.fc-event-nail { background-color: #ff9800; border-color: #ff9800; color: white; }
-.fc-event-ear { background-color: #2196f3; border-color: #2196f3; color: white; }
-.fc-event-brush { background-color: #4caf50; border-color: #4caf50; color: white; }
-.fc-event-fur { background-color: #9c27b0; border-color: #9c27b0; color: white; }
+/* 케어 종류별 색상 */
+.fc-event-nail { background-color: #ff9800 !important; border-color: #ff9800 !important; color: white !important; }
+.fc-event-ear { background-color: #2196f3 !important; border-color: #2196f3 !important; color: white !important; }
+.fc-event-brush { background-color: #4caf50 !important; border-color: #4caf50 !important; color: white !important; }
+.fc-event-fur { background-color: #9c27b0 !important; border-color: #9c27b0 !important; color: white !important; }
 
 /* --- 반응형 --- */
+@media (max-width: 1800px) {
+    .care-main {
+        max-width: 98vw;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
 @media (max-width: 1200px) {
     .main-content { flex-direction: column; gap: var(--spacing-xl); }
     .stats-section, .dashboard-cards { grid-template-columns: 1fr 1fr; }
+    .care-main { max-width: 100vw; padding-left: 4px; padding-right: 4px; }
 }
 @media (max-width: 768px) {
     .care-nav { flex-direction: column; gap: var(--spacing-md); text-align: center; }
@@ -286,6 +344,7 @@
     .calendar-header, .form-header, .records-header { flex-direction: column; gap: var(--spacing-sm); align-items: stretch; }
     .form-content, .records-content, .calendar-wrapper { padding: var(--spacing-lg); }
     #calendar { height: 400px; }
+    .pet-global-filter { width: 100%; }
 }
 
 /* Loading Styles */
@@ -405,6 +464,42 @@
         justify-content: center;
     }
 }
+
+@media (max-width: 1400px) {
+  .main-content {
+    flex-direction: column;
+    gap: 32px;
+  }
+  .calendar-section, .sidebar-section {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  .stats-section, .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .main-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .calendar-section, .sidebar-section {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  .stats-section, .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 1024px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .stats-section, .dashboard-cards { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .care-main { padding: 16px; }
+  .dashboard-grid { grid-template-columns: 1fr; gap: 16px; }
+  .stats-section, .dashboard-cards { grid-template-columns: 1fr; }
+}
 </style>
 
 <!-- FullCalendar CSS -->
@@ -420,9 +515,20 @@
                     케어캘린더
                 </h1>
             </div>
-            <!-- nav-right 버튼 영역 완전 제거 -->
+        </div>
+        <!-- [위치 이동] select box를 care-header 안으로 이동 및 스타일 개선 -->
+        <div class="pet-global-filter">
+            <select class="filter-select" id="globalPetFilter">
+                <option value="all">전체 보기</option>
+                {% for pet in pets %}
+                    <option value="{{ pet.id }}">{{ pet.name }}</option>
+                {% endfor %}
+            </select>
         </div>
     </div>
+
+    <!-- 전역 펫 선택 셀렉트 박스 -->
+    <!-- 기존 select box 위치 삭제 -->
 
     <div class="care-main">
         <!-- Stats Section -->
@@ -430,15 +536,8 @@
             <!-- JavaScript로 동적 생성 -->
         </div>
 
-        <!-- Dashboard Cards -->
-        <div class="dashboard-section">
-            <div class="dashboard-cards" id="dashboardCards">
-                <!-- JavaScript로 동적 생성 -->
-            </div>
-        </div>
-
         <!-- Main Content -->
-        <div class="main-content">
+        <div class="dashboard-grid">
             <!-- Calendar Section -->
             <div class="calendar-section">
                 <div class="calendar-card">
@@ -448,7 +547,7 @@
                             케어 일정 캘린더
                         </h3>
                         <div class="calendar-filters">
-                            <select class="filter-select" id="petFilter">
+                            <select class="filter-select" id="petFilter" style="display:none;">
                                 <option value="all">전체 보기</option>
                                 {% for pet in pets %}
                                     <option value="{{ pet.id }}">{{ pet.name }}</option>
@@ -458,27 +557,6 @@
                     </div>
                     <div class="calendar-wrapper">
                         <div id="calendar"></div>
-                    </div>
-                    <div class="calendar-legend">
-                        <div class="legend-title">케어 종류</div>
-                        <div class="legend-items">
-                            <div class="legend-item">
-                                <div class="legend-color nail"></div>
-                                <span>발톱깎기</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color ear"></div>
-                                <span>귀청소</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color brush"></div>
-                                <span>양치하기</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color fur"></div>
-                                <span>털정리</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -553,28 +631,14 @@
                         </form>
                     </div>
                 </div>
+                <!-- Records Card 삭제됨 -->
+            </div>
+        </div>
 
-                <!-- Records Card -->
-                <div class="records-card">
-                    <div class="records-header">
-                        <h3 class="records-title">
-                            <i class="fas fa-history"></i>
-                            최근 케어 기록
-                        </h3>
-                        <div class="records-filters">
-                            <select class="filter-select-small" id="lastEventPetFilter">
-                                {% for pet in pets %}
-                                    <option value="{{ pet.id }}">{{ pet.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="records-content">
-                        <div id="allPreviousCareRecords" class="care-records">
-                            <!-- JavaScript로 동적 생성 -->
-                        </div>
-                    </div>
-                </div>
+        <!-- Dashboard Cards: care-main의 맨 아래로 이동 -->
+        <div class="dashboard-section" style="width:100%; margin-top:32px;">
+            <div class="dashboard-cards" id="dashboardCards">
+                <!-- JavaScript로 동적 생성 -->
             </div>
         </div>
     </div>
@@ -589,7 +653,30 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var calendarEl = document.getElementById('calendar');
-    var selectedPetId = 'all';
+    var selectedPetId = document.getElementById('globalPetFilter') ? document.getElementById('globalPetFilter').value : 'all';
+    // globalPetFilter 값이 바뀔 때마다 폼 select 값도 동기화
+    function syncPetSelectWithGlobal() {
+        var globalPetId = document.getElementById('globalPetFilter').value;
+        var petSelect = document.getElementById('pet');
+        if (globalPetId && globalPetId !== 'all') {
+            petSelect.value = globalPetId;
+        } else if (petSelect.options.length > 0) {
+            petSelect.value = petSelect.options[0].value;
+        }
+    }
+    syncPetSelectWithGlobal();
+
+    // 대시보드/통계 fetch 및 갱신 함수
+    function fetchAndUpdateDashboard() {
+        fetch('/care/events/')
+            .then(response => response.json())
+            .then(data => {
+                const filteredEvents = data.filter(event => selectedPetId === 'all' || event.pet_id == selectedPetId);
+                updateDashboard(filteredEvents);
+                updateHeaderStats(filteredEvents);
+            });
+    }
+
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'ko',
@@ -611,23 +698,21 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch('/care/events/')
                 .then(response => response.json())
                 .then(data => {
-                    const events = data
-                        .filter(event => selectedPetId === 'all' || event.pet_id == selectedPetId)
-                        .map(event => ({
-                            id: event.id,
-                            title: event.title + ` (${event.pet_name})`,
-                            start: event.start,
-                            className: `fc-event-${event.category}`,
-                            extendedProps: {
-                                petName: event.pet_name,
-                                description: event.description,
-                                category: event.category,
-                                pet_id: event.pet_id
-                            }
-                        }));
+                    const filteredEvents = data.filter(event => selectedPetId === 'all' || event.pet_id == selectedPetId);
+                    const events = filteredEvents.map(event => ({
+                        id: event.id,
+                        title: event.title + ` (${event.pet_name})`,
+                        start: event.start,
+                        className: `fc-event-${event.category}`,
+                        extendedProps: {
+                            petName: event.pet_name,
+                            description: event.description,
+                            category: event.category,
+                            pet_id: event.pet_id
+                        }
+                    }));
                     successCallback(events);
-                    updateDashboard(data);
-                    updateHeaderStats(data);
+                    // 캘린더에서 대시보드/통계 갱신은 제거 (fetchAndUpdateDashboard에서만)
                 })
                 .catch(error => {
                     failureCallback(error);
@@ -640,15 +725,14 @@ document.addEventListener('DOMContentLoaded', function () {
         dateClick: function (info) {
             resetForm();
             document.getElementById('start_time').value = info.dateStr;
+            // 날짜 클릭 시 항상 추가 모드 (eventId 비움)
+            document.getElementById('eventId').value = '';
         }
     });
     calendar.render();
 
-    // 초기화
-    const initialPetId = document.getElementById('pet').value;
-    if (initialPetId) {
-        fetchAllPreviousCare(initialPetId);
-    }
+    // 페이지 최초 진입 시 대시보드/통계 fetch
+    fetchAndUpdateDashboard();
 
     // 오늘 날짜 설정
     const today = new Date().toISOString().split('T')[0];
@@ -732,8 +816,59 @@ document.addEventListener('DOMContentLoaded', function () {
             fur: { name: '털정리', icon: '✂️', color: '#9c27b0' }
         };
 
+        // 전체보기일 때는 펫별로 그룹화하여 카드 생성
+        if (selectedPetId === 'all') {
+            // 펫별로 그룹화
+            const petMap = {};
+            events.forEach(event => {
+                if (!petMap[event.pet_id]) {
+                    petMap[event.pet_id] = {
+                        pet_name: event.pet_name,
+                        categories: {}
+                    };
+                }
+                if (!petMap[event.pet_id].categories[event.category]) {
+                    petMap[event.pet_id].categories[event.category] = [];
+                }
+                petMap[event.pet_id].categories[event.category].push(event);
+            });
+
+            let cardsHTML = '';
+            Object.values(petMap).forEach(petInfo => {
+                cardsHTML += `<div class="dashboard-card" style="padding: 24px 16px;">
+                    <div style="font-weight:700; font-size:18px; margin-bottom:8px; color:var(--color-primary);">${petInfo.pet_name}</div>`;
+                Object.keys(categories).forEach(categoryKey => {
+                    const category = categories[categoryKey];
+                    const categoryEvents = petInfo.categories[categoryKey] || [];
+                    // 마지막 기록
+                    let content, value;
+                    if (categoryEvents.length > 0) {
+                        // 최신 기록 찾기
+                        categoryEvents.sort((a, b) => new Date(b.start) - new Date(a.start));
+                        const lastEvent = categoryEvents[0];
+                        const daysSince = Math.floor((new Date() - new Date(lastEvent.start)) / (1000 * 60 * 60 * 24));
+                        content = `마지막: ${daysSince}일 전`;
+                        value = `${categoryEvents.length}회`;
+                    } else {
+                        content = '아직 기록이 없어요';
+                        value = '0회';
+                    }
+                    cardsHTML += `
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                            <span style="font-size:20px;">${category.icon}</span>
+                            <span style="font-weight:600;">${category.name}</span>
+                            <span style="margin-left:auto;font-weight:700;">${value}</span>
+                        </div>
+                        <div style="font-size:13px;color:#888;margin-bottom:8px;">${content}</div>
+                    `;
+                });
+                cardsHTML += `</div>`;
+            });
+            dashboardCards.innerHTML = cardsHTML;
+            return;
+        }
+
         let cardsHTML = '';
-        
         Object.keys(categories).forEach(categoryKey => {
             const category = categories[categoryKey];
             const categoryEvents = events.filter(event => event.category === categoryKey);
@@ -760,19 +895,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             `;
         });
-        
         dashboardCards.innerHTML = cardsHTML;
     }
 
     // 이벤트 리스너들
-    document.getElementById('lastEventPetFilter').addEventListener('change', function () {
-        const selectedPetId = this.value;
-        fetchAllPreviousCare(selectedPetId);
-    });
-
     document.getElementById('petFilter').addEventListener('change', function () {
         selectedPetId = this.value;
         calendar.refetchEvents();
+    });
+
+    // 전역 펫 선택 시 전체에 반영
+    document.getElementById('globalPetFilter').addEventListener('change', function() {
+        selectedPetId = this.value;
+        calendar.refetchEvents();
+        fetchAndUpdateDashboard();
+        syncPetSelectWithGlobal();
     });
 
     // 폼 리셋
@@ -830,9 +967,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 resetForm();
                 showNotification(data.message || '케어 기록이 저장되었습니다!', 'success');
                 
-                // 최근 케어 기록 새로고침
-                const selectedPetId = document.getElementById('lastEventPetFilter').value;
-                fetchAllPreviousCare(selectedPetId);
             } else {
                 throw new Error(data.message || '저장 중 오류가 발생했습니다.');
             }
@@ -862,73 +996,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const deleteBtn = document.getElementById('deleteBtn');
         deleteBtn.style.display = 'block';
         document.getElementById('saveBtn').innerHTML = '<i class="fas fa-edit"></i> 기록 수정';
-    }
-
-    // 이전 케어 기록 조회
-    function fetchAllPreviousCare(petId) {
-        const categories = {
-            nail: { name: '발톱깎기', icon: '🦴' },
-            ear: { name: '귀청소', icon: '👂' },
-            brush: { name: '양치하기', icon: '🦷' },
-            fur: { name: '털정리', icon: '✂️' }
-        };
-
-        const recordsContainer = document.getElementById('allPreviousCareRecords');
-        recordsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>로딩 중...</div>';
-
-        Promise.all(Object.keys(categories).map(category =>
-            fetch(`/care/previous-care/${petId}/${category}/`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => ({category, data}))
-                .catch(error => {
-                    return {
-                        category,
-                        data: {status: 'error', message: error.message}
-                    };
-                })
-        )).then(results => {
-            recordsContainer.innerHTML = '';
-
-            results.forEach(({category, data}) => {
-                const categoryInfo = categories[category];
-                const recordDiv = document.createElement('div');
-                recordDiv.className = `care-record-item ${category}`;
-
-                if (data.status === 'success' && data.previous_care) {
-                    const lastCareDate = new Date(data.previous_care.date + 'T00:00:00');
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const diffTime = today - lastCareDate;
-                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-                    recordDiv.innerHTML = `
-                        <div class="care-record-header">
-                            <div class="care-record-title">
-                                ${categoryInfo.icon} ${categoryInfo.name}
-                            </div>
-                            <div class="care-record-days">${diffDays}일 전</div>
-                        </div>
-                        <div class="care-record-date">${formatDate(data.previous_care.date)}</div>
-                    `;
-                } else {
-                    recordDiv.innerHTML = `
-                        <div class="care-record-header">
-                            <div class="care-record-title">
-                                ${categoryInfo.icon} ${categoryInfo.name}
-                            </div>
-                        </div>
-                        <div class="no-record">아직 기록이 없어요</div>
-                    `;
-                }
-
-                recordsContainer.appendChild(recordDiv);
-            });
-        });
     }
 
     // 삭제 버튼 처리
@@ -962,9 +1029,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     resetForm();
                     showNotification(data.message || '케어 기록이 삭제되었습니다.', 'success');
                     
-                    // 최근 케어 기록 새로고침
-                    const selectedPetId = document.getElementById('lastEventPetFilter').value;
-                    fetchAllPreviousCare(selectedPetId);
                 } else {
                     throw new Error(data.message || '삭제 중 오류가 발생했습니다.');
                 }
