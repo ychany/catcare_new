@@ -1,120 +1,84 @@
 {% extends 'common_app/base.html' %}
 {% load static %}
 
-{% block title %}반려동물 등록 - 냐옹노트{% endblock %}
+{% block title %}고양이 등록 - 냥노트{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-      <div class="card shadow-lg border-0 rounded-4 p-0" style="overflow:hidden;">
-        <div class="card-header bg-white text-center border-0 p-4" style="background:linear-gradient(135deg, #FF6B35 60%, #FF9F1C 100%);">
-          <div style="margin-bottom:16px;">
-            <i class="fas fa-cat" style="font-size:48px; color:#fff;"></i>
-          </div>
-          <h2 class="fw-bold mb-1" style="color:#fff; letter-spacing:1px;">고양이 등록</h2>
-          <div class="body-text" style="color:#fff; opacity:0.9;">우리 집 고양이의 정보를 입력해 주세요</div>
+<div class="flex-center" style="min-height:calc(100vh - 120px);">
+  <div class="card" style="max-width:480px; width:100%; margin:32px 0;">
+    <div class="card-header text-center" style="background:linear-gradient(135deg, var(--primary-color), var(--accent-color)); color:var(--white); border-radius:24px 24px 0 0;">
+      <i class="fas fa-cat" style="font-size:48px; margin-bottom:8px;"></i>
+      <h2 class="heading-2" style="color:var(--white); margin-bottom:4px;">고양이 등록</h2>
+      <div class="body-text" style="color:var(--white); opacity:0.9;">우리 집 고양이의 정보를 입력해 주세요</div>
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group mb-lg">
+          <label class="form-label" for="id_name"><i class="fas fa-signature me-1 text-primary"></i> {{ form.name.label }}</label>
+          <input type="text" name="name" class="form-input" id="id_name" value="{{ form.name.value|default_if_none:'' }}" placeholder="이름">
+          {% for error in form.name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
         </div>
-        <div class="card-body p-4 bg-white">
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="row g-3 align-items-center">
-              <div class="col-md-6">
-                <label class="form-label fw-semibold mb-1"><i class="fas fa-signature me-1 text-primary"></i> {{ form.name.label }}</label>
-                <input type="text" name="name" class="form-control rounded-pill px-3 py-2" id="id_name" value="{{ form.name.value|default_if_none:'' }}">
-                {% for error in form.name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold mb-1"><i class="fas fa-paw me-1 text-primary"></i> {{ form.breed.label }}</label>
-                <select name="breed" class="form-select rounded-pill px-3 py-2" id="id_breed">{% for val, label in form.fields.breed.choices %}<option value="{{ val }}" {% if form.breed.value == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
-                {% for error in form.breed.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold mb-1"><i class="fas fa-calendar-alt me-1 text-primary"></i> {{ form.birth_date.label }}</label>
-                <input type="date" name="birth_date" class="form-control rounded-pill px-3 py-2" id="id_birth_date" value="{{ form.birth_date.value|default_if_none:'' }}">
-                {% for error in form.birth_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold mb-1"><i class="fas fa-venus-mars me-1 text-primary"></i> {{ form.gender.label }}</label>
-                <select name="gender" class="form-select rounded-pill px-3 py-2" id="id_gender">{% for val, label in form.fields.gender.choices %}<option value="{{ val }}" {% if form.gender.value == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
-                {% for error in form.gender.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold mb-1"><i class="fas fa-syringe me-1 text-primary"></i> {{ form.neutered.label }}</label>
-                <input type="checkbox" name="neutered" class="form-check-input ms-2" id="id_neutered" {% if form.neutered.value %}checked{% endif %}>
-                {% for error in form.neutered.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold mb-1"><i class="fas fa-weight-hanging me-1 text-primary"></i> {{ form.weight.label }}</label>
-                <input type="number" name="weight" class="form-control rounded-pill px-3 py-2" id="id_weight" value="{{ form.weight.value|default_if_none:'' }}">
-                {% for error in form.weight.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-              </div>
-              <div class="col-12">
-                <label class="form-label fw-semibold mb-1"><i class="fas fa-sticky-note me-1 text-primary"></i> {{ form.notes.label }}</label>
-                <textarea name="notes" class="form-control rounded-3 px-3 py-2" id="id_notes">{{ form.notes.value|default_if_none:'' }}</textarea>
-                {% for error in form.notes.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-              </div>
-              <div class="col-12">
-                <label class="form-label fw-semibold mb-1"><i class="fas fa-image me-1 text-primary"></i> {{ form.image.label }}</label>
-                <input type="file" name="image" class="form-control" id="id_image">
-                {% for error in form.image.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-              </div>
-            </div>
-            <div class="d-flex justify-content-between mt-4">
-              <button type="submit" class="btn btn-primary px-4 rounded-pill" style="font-weight:600; font-size:1.1rem;">등록하기</button>
-              <a href="{% url 'index' %}" class="btn btn-outline-secondary px-4 rounded-pill">취소</a>
-            </div>
-          </form>
+        <div class="form-group mb-lg">
+          <label class="form-label" for="id_breed"><i class="fas fa-paw me-1 text-primary"></i> {{ form.breed.label }}</label>
+          <select name="breed" class="form-input" id="id_breed">{% for val, label in form.fields.breed.choices %}<option value="{{ val }}" {% if form.breed.value == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+          {% for error in form.breed.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
         </div>
-      </div>
+        <div class="form-group mb-lg">
+          <label class="form-label" for="id_birth_date"><i class="fas fa-calendar-alt me-1 text-primary"></i> {{ form.birth_date.label }}</label>
+          <input type="date" name="birth_date" class="form-input" id="id_birth_date" value="{{ form.birth_date.value|default_if_none:'' }}">
+          {% for error in form.birth_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="form-group mb-lg">
+          <label class="form-label" for="id_gender"><i class="fas fa-venus-mars me-1 text-primary"></i> {{ form.gender.label }}</label>
+          <select name="gender" class="form-input" id="id_gender">{% for val, label in form.fields.gender.choices %}<option value="{{ val }}" {% if form.gender.value == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+          {% for error in form.gender.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="form-group mb-lg flex gap-md align-items-center">
+          <label class="form-label mb-0" for="id_neutered"><i class="fas fa-syringe me-1 text-primary"></i> {{ form.neutered.label }}</label>
+          <input type="checkbox" name="neutered" class="form-check-input" id="id_neutered" {% if form.neutered.value %}checked{% endif %}>
+          {% for error in form.neutered.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="form-group mb-lg">
+          <label class="form-label" for="id_weight"><i class="fas fa-weight-hanging me-1 text-primary"></i> {{ form.weight.label }}</label>
+          <input type="number" name="weight" class="form-input" id="id_weight" value="{{ form.weight.value|default_if_none:'' }}" placeholder="kg">
+          {% for error in form.weight.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="form-group mb-lg">
+          <label class="form-label" for="id_notes"><i class="fas fa-sticky-note me-1 text-primary"></i> {{ form.notes.label }}</label>
+          <textarea name="notes" class="form-input" id="id_notes" rows="3" placeholder="특이사항, 메모 등">{{ form.notes.value|default_if_none:'' }}</textarea>
+          {% for error in form.notes.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="form-group mb-lg">
+          <label class="form-label" for="id_image"><i class="fas fa-image me-1 text-primary"></i> {{ form.image.label }}</label>
+          <input type="file" name="image" class="form-input" id="id_image">
+          {% for error in form.image.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="flex-between mt-xl">
+          <button type="submit" class="btn btn-primary btn-lg" style="width:48%; font-size:1.1rem;">등록하기</button>
+          <a href="{% url 'index' %}" class="btn btn-secondary btn-lg" style="width:48%;">취소</a>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+{% endblock %}
 
-<style>
-.card {
-  border-radius: 24px;
-  box-shadow: 0 4px 24px 0 rgb(255 111 53 / 10%);
-}
-.form-label {
-  font-weight: 600;
-  font-size: 1rem;
-}
-input.form-control, select.form-select, textarea.form-control {
-  background: #F9FAFB;
-  border: 1.5px solid #E5E7EB;
-  border-radius: 24px;
-  padding: 12px 18px;
-  font-size: 1rem;
-  transition: border 0.2s, box-shadow 0.2s;
-  box-shadow: none;
-}
-input.form-control:focus, select.form-select:focus, textarea.form-control:focus {
-  border-color: #FF6B35;
-  box-shadow: 0 0 0 2px #FF6B3533;
-  background: #fff;
-  outline: none;
-}
-input.form-control::placeholder, textarea.form-control::placeholder {
-  color: #B0B8C1;
-  opacity: 1;
-}
-input.form-control:disabled, select.form-select:disabled, textarea.form-control:disabled {
-  background: #F3F4F6;
-  color: #B0B8C1;
-}
-input.form-control.is-invalid, select.form-select.is-invalid, textarea.form-control.is-invalid {
-  border-color: #E74C3C;
-  background: #FFF0F0;
-}
-input[type="checkbox"].form-check-input {
-  width: 18px;
-  height: 18px;
-  margin-top: 0.3em;
-}
-@media (max-width: 768px) {
-  .card-body, .card-header { padding: 1.2rem !important; }
-  .row.g-3 > [class^="col-"] { flex: 0 0 100%; max-width: 100%; }
-}
-</style>
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+  $('#id_breed').select2({
+    width: '100%',
+    placeholder: '품종을 검색하세요',
+    allowClear: true,
+    language: 'ko'
+  });
+});
+</script>
 {% endblock %} 
