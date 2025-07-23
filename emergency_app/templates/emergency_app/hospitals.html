@@ -17,7 +17,7 @@
     </div>
   </div>
 </div>
-<!-- 본문 내 상단 헤더(← 병원찾기) 전체 삭제 -->
+
 <style>
 .weight-header {
   background: #fff;
@@ -588,85 +588,250 @@
     border: 2px solid #174ea6 !important;
     box-shadow: 0 2px 8px rgba(49,130,246,0.10);
 }
+
+.hospital-main-narrow {
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px 0 0 0;
+}
+.hospital-card-style {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px 0 rgb(0 0 0 / 4%);
+  padding: 32px 32px 24px 32px;
+  margin-bottom: 32px;
+}
+.hospital-search-section {
+  margin: 0 0 32px 0;
+  padding: 0;
+}
+.search-controls {
+  display: flex;
+  gap: 12px;
+}
+.search-box {
+  flex: 1;
+  position: relative;
+}
+.search-input {
+  width: 100%;
+  padding: 14px 16px 14px 44px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
+  font-size: 16px;
+  color: #222f3e;
+}
+.search-input::placeholder {
+  color: #b0b8c1;
+}
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b0b8c1;
+  font-size: 20px;
+}
+.search-btn {
+  min-width: 100px;
+  padding: 12px 28px;
+  border: 2px solid #3182f6;
+  border-radius: 999px;
+  background: #fff;
+  color: #3182f6;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(49,130,246,0.10);
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, border 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  letter-spacing: 1px;
+}
+.search-btn:hover, .search-btn:focus {
+  background: #3182f6;
+  color: #fff;
+  border: 2px solid #2563c6;
+  box-shadow: 0 4px 18px rgba(49,130,246,0.13);
+  outline: none;
+}
+
+.hospital-main {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+.map-section, .hospital-list-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px 0 rgb(0 0 0 / 4%);
+  padding: 24px;
+}
+.map-section {
+  flex: 1;
+  min-width: 340px;
+}
+.hospital-list-section {
+  flex: 1;
+  min-width: 340px;
+}
+.map-header, .hospital-list-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.map-title, .hospital-list-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222f3e;
+  margin: 0;
+}
+.emergency-section {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 16px;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+}
+.emergency-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e53e3e;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.checklist-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222f3e;
+  margin: 0 0 12px 0;
+}
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+.checklist li {
+  font-size: 14px;
+  color: #e53e3e;
+  margin-bottom: 6px;
+  padding-left: 16px;
+  position: relative;
+}
+.checklist li::before {
+  content: "•";
+  color: #e53e3e;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+.emergency-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.contact-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  background: none;
+  border-radius: 8px;
+}
+.contact-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #222f3e;
+}
+.contact-phone {
+  font-size: 14px;
+  color: #3182f6;
+  font-weight: 600;
+}
 </style>
 
-<div class="hospital-page">
-    <!-- 검색폼을 상단 weight-header 바로 아래로 이동 -->
-    <div class="hospital-search-section" style="margin-top: 0;">
-        <div class="search-controls">
-            <div class="search-box">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="병원명 또는 주소로 검색..." value="{{ search_query|default:'' }}">
-            </div>
-            <button class="search-btn" onclick="performSearch()">
-                <i class="fas fa-search"></i>
-                조회
-            </button>
-        </div>
+<div class="hospital-main-narrow">
+  <!-- 검색 카드 -->
+  <div class="hospital-card-style hospital-search-section">
+    <div class="search-controls">
+      <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" placeholder="병원명 또는 주소로 검색..." value="{{ search_query|default:'' }}">
+      </div>
+      <button class="search-btn" onclick="performSearch()">
+        <i class="fas fa-search"></i>
+        조회
+      </button>
     </div>
+  </div>
 
-    <div style="padding: var(--spacing-xl);">
-        <div class="hospital-main">
-            <div class="map-section">
-                <div class="map-header">
-                    <i class="fas fa-map-marker-alt" style="color: var(--color-primary);"></i>
-                    <h3 class="map-title">주변 병원 지도</h3>
-                </div>
-                <div class="map-container" id="map" style="height:400px;"></div>
-            </div>
-
-            <div class="hospital-list-section">
-                <div class="hospital-list">
-                    <div class="hospital-card">
-                        <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
-                            <i class="fas fa-search" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3;"></i>
-                            <p>검색어를 입력해보세요.</p>
-                            <p>병원명 또는 주소로 검색 가능합니다.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="emergency-section">
-            <h3 class="emergency-title">
-                <i class="fas fa-exclamation-triangle"></i>
-                응급상황 대응 가이드
-            </h3>
-            
-            <div class="emergency-content">
-                <div class="checklist-section">
-                    <h4>응급 증상 체크리스트</h4>
-                    <ul class="checklist">
-                        <li>호흡곤란 또는 과도한 헐떡임</li>
-                        <li>의식을 잃거나 경련 증상</li>
-                        <li>심한 구토나 설사가 지속됨</li>
-                        <li>외상으로 인한 출혈</li>
-                        <li>중독 의심 증상 (구토, 경련 등)</li>
-                        <li>체온이 급격히 오르거나 내려감</li>
-                    </ul>
-                </div>
-                
-                <div class="checklist-section">
-                    <h4>24시간 응급 연락처</h4>
-                    <div class="emergency-contacts">
-                        <div class="contact-item">
-                            <span class="contact-name">24시 우리동물병원</span>
-                            <span class="contact-phone">02-1234-5678</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-name">응급동물의료센터</span>
-                            <span class="contact-phone">02-4567-8901</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-name">야간응급동물병원</span>
-                            <span class="contact-phone">02-7890-1234</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- 지도/리스트 카드 -->
+  <div class="hospital-main">
+    <div class="map-section">
+      <div class="map-header">
+        <i class="fas fa-map-marker-alt" style="color: #3182f6;"></i>
+        <h3 class="map-title">주변 병원 지도</h3>
+      </div>
+      <div class="map-container" id="map" style="height:400px;"></div>
     </div>
+    <div class="hospital-list-section">
+      <div class="hospital-list-header">
+        <i class="fas fa-hospital"></i>
+        <h3 class="hospital-list-title">병원 리스트</h3>
+      </div>
+      <div class="hospital-list">
+        <!-- 기존 병원 리스트 내용 -->
+        {% block hospital_list %}{% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 응급 가이드 카드 -->
+  <div class="emergency-section">
+    <h3 class="emergency-title">
+      <i class="fas fa-exclamation-triangle"></i>
+      응급상황 대응 가이드
+    </h3>
+    <div class="emergency-content">
+      <div class="checklist-section">
+        <h4>응급 증상 체크리스트</h4>
+        <ul class="checklist">
+          <li>호흡곤란 또는 과도한 헐떡임</li>
+          <li>의식을 잃거나 경련 증상</li>
+          <li>심한 구토나 설사가 지속됨</li>
+          <li>외상으로 인한 출혈</li>
+          <li>중독 의심 증상 (구토, 경련 등)</li>
+          <li>체온이 급격히 오르거나 내려감</li>
+        </ul>
+      </div>
+      <div class="checklist-section">
+        <h4>24시간 응급 연락처</h4>
+        <div class="emergency-contacts">
+          <div class="contact-item">
+            <span class="contact-name">24시 우리동물병원</span>
+            <span class="contact-phone">02-1234-5678</span>
+          </div>
+          <div class="contact-item">
+            <span class="contact-name">응급동물의료센터</span>
+            <span class="contact-phone">02-4567-8901</span>
+          </div>
+          <div class="contact-item">
+            <span class="contact-name">야간응급동물병원</span>
+            <span class="contact-phone">02-7890-1234</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script id="hospital-data" type="application/json">
@@ -689,6 +854,9 @@ let searchResults = [];
 let currentMap = null;
 let userLocation = { lat: 37.5665, lng: 126.9780 }; // 기본값: 서울 중심부
 
+// 마커를 placeId(또는 name+좌표)로 매핑
+let markerMap = {};
+
 // 기존 맵 초기화 함수 수정
 function initMap() {
     if (!window.kakao || !window.kakao.maps) return;
@@ -710,6 +878,7 @@ function displayHospitals(hospitalData) {
     // 기존 마커 제거
     markers.forEach(m => m.setMap(null));
     markers = [];
+    markerMap = {};
     infowindow.close();
     
     const bounds = new kakao.maps.LatLngBounds();
@@ -723,6 +892,10 @@ function displayHospitals(hospitalData) {
             });
             markers.push(marker);
             
+            // placeId가 있으면 placeId로, 없으면 name+lat+lng로 매핑
+            const key = hospital.placeId || (hospital.name + '_' + hospital.lat + '_' + hospital.lng);
+            markerMap[key] = marker;
+
             kakao.maps.event.addListener(marker, 'click', function() {
                 let content;
                 
@@ -761,6 +934,9 @@ function displayHospitals(hospitalData) {
     if (hospitalData.length > 0 && hospitalData.some(h => h.lat && h.lng)) {
         currentMap.setBounds(bounds);
     }
+    // 병원 리스트와 클릭 이벤트 바인딩을 마커 생성 후에만 실행
+    updateHospitalList(hospitalData);
+    addHospitalListClickHandlers(hospitalData);
 }
 
 // 카카오 API 검색 함수
@@ -881,71 +1057,95 @@ function performSearch() {
     searchAnimalHospitals(searchValue);
 }
 
-// 병원 리스트 업데이트 함수
-function updateHospitalList(hospitalData) {
-    const hospitalListContainer = document.querySelector('.hospital-list');
-    if (!hospitalListContainer) return;
-    
-    if (hospitalData.length === 0) {
-        hospitalListContainer.innerHTML = `
-            <div class="hospital-card">
-                <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
-                    <i class="fas fa-search" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3;"></i>
-                    <p>검색 결과가 없습니다.</p>
-                    <p>다른 검색어를 입력해보세요.</p>
-                </div>
-            </div>
-        `;
-        return;
-    }
-    
-    let listHtml = '';
-    hospitalData.forEach(hospital => {
-        // 응급실 배지
-        const emergencyBadge = hospital.isEmergency ? 
-            '<span class="emergency-badge">응급</span>' : '';
-        
-        listHtml += `
-            <div class="hospital-card">
-                <div class="hospital-header">
-                    <div class="hospital-image">
-                        <i class="fas fa-hospital" style="color: var(--color-text-light); font-size: 24px; display: flex; align-items: center; justify-content: center; height: 100%;"></i>
-                    </div>
-                    <div class="hospital-info">
-                        <div class="hospital-name-row">
-                            <h3 class="hospital-name">${hospital.name}</h3>
-                            ${emergencyBadge}
-                        </div>
-                        <div class="hospital-rating">
-                            <span class="rating-text">${hospital.distance}km</span>
-                        </div>
-                        <div class="hospital-details">
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt detail-icon"></i>
-                                <span>${hospital.address}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-phone detail-icon"></i>
-                                <span>${hospital.phone}</span>
-                            </div>
-                        </div>
-                        <div class="hospital-actions">
-                            <a href="tel:${hospital.phone}" class="action-btn btn-primary">
-                                <i class="fas fa-phone"></i>
-                                전화하기
-                            </a>
-                            <a href="#" class="action-btn btn-secondary" onclick="openDirections('${hospital.address}')">
-                                <i class="fas fa-route"></i>
-                                길찾기
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+// 병원 리스트 클릭 시 지도 이동/마커 강조 (placeId 매칭)
+function addHospitalListClickHandlers(hospitalData) {
+  const cards = document.querySelectorAll('.hospital-card');
+  cards.forEach((card, idx) => {
+    card.addEventListener('click', function() {
+      const lat = parseFloat(card.getAttribute('data-lat'));
+      const lng = parseFloat(card.getAttribute('data-lng'));
+      const placeId = card.getAttribute('data-place-id');
+      let key = placeId;
+      if (!key) {
+        key = card.querySelector('.hospital-name').textContent + '_' + lat + '_' + lng;
+      }
+      const marker = markerMap[key];
+      if (!isNaN(lat) && !isNaN(lng) && currentMap && marker) {
+        const moveLatLon = new kakao.maps.LatLng(lat, lng);
+        currentMap.panTo(moveLatLon);
+        currentMap.setLevel(3);
+        infowindow.open(currentMap, marker);
+      }
     });
-    
-    hospitalListContainer.innerHTML = listHtml;
+  });
+}
+
+// 병원 리스트 업데이트 함수 수정 (data-place-id 추가)
+function updateHospitalList(hospitalData) {
+  const hospitalListContainer = document.querySelector('.hospital-list');
+  if (!hospitalListContainer) return;
+
+  if (hospitalData.length === 0) {
+    hospitalListContainer.innerHTML = `
+        <div class="hospital-card">
+            <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3;"></i>
+                <p>검색 결과가 없습니다.</p>
+                <p>다른 검색어를 입력해보세요.</p>
+            </div>
+        </div>
+    `;
+    return;
+  }
+
+  let listHtml = '';
+  hospitalData.forEach((hospital, idx) => {
+    // 응급실 배지
+    const emergencyBadge = hospital.isEmergency ? 
+        '<span class="emergency-badge">응급</span>' : '';
+    const placeIdAttr = hospital.placeId ? `data-place-id="${hospital.placeId}"` : '';
+    listHtml += `
+        <div class="hospital-card" data-lat="${hospital.lat}" data-lng="${hospital.lng}" ${placeIdAttr}>
+            <div class="hospital-header">
+                <div class="hospital-image">
+                    <i class="fas fa-hospital" style="color: var(--color-text-light); font-size: 24px; display: flex; align-items: center; justify-content: center; height: 100%;"></i>
+                </div>
+                <div class="hospital-info">
+                    <div class="hospital-name-row">
+                        <h3 class="hospital-name">${hospital.name}</h3>
+                        ${emergencyBadge}
+                    </div>
+                    <div class="hospital-rating">
+                        <span class="rating-text">${hospital.distance}km</span>
+                    </div>
+                    <div class="hospital-details">
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt detail-icon"></i>
+                            <span>${hospital.address}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone detail-icon"></i>
+                            <span>${hospital.phone}</span>
+                        </div>
+                    </div>
+                    <div class="hospital-actions">
+                        <a href="tel:${hospital.phone}" class="action-btn btn-primary">
+                            <i class="fas fa-phone"></i>
+                            전화하기
+                        </a>
+                        <a href="#" class="action-btn btn-secondary" onclick="openDirections('${hospital.address}')">
+                            <i class="fas fa-route"></i>
+                            길찾기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+  });
+
+  hospitalListContainer.innerHTML = listHtml;
+  // addHospitalListClickHandlers는 여기서 호출하지 않음
 }
 
 // 검색 기능
