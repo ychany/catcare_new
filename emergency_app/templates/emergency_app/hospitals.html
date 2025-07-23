@@ -295,11 +295,13 @@
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-lg);
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .hospital-card:hover {
     box-shadow: var(--shadow-md);
     border-color: var(--color-primary-light);
+    transform: translateY(-2px);
 }
 
 .hospital-header {
@@ -870,7 +872,25 @@ function initMap() {
         level: 6
     });
     
-    // 처음에는 빈 지도만 표시 (기존 병원 데이터 표시하지 않음)
+    // 초기 상태에서 병원 리스트에 안내 메시지 표시
+    showInitialMessage();
+}
+
+// 초기 안내 메시지 표시 함수
+function showInitialMessage() {
+    const hospitalListContainer = document.querySelector('.hospital-list');
+    if (!hospitalListContainer) return;
+    
+    hospitalListContainer.innerHTML = `
+        <div class="hospital-card">
+            <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3; color: #3182f6;"></i>
+                <h4 style="margin-bottom: var(--spacing-sm); color: var(--color-text);">병원을 검색해보세요</h4>
+                <p style="margin-bottom: 0;">병원명이나 지역명을 입력하여</p>
+                <p style="margin: 0;">주변 동물병원을 찾아보실 수 있습니다.</p>
+            </div>
+        </div>
+    `;
 }
 
 // 병원 데이터를 지도와 리스트에 표시하는 함수
@@ -934,9 +954,8 @@ function displayHospitals(hospitalData) {
     if (hospitalData.length > 0 && hospitalData.some(h => h.lat && h.lng)) {
         currentMap.setBounds(bounds);
     }
-    // 병원 리스트와 클릭 이벤트 바인딩을 마커 생성 후에만 실행
+    // 병원 리스트 업데이트
     updateHospitalList(hospitalData);
-    addHospitalListClickHandlers(hospitalData);
 }
 
 // 카카오 API 검색 함수
@@ -970,9 +989,20 @@ function searchAnimalHospitals(keyword) {
                 updateHospitalList(convertedResults);
             });
         } else {
-            alert('동물병원이 검색되지 않았습니다.');
-            // 검색 실패시 빈 상태 유지
-            updateHospitalList([]);
+            // 검색 결과가 없을 때 안내 메시지 표시
+            const hospitalListContainer = document.querySelector('.hospital-list');
+            if (hospitalListContainer) {
+                hospitalListContainer.innerHTML = `
+                    <div class="hospital-card">
+                        <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
+                            <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3; color: #f59e0b;"></i>
+                            <h4 style="margin-bottom: var(--spacing-sm); color: var(--color-text);">검색 결과가 없습니다</h4>
+                            <p style="margin-bottom: 0;">다른 검색어로 시도해보세요.</p>
+                            <p style="margin: 0;">예: "서울 동물병원", "강남구", "24시간" 등</p>
+                        </div>
+                    </div>
+                `;
+            }
         }
     });
 }
@@ -1061,21 +1091,81 @@ function performSearch() {
 function addHospitalListClickHandlers(hospitalData) {
   const cards = document.querySelectorAll('.hospital-card');
   cards.forEach((card, idx) => {
-    card.addEventListener('click', function() {
+    card.addEventListener('click', function(e) {
+      // 버튼 클릭 시에는 지도 이동하지 않음
+      if (e.target.closest('.action-btn')) {
+        return;
+      }
+      
       const lat = parseFloat(card.getAttribute('data-lat'));
       const lng = parseFloat(card.getAttribute('data-lng'));
       const placeId = card.getAttribute('data-place-id');
+      const hospitalName = card.querySelector('.hospital-name').textContent;
+      
+      // 마커 키 생성
       let key = placeId;
       if (!key) {
-        key = card.querySelector('.hospital-name').textContent + '_' + lat + '_' + lng;
+        key = hospitalName + '_' + lat + '_' + lng;
       }
+      
       const marker = markerMap[key];
-      if (!isNaN(lat) && !isNaN(lng) && currentMap && marker) {
+      
+      if (!isNaN(lat) && !isNaN(lng) && currentMap) {
         const moveLatLon = new kakao.maps.LatLng(lat, lng);
+        
+        // 지도 중심 이동 및 확대
         currentMap.panTo(moveLatLon);
         currentMap.setLevel(3);
-        infowindow.open(currentMap, marker);
+        
+        // 마커가 있으면 정보창 표시
+        if (marker) {
+          // 해당 병원 정보 찾기
+          const hospital = hospitalData[idx];
+          if (hospital) {
+            let content;
+            
+            // 검색된 병원인지 기존 병원인지 구분하여 정보창 내용 생성
+            if (hospital.category && hospital.placeUrl) {
+              // 검색된 병원 (카카오 API 결과)
+              content = `
+                <div style="padding:15px; font-size:14px; min-width:250px; line-height:1.4;">
+                  <div style="font-weight:bold; font-size:16px; margin-bottom:8px; color:#222;">📍 ${hospital.name}</div>
+                  ${hospital.phone && hospital.phone !== '정보 없음' ? `<div style="margin-bottom:5px;">📞 ${hospital.phone}</div>` : ''}
+                  <div style="margin-bottom:5px;">📫 ${hospital.address}</div>
+                  <div style="margin-bottom:8px;">🏷 ${hospital.category}</div>
+                  <div style="margin-bottom:5px;">📍 거리: ${hospital.distance}km</div>
+                  <div style="margin-top:10px;">
+                    <a href="${hospital.placeUrl}" target="_blank" style="color:#3182f6; text-decoration:underline; font-weight:500;">카카오맵에서 자세히 보기</a>
+                  </div>
+                </div>
+              `;
+            } else {
+              // 기존 병원 (DB 데이터)
+              content = `
+                <div style="padding:15px; font-size:14px; min-width:250px; line-height:1.4;">
+                  <div style="font-weight:bold; font-size:16px; margin-bottom:8px; color:#222;">📍 ${hospital.name}</div>
+                  ${hospital.phone && hospital.phone !== '정보 없음' ? `<div style="margin-bottom:5px;">📞 ${hospital.phone}</div>` : ''}
+                  <div style="margin-bottom:5px;">📫 ${hospital.address}</div>
+                  <div style="margin-bottom:8px;">🏷 동물병원</div>
+                  <div style="margin-bottom:5px;">📍 거리: ${hospital.distance}km</div>
+                </div>
+              `;
+            }
+            
+            infowindow.setContent(content);
+            infowindow.open(currentMap, marker);
+          }
+        } else {
+          console.log('마커를 찾을 수 없음:', key);
+        }
       }
+      
+      // 카드 선택 효과 (선택적)
+      cards.forEach(c => c.style.backgroundColor = '');
+      card.style.backgroundColor = '#f8fafc';
+      setTimeout(() => {
+        card.style.backgroundColor = '';
+      }, 2000);
     });
   });
 }
@@ -1145,7 +1235,9 @@ function updateHospitalList(hospitalData) {
   });
 
   hospitalListContainer.innerHTML = listHtml;
-  // addHospitalListClickHandlers는 여기서 호출하지 않음
+  
+  // 병원 카드 클릭 이벤트 추가
+  addHospitalListClickHandlers(hospitalData);
 }
 
 // 검색 기능
@@ -1168,11 +1260,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchValue = this.value.trim();
             
             if (searchValue === '') {
-                // 검색어가 비어있으면 빈 상태로 유지
+                // 검색어가 비어있으면 초기 상태로 복원
                 markers.forEach(m => m.setMap(null));
                 markers = [];
                 infowindow.close();
-                updateHospitalList([]);
+                showInitialMessage();
                 return;
             }
             
