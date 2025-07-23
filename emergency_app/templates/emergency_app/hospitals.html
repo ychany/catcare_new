@@ -4,7 +4,72 @@
 {% block title %}병원 찾기 - 냥이 집사{% endblock %}
 
 {% block content %}
+<div class="weight-header">
+  <div class="weight-nav">
+    <div class="nav-left">
+      <button class="back-btn" onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <span class="weight-title">
+        <i class="fas fa-hospital"></i>
+        병원찾기
+      </span>
+    </div>
+  </div>
+</div>
+<!-- 본문 내 상단 헤더(← 병원찾기) 전체 삭제 -->
 <style>
+.weight-header {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 24px 0 16px 0;
+}
+.weight-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-bottom: 0;
+}
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #222f3e;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+.back-btn:hover {
+  background: #f3f4f6;
+}
+.weight-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222f3e;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.weight-title i {
+  color: #222f3e;
+  background: #f3f4f6;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
 .page-hide-nav {
     display: none !important;
 }
@@ -526,29 +591,17 @@
 </style>
 
 <div class="hospital-page">
-    <div class="hospital-header">
-        <div class="hospital-nav">
-            <div class="nav-left">
-                <button class="back-btn" onclick="history.back()">←</button>
-                <h1 class="hospital-title">병원 찾기</h1>
+    <!-- 검색폼을 상단 weight-header 바로 아래로 이동 -->
+    <div class="hospital-search-section" style="margin-top: 0;">
+        <div class="search-controls">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="병원명 또는 주소로 검색..." value="{{ search_query|default:'' }}">
             </div>
-            <div class="nav-right">
-                <a href="#" class="nav-btn">즐겨찾기</a>
-                <a href="#" class="nav-btn" onclick="requestUserLocation()">내 위치</a>
-            </div>
-        </div>
-        
-        <div class="hospital-search-section">
-            <div class="search-controls">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="병원명 또는 주소로 검색..." value="{{ search_query|default:'' }}">
-                </div>
-                <button class="search-btn" onclick="performSearch()">
-                    <i class="fas fa-search"></i>
-                    조회
-                </button>
-            </div>
+            <button class="search-btn" onclick="performSearch()">
+                <i class="fas fa-search"></i>
+                조회
+            </button>
         </div>
     </div>
 
