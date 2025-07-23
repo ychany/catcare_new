@@ -23,394 +23,173 @@
 /* Care calendar page specific styles */
 .care-page {
     min-height: 100vh;
-    background: var(--color-background);
+    background: var(--bg-primary) !important;
     font-family: var(--font-primary);
 }
-
-.care-header {
-    background: white;
-    border-bottom: 1px solid var(--color-border);
-    padding: var(--spacing-lg) var(--spacing-xl);
+.stat-card,
+.dashboard-card,
+.calendar-card,
+.form-card,
+.records-card {
+    background: var(--bg-primary) !important;
 }
 
+/* --- 상단 헤더/타이틀/설명 --- */
+.care-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-light);
+    padding: var(--spacing-2xl) var(--spacing-3xl);
+}
 .care-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
 }
-
-.nav-left {
+.care-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
 }
 
-.back-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: var(--color-text);
-    cursor: pointer;
-    padding: var(--spacing-xs);
-    border-radius: var(--border-radius-md);
-    transition: background-color 0.2s;
-}
-
-.back-btn:hover {
-    background: var(--color-surface);
-}
-
-.care-title {
-    font-size: 24px;
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.nav-right {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.nav-btn {
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-lg);
-    color: var(--color-text);
-    text-decoration: none;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    cursor: pointer;
-}
-
-.nav-btn:hover {
-    background: var(--color-primary-light);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-}
-
-.care-main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: var(--spacing-xl);
-}
-
-/* Stats Section */
-.stats-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
-}
-
-.stat-card {
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-xl);
-    padding: var(--spacing-lg);
-    text-align: center;
-    transition: all 0.2s;
-}
-
-.stat-card:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--color-primary-light);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    background: var(--color-primary-lightest);
-    border-radius: var(--border-radius-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto var(--spacing-sm);
-    color: var(--color-primary);
-    font-size: 20px;
-}
-
-.stat-value {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text);
-    margin-bottom: var(--spacing-xs);
-}
-
-.stat-label {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-    font-weight: var(--font-weight-medium);
-}
-
-/* Dashboard Cards */
-.dashboard-section {
-    margin-bottom: var(--spacing-xl);
-}
-
-.dashboard-cards {
+/* --- 통계/대시보드 카드 --- */
+.stats-section, .dashboard-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-lg);
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
 }
-
-.dashboard-card {
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-xl);
-    padding: var(--spacing-lg);
-    transition: all 0.2s;
+.stat-card, .dashboard-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s, transform 0.2s;
 }
-
-.dashboard-card:hover {
-    transform: translateY(-2px);
+.stat-card:hover, .dashboard-card:hover {
     box-shadow: var(--shadow-md);
-    border-color: var(--color-primary-light);
+    transform: translateY(-2px);
 }
-
-.dashboard-card-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: var(--border-radius-lg);
+.stat-icon, .dashboard-card-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--white);
     font-size: 24px;
-    margin-bottom: var(--spacing-md);
-}
-
-.dashboard-card-title {
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
     margin-bottom: var(--spacing-xs);
 }
-
-.dashboard-card-content {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    line-height: 1.4;
-    margin-bottom: var(--spacing-sm);
+.stat-value, .dashboard-card-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.stat-label, .dashboard-card-title {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
-.dashboard-card-value {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-primary);
+/* --- 캘린더/폼/리스트/사이드바 --- */
+.care-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-2xl);
 }
-
-/* Main Content Layout */
 .main-content {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: var(--spacing-xl);
+    display: flex;
+    gap: var(--spacing-2xl);
+    align-items: flex-start;
 }
-
-/* Calendar Section */
-.calendar-card {
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-xl);
+.calendar-card, .form-card, .records-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
 }
-
-.calendar-header {
-    background: var(--color-surface);
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
+.calendar-header, .form-header, .records-header {
+    background: var(--bg-tertiary);
+    padding: var(--spacing-xl);
+    border-bottom: 1px solid var(--border-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
-.calendar-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
+.calendar-title, .form-title, .records-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
     margin: 0;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
 }
-
-.calendar-title i {
-    color: var(--color-primary);
+.calendar-title i, .form-title i, .records-title i {
+    color: var(--primary-color);
 }
-
-.filter-select {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-md);
-    font-size: var(--font-size-sm);
-    background: white;
-    min-width: 120px;
-}
-
-.calendar-wrapper {
+.calendar-wrapper, .form-content, .records-content {
     padding: var(--spacing-xl);
 }
-
-#calendar {
-    height: 500px;
-}
-
-.calendar-legend {
-    background: var(--color-surface);
-    padding: var(--spacing-lg);
-    border-top: 1px solid var(--color-border);
-}
-
-.legend-title {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    margin-bottom: var(--spacing-md);
-}
-
-.legend-items {
-    display: flex;
-    gap: var(--spacing-lg);
-    flex-wrap: wrap;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-}
-
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-}
-
-.legend-color.nail { background: #ff9800; }
-.legend-color.ear { background: #2196f3; }
-.legend-color.brush { background: #4caf50; }
-.legend-color.fur { background: #9c27b0; }
-
-/* Sidebar Section */
-.sidebar-section {
+.care-form, .care-records {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
 }
-
-/* Form Card */
-.form-card {
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-xl);
-    overflow: hidden;
-}
-
-.form-header {
-    background: var(--color-surface);
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.form-title {
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.form-title i {
-    color: var(--color-primary);
-}
-
-.form-content {
-    padding: var(--spacing-xl);
-}
-
-.care-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-}
-
 .form-group {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
 }
-
 .form-label {
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
 }
-
 .form-label i {
-    color: var(--color-primary);
+    color: var(--primary-color);
     width: 16px;
 }
-
-.optional {
-    color: var(--color-text-muted);
-    font-weight: var(--font-weight-normal);
-    font-size: var(--font-size-xs);
-}
-
 .form-input, .form-textarea {
     padding: var(--spacing-md);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-lg);
-    font-size: var(--font-size-md);
-    transition: all 0.2s;
-    background: white;
-    font-family: inherit;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
 }
-
 .form-input:focus, .form-textarea:focus {
     outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
 }
-
-.form-textarea {
-    resize: vertical;
-}
-
-.form-actions {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-sm);
-}
-
-.btn-submit {
-    background: var(--color-primary);
+.form-textarea { resize: vertical; }
+.form-actions { display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm); }
+.btn-submit, .btn-delete {
+    background: var(--primary-color);
     color: white;
     border: none;
     padding: var(--spacing-md) var(--spacing-lg);
-    border-radius: var(--border-radius-lg);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
@@ -419,155 +198,62 @@
     gap: var(--spacing-xs);
     flex: 1;
 }
-
-.btn-submit:hover {
-    background: var(--color-primary-dark);
+.btn-submit:hover, .btn-delete:hover {
+    background: var(--primary-color-dark);
+    color: #fff;
     transform: translateY(-2px);
 }
-
-.btn-submit:disabled {
+.btn-submit:disabled, .btn-delete:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
-.btn-delete {
-    background: var(--color-danger);
-    color: white;
-    border: none;
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-radius: var(--border-radius-lg);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-xs);
-    flex: 1;
-}
-
-.btn-delete:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
-}
-
-.btn-delete:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Records Card */
-.records-card {
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-xl);
-    overflow: hidden;
-    flex: 1;
-}
-
-.records-header {
-    background: var(--color-surface);
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.records-title {
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.records-title i {
-    color: var(--color-primary);
-}
-
-.filter-select-small {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-md);
-    font-size: var(--font-size-xs);
-    background: white;
-    min-width: 100px;
-}
-
-.records-content {
-    padding: var(--spacing-lg);
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.care-records {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
+/* --- 리스트/카드/레코드 --- */
 .care-record-item {
-    background: var(--color-surface);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-md);
-    border-left: 4px solid;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    border-left: 4px solid var(--primary-color);
     transition: all 0.2s;
 }
-
 .care-record-item:hover {
     background: #f0f0f0;
-    transform: translateX(2px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
-
-.care-record-item.nail { border-left-color: #ff9800; }
-.care-record-item.ear { border-left-color: #2196f3; }
-.care-record-item.brush { border-left-color: #4caf50; }
-.care-record-item.fur { border-left-color: #9c27b0; }
-
 .care-record-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--spacing-xs);
 }
-
 .care-record-title {
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text);
+    font-weight: 600;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
+    font-size: 14px;
+}
+.care-record-days, .care-record-date {
+    font-size: 12px;
+    color: var(--text-secondary);
 }
 
-.care-record-days {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-    padding: 2px var(--spacing-xs);
-    background: rgba(0,0,0,0.05);
-    border-radius: var(--border-radius-full);
+/* --- 필터/셀렉트 --- */
+.filter-select, .filter-select-small {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-width: 120px;
 }
 
-.care-record-date {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-}
-
-.no-record {
-    color: var(--color-text-muted);
-    font-style: italic;
-    text-align: center;
-    padding: var(--spacing-lg);
-    font-size: var(--font-size-sm);
-}
-
-/* FullCalendar Custom Styles */
+/* --- 캘린더/FullCalendar 커스텀 --- */
+#calendar { height: 500px; }
 .fc-event {
     cursor: pointer;
     border-radius: 6px;
@@ -577,66 +263,29 @@
     font-weight: 500;
     transition: all 0.2s ease;
 }
-
 .fc-event:hover {
     transform: scale(1.05);
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
+.fc-event-nail { background-color: #ff9800; border-color: #ff9800; color: white; }
+.fc-event-ear { background-color: #2196f3; border-color: #2196f3; color: white; }
+.fc-event-brush { background-color: #4caf50; border-color: #4caf50; color: white; }
+.fc-event-fur { background-color: #9c27b0; border-color: #9c27b0; color: white; }
 
-.fc-event-nail {
-    background-color: #ff9800;
-    border-color: #ff9800;
-    color: white;
+/* --- 반응형 --- */
+@media (max-width: 1200px) {
+    .main-content { flex-direction: column; gap: var(--spacing-xl); }
+    .stats-section, .dashboard-cards { grid-template-columns: 1fr 1fr; }
 }
-
-.fc-event-ear {
-    background-color: #2196f3;
-    border-color: #2196f3;
-    color: white;
-}
-
-.fc-event-brush {
-    background-color: #4caf50;
-    border-color: #4caf50;
-    color: white;
-}
-
-.fc-event-fur {
-    background-color: #9c27b0;
-    border-color: #9c27b0;
-    color: white;
-}
-
-.fc-daygrid-event {
-    white-space: normal !important;
-    align-items: normal !important;
-}
-
-.fc-event-title {
-    font-weight: 500 !important;
-}
-
-.fc-event-time {
-    display: none !important;
-}
-
-.fc-header-toolbar {
-    margin-bottom: 1.5rem;
-}
-
-.fc-button-primary {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
-}
-
-.fc-button-primary:hover {
-    background-color: var(--color-primary-dark);
-    border-color: var(--color-primary-dark);
-}
-
-.fc-today-button {
-    background-color: var(--color-primary) !important;
-    border-color: var(--color-primary) !important;
+@media (max-width: 768px) {
+    .care-nav { flex-direction: column; gap: var(--spacing-md); text-align: center; }
+    .care-title { font-size: 20px; }
+    .care-main { padding: var(--spacing-lg); }
+    .stats-section, .dashboard-cards { grid-template-columns: 1fr; }
+    .main-content { flex-direction: column; gap: var(--spacing-lg); }
+    .calendar-header, .form-header, .records-header { flex-direction: column; gap: var(--spacing-sm); align-items: stretch; }
+    .form-content, .records-content, .calendar-wrapper { padding: var(--spacing-lg); }
+    #calendar { height: 400px; }
 }
 
 /* Loading Styles */
@@ -771,16 +420,7 @@
                     케어캘린더
                 </h1>
             </div>
-            <div class="nav-right">
-                <button class="nav-btn" onclick="location.reload()">
-                    <i class="fas fa-sync-alt"></i>
-                    새로고침
-                </button>
-                <button class="nav-btn" onclick="resetForm()">
-                    <i class="fas fa-plus"></i>
-                    새 기록
-                </button>
-            </div>
+            <!-- nav-right 버튼 영역 완전 제거 -->
         </div>
     </div>
 
