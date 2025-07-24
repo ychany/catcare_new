@@ -64,6 +64,35 @@ def product_detail(request, pk):
 
 @login_required
 def recommend_form(request, pet_profile_id):
+    # pet_profile_id는 실제로는 Pet의 id이므로 Pet을 먼저 찾음
+    pet = get_object_or_404(Pet, id=pet_profile_id, owner=request.user)
+    # PetProfile을 user, name, birth_date 등 주요 정보로 찾음
+    pet_profile = PetProfile.objects.filter(
+        user=pet.owner,
+        name=pet.name,
+        birth_date=pet.birth_date
+    ).first()
+    if not pet_profile:
+        pet_profile = PetProfile.objects.create(
+            user=pet.owner,
+            name=pet.name,
+            pet_type=pet.pet_type if hasattr(pet, 'pet_type') else 'cat',
+            breed=pet.breed,
+            birth_date=pet.birth_date,
+            weight=pet.weight,
+            gender=pet.gender if hasattr(pet, 'gender') else 'unknown',
+            is_neutered=getattr(pet, 'neutered', False),
+            preference_dict={key: 3 for _, key in [
+                ('통원치료비', 'outpatient'),
+                ('입원치료비', 'inpatient'),
+                ('수술치료비', 'surgery'),
+                ('배상책임', 'liability'),
+                ('슬관절', 'joint'),
+                ('피부병', 'skin'),
+                ('구강질환', 'oral'),
+                ('비뇨기질환', 'urinary'),
+            ]}
+        )
     # preference_fields 정의 (label, key)
     preference_fields = [
         ('통원치료비', 'outpatient'),
@@ -75,7 +104,6 @@ def recommend_form(request, pet_profile_id):
         ('구강질환', 'oral'),
         ('비뇨기질환', 'urinary'),
     ]
-    pet_profile = get_object_or_404(PetProfile, id=pet_profile_id)
     # breed.json에서 품종명 리스트 추출
     breed_path = Path(__file__).parent / 'fixtures' / 'breed.json'
     breed_list = []
@@ -103,14 +131,37 @@ def insurance_recommend(request, pet_profile_id):
     # POST 데이터가 없으면 폼으로 리다이렉트
     if request.method != 'POST':
         return HttpResponseRedirect(reverse('insurance:recommend_form', args=[pet_profile_id]))
+    
+    # pet_profile_id는 실제로는 Pet의 id이므로 Pet을 먼저 찾음
     pet = get_object_or_404(Pet, id=pet_profile_id, owner=request.user)
     breed_name = pet.breed  # Pet 객체에서 breed 값을 가져옴
-    
-    # PetProfile preference_dict 저장
-    try:
-        pet_profile = PetProfile.objects.get(id=pet_profile_id)
-    except PetProfile.DoesNotExist:
-        pet_profile = None
+    # PetProfile을 user, name, birth_date 등 주요 정보로 찾음
+    pet_profile = PetProfile.objects.filter(
+        user=pet.owner,
+        name=pet.name,
+        birth_date=pet.birth_date
+    ).first()
+    if not pet_profile:
+        pet_profile = PetProfile.objects.create(
+            user=pet.owner,
+            name=pet.name,
+            pet_type=pet.pet_type if hasattr(pet, 'pet_type') else 'cat',
+            breed=pet.breed,
+            birth_date=pet.birth_date,
+            weight=pet.weight,
+            gender=pet.gender if hasattr(pet, 'gender') else 'unknown',
+            is_neutered=getattr(pet, 'neutered', False),
+            preference_dict={key: 3 for _, key in [
+                ('통원치료비', 'outpatient'),
+                ('입원치료비', 'inpatient'),
+                ('수술치료비', 'surgery'),
+                ('배상책임', 'liability'),
+                ('슬관절', 'joint'),
+                ('피부병', 'skin'),
+                ('구강질환', 'oral'),
+                ('비뇨기질환', 'urinary'),
+            ]}
+        )
     # preference_fields 정의 (label, key)
     preference_fields = [
         ('통원치료비', 'outpatient'),
@@ -122,6 +173,7 @@ def insurance_recommend(request, pet_profile_id):
         ('구강질환', 'oral'),
         ('비뇨기질환', 'urinary'),
     ]
+    
     if request.method == 'POST':
         preference_dict = {}
         for label, key in preference_fields:
