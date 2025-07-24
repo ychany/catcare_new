@@ -5,92 +5,11 @@
 
 {% block content %}
 <style>
-body {
-    background: #f5f7fa;
-    color: #222;
-}
-
-.community-card, .card {
-    background: #fff;
-    border: 1px solid #e3e8f0;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(49,130,246,0.08);
-    color: #222;
-}
-
-.btn-primary, .btn-write {
-    background: #3182f6;
-    color: #fff;
-    border: none;
-    font-weight: bold;
-    border-radius: 999px;
-    box-shadow: 0 2px 8px rgba(49,130,246,0.10);
-    transition: background 0.18s, color 0.18s;
-}
-.btn-primary:hover, .btn-write:hover {
-    background: #2563c6;
-    color: #fff;
-}
-
-.btn-secondary {
-    background: #fff;
-    color: #3182f6;
-    border: 2px solid #3182f6;
-    font-weight: bold;
-    border-radius: 999px;
-}
-.btn-secondary:hover {
-    background: #3182f6;
-    color: #fff;
-}
-
-/* 텍스트 강조 */
-.community-title, .card-title, .heading-2 {
-    color: #222;
-    font-weight: 700;
-}
-
-/* 안내 메시지 */
-.empty-message, .no-posts-message {
-    color: #666;
-    background: #fff;
-    border: 1px solid #e3e8f0;
-    border-radius: 12px;
-    padding: 32px 0;
-    margin: 32px 0;
-    text-align: center;
-    font-size: 18px;
-    box-shadow: 0 2px 8px rgba(49,130,246,0.06);
-}
-
-.page-hide-nav {
-    display: none !important;
-}
-
-/* Hide default header/nav */
-.navbar, .nav-section, .header-section, .breadcrumb-section {
-    display: none !important;
-}
-
-.main-container {
-    padding: 0 !important;
-    max-width: none !important;
-    background: var(--color-background) !important;
-}
-
-/* Community page specific styles */
-.community-page {
-    min-height: 100vh;
-    background: var(--color-background);
-    font-family: var(--font-primary);
-}
-
 .community-header {
-    background: white;
-    border-bottom: 1px solid var(--color-border);
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-light);
     padding: var(--spacing-lg) var(--spacing-xl);
 }
-
 .community-nav {
     display: flex;
     align-items: center;
@@ -99,425 +18,330 @@ body {
     margin: 0 auto;
     margin-bottom: var(--spacing-lg);
 }
-
 .nav-left {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
 }
-
 .back-btn {
     background: none;
     border: none;
     font-size: 24px;
-    color: var(--color-text);
+    color: var(--text-primary);
     cursor: pointer;
     padding: var(--spacing-xs);
-    border-radius: var(--border-radius-md);
+    border-radius: var(--radius-md);
     transition: background-color 0.2s;
 }
-
 .back-btn:hover {
-    background: var(--color-surface);
+    background: var(--bg-tertiary);
 }
-
 .community-title {
     font-size: 24px;
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
+    font-weight: 700;
+    color: var(--text-primary);
     margin: 0;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
 }
-
 .nav-right {
     display: flex;
     gap: var(--spacing-sm);
 }
-
+.btn-primary, .btn-write {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    border-radius: var(--radius-full);
+    box-shadow: 0 2px 8px rgba(49,130,246,0.10);
+    transition: background 0.18s, color 0.18s;
+    font-size: 16px;
+    padding: 12px 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+.btn-primary:hover, .btn-write:hover {
+    background: var(--primary-color-dark);
+    color: #fff;
+}
 .nav-btn {
     padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-lg);
-    color: var(--color-text);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
     text-decoration: none;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
+    font-size: 14px;
+    font-weight: 500;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
 }
-
 .nav-btn:hover {
-    background: var(--color-primary-light);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
 }
-
-.btn-write {
-    background: var(--color-primary);
-    color: white !important;
-    border-color: var(--color-primary);
-}
-
-.btn-write:hover {
-    background: var(--color-primary-dark);
-    border-color: var(--color-primary-dark);
-    color: white !important;
-}
-
-.btn-write, .btn-primary.btn-write {
-    background: #222 !important;
-    color: #fff !important;
-    border: none !important;
-    font-weight: bold !important;
-    border-radius: 999px !important;
-    box-shadow: 0 2px 8px rgba(49,130,246,0.10) !important;
-    font-size: 16px !important;
-    padding: 12px 28px !important;
-    display: inline-flex !important;
-    align-items: center;
-    gap: 8px;
-    z-index: 10;
-}
-.btn-write:hover, .btn-primary.btn-write:hover {
-    background: #111 !important;
-    color: #fff !important;
-}
-
 .community-main {
     max-width: 1200px;
     margin: 0 auto;
     padding: var(--spacing-xl);
 }
-
-/* Search Section */
 .search-section {
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-xl);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
     margin-bottom: var(--spacing-xl);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xl);
+    align-items: flex-end;
 }
-
 .search-grid {
-    display: grid;
-    grid-template-columns: 200px 300px 1fr;
-    gap: var(--spacing-lg);
-    align-items: end;
+    display: flex;
+    gap: var(--spacing-xl);
+    flex-wrap: wrap;
+    width: 100%;
 }
-
 .form-group {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+    min-width: 180px;
 }
-
 .filter-label {
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
 }
-
 .filter-label i {
-    color: var(--color-primary);
+    color: var(--primary-color);
     width: 16px;
 }
-
 .filter-select, .search-input, .date-input {
     padding: var(--spacing-md);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-lg);
-    font-size: var(--font-size-md);
-    transition: all 0.2s;
-    background: white;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
 }
-
 .filter-select:focus, .search-input:focus, .date-input:focus {
     outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
 }
-
-.date-range {
-    grid-column: span 1;
-}
-
 .date-inputs {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
 }
-
 .date-separator {
-    color: var(--color-text-muted);
-    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    font-weight: 500;
 }
-
-.date-input {
-    flex: 1;
-}
-
 .search-input-group {
     display: flex;
     position: relative;
 }
-
 .search-input {
     flex: 1;
     padding-right: 48px;
 }
-
 .search-btn {
     position: absolute;
     right: var(--spacing-xs);
     top: 50%;
     transform: translateY(-50%);
-    background: var(--color-primary);
+    background: var(--primary-color);
     color: white;
     border: none;
-    border-radius: var(--border-radius-md);
+    border-radius: var(--radius-md);
     padding: var(--spacing-xs) var(--spacing-sm);
     cursor: pointer;
     transition: all 0.2s;
 }
-
 .search-btn:hover {
-    background: var(--color-primary-dark);
+    background: var(--primary-color-dark);
 }
-
-/* Posts Section */
 .posts-stats {
     margin-bottom: var(--spacing-lg);
     padding: 0 var(--spacing-xs);
 }
-
 .stats-text {
-    color: var(--color-text-muted);
-    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
+    font-size: 14px;
 }
-
 .posts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: var(--spacing-xl);
     margin-bottom: var(--spacing-3xl);
 }
-
-.post-card {
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-xl);
+.card.community-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
     transition: all 0.2s;
     cursor: pointer;
-}
-
-.post-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--color-primary-light);
-}
-
-.post-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.post-author {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.author-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--border-radius-full);
-    background: var(--color-surface);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary);
-    font-size: 18px;
-}
-
-.author-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    min-height: 220px;
 }
-
-.author-name {
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text);
-    font-size: var(--font-size-sm);
+.card.community-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
 }
-
-.post-date {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
+.card-body {
+    padding: var(--spacing-xl);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
 }
-
-.post-id {
-    background: var(--color-surface);
-    color: var(--color-text-muted);
-    padding: 4px var(--spacing-sm);
-    border-radius: var(--border-radius-full);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-}
-
-.post-content {
-    padding: var(--spacing-lg);
-}
-
-.post-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    margin-bottom: var(--spacing-sm);
+.card-body .heading-3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-
-.post-excerpt {
-    color: var(--color-text-muted);
+.card-body .body-text-sm {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+.card-body .post-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.card-body .post-meta i {
+    color: var(--primary-color);
+}
+.card-body .post-excerpt {
+    color: var(--text-secondary);
     line-height: 1.5;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: 8px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    font-size: var(--font-size-sm);
+    font-size: 14px;
 }
-
-.post-image {
-    margin-top: var(--spacing-md);
-    border-radius: var(--border-radius-lg);
+.card-body .post-image {
+    margin-top: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
-    max-height: 200px;
+    max-height: 160px;
 }
-
-.post-image img {
+.card-body .post-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
 }
-
-.post-card:hover .post-image img {
+.card.community-card:hover .post-image img {
     transform: scale(1.05);
 }
-
-.post-footer {
+.card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: var(--color-surface);
+    padding: var(--spacing-md) var(--spacing-xl);
+    background: var(--bg-tertiary);
 }
-
-.post-stats {
+.card-footer .post-stats {
     display: flex;
     gap: var(--spacing-md);
 }
-
-.stat-item {
+.card-footer .stat-item {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
 }
-
-.stat-item i {
-    color: var(--color-primary);
+.card-footer .stat-item i {
+    color: var(--primary-color);
 }
-
-.read-more {
-    color: var(--color-primary);
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-xs);
+.card-footer .read-more {
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 13px;
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
     transition: all 0.2s;
 }
-
-.post-card:hover .read-more {
+.card.community-card:hover .read-more {
     transform: translateX(2px);
 }
-
-/* Empty State */
 .empty-state {
     text-align: center;
-    padding: var(--spacing-3xl);
-    color: var(--color-text-muted);
+    padding: var(--spacing-6xl) var(--spacing-3xl);
+    color: var(--text-secondary);
 }
-
 .empty-icon {
-    font-size: 80px;
+    font-size: 64px;
     margin-bottom: var(--spacing-lg);
     opacity: 0.3;
 }
-
 .empty-state h3 {
-    font-size: var(--font-size-xl);
+    font-size: 20px;
     margin-bottom: var(--spacing-sm);
-    color: var(--color-text);
-    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    font-weight: 600;
 }
-
 .empty-state p {
-    font-size: var(--font-size-md);
-    margin-bottom: var(--spacing-xl);
+    font-size: 16px;
+    margin: 0 0 var(--spacing-xl) 0;
 }
-
 .btn-empty-action {
-    background: var(--color-primary);
+    background: var(--primary-color);
     color: white;
     padding: var(--spacing-md) var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
+    border-radius: var(--radius-lg);
     text-decoration: none;
-    font-weight: var(--font-weight-medium);
+    font-weight: 500;
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-sm);
     transition: all 0.2s;
 }
-
 .btn-empty-action:hover {
-    background: var(--color-primary-dark);
+    background: var(--primary-color-dark);
     color: white;
     text-decoration: none;
     transform: translateY(-2px);
 }
-
-/* Pagination */
 .pagination-nav {
     margin-top: var(--spacing-3xl);
     display: flex;
     justify-content: center;
 }
-
 .custom-pagination {
     display: flex;
     gap: var(--spacing-xs);
@@ -525,352 +349,257 @@ body {
     padding: 0;
     margin: 0;
 }
-
 .custom-pagination .page-item .page-link {
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
     padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius-lg);
-    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-lg);
+    font-weight: 500;
     text-decoration: none;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 40px;
-    background: white;
+    background: var(--bg-primary);
 }
-
 .custom-pagination .page-item .page-link:hover {
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-    border-color: var(--color-primary);
+    background: var(--primary-color-light);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
 }
-
 .custom-pagination .page-item.active .page-link {
-    background: var(--color-primary);
+    background: var(--primary-color);
     color: white;
-    border-color: var(--color-primary);
+    border-color: var(--primary-color);
 }
-
-/* Responsive Design */
 @media (max-width: 1024px) {
-    .search-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    }
+    .search-grid { flex-direction: column; gap: var(--spacing-lg); }
+    .posts-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 }
-
 @media (max-width: 768px) {
-    .community-nav {
-        flex-direction: column;
-        gap: var(--spacing-md);
-        text-align: center;
-    }
-
-    .community-title {
-        font-size: 20px;
-    }
-
-    .community-main {
-        padding: var(--spacing-lg);
-    }
-
-    .search-section {
-        padding: var(--spacing-lg);
-    }
-
-    .posts-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-lg);
-    }
-
-    .date-inputs {
-        flex-direction: column;
-    }
-
-    .date-separator {
-        display: none;
-    }
-
-    .nav-right {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .nav-btn {
-        justify-content: center;
-    }
+    .community-nav { flex-direction: column; gap: var(--spacing-md); text-align: center; }
+    .community-title { font-size: 20px; }
+    .community-main { padding: var(--spacing-lg); }
+    .search-section { padding: var(--spacing-lg); }
+    .posts-grid { grid-template-columns: 1fr; gap: var(--spacing-lg); }
+    .date-inputs { flex-direction: column; }
+    .date-separator { display: none; }
+    .nav-right { flex-direction: column; width: 100%; }
+    .nav-btn { justify-content: center; }
 }
 </style>
 
-<div class="community-page">
-    <div class="community-header">
-        <div class="community-nav">
-            <div class="nav-left">
-                <button class="back-btn" onclick="history.back()">←</button>
-                <h1 class="community-title">
-                    <i class="fas fa-comments" style="color: var(--color-primary);"></i>
-                    커뮤니티
-                </h1>
-            </div>
-            <div class="nav-right">
-            {% if user.is_authenticated %}
-                <a href="{% url 'community_app:create' %}" class="btn btn-primary btn-write" style="margin-bottom: 20px;">
-                    <i class="fas fa-pen"></i> 글쓰기
-                </a>
-            {% endif %}
-                <button class="nav-btn" onclick="location.reload()">
-                    <i class="fas fa-sync-alt"></i>
-                    새로고침
-                </button>
-            </div>
+<div class="community-header">
+  <div class="community-nav">
+    <div class="nav-left">
+      <button class="back-btn" onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <h1 class="community-title">
+        <i class="fas fa-users"></i>
+        커뮤니티
+      </h1>
+    </div>
+    <div class="nav-right">
+      {% if user.is_authenticated %}
+      <a href="{% url 'community_app:create' %}" class="btn btn-primary btn-write">
+        <i class="fas fa-pen"></i> 글쓰기
+      </a>
+      {% endif %}
+      <button class="nav-btn" onclick="location.reload()">
+        <i class="fas fa-sync-alt"></i> 새로고침
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="community-main">
+  <div class="search-section">
+    <form method="get" class="search-form" style="width:100%;">
+      <div class="search-grid">
+        <div class="form-group">
+          <label class="filter-label">
+            <i class="fas fa-calendar-alt"></i>
+            기간
+          </label>
+          <select name="period" class="filter-select" id="periodSelect">
+            <option value="">전체 기간</option>
+            <option value="1d" {% if period == '1d' %}selected{% endif %}>1일</option>
+            <option value="1w" {% if period == '1w' %}selected{% endif %}>1주일</option>
+            <option value="1m" {% if period == '1m' %}selected{% endif %}>1개월</option>
+            <option value="6m" {% if period == '6m' %}selected{% endif %}>6개월</option>
+            <option value="1y" {% if period == '1y' %}selected{% endif %}>1년</option>
+          </select>
         </div>
+        <div class="form-group">
+          <label class="filter-label">
+            <i class="fas fa-calendar-range"></i>
+            날짜 범위
+          </label>
+          <div class="date-inputs">
+            <input type="date" name="start_date" class="date-input" value="{{ start_date|date:'Y-m-d' }}" id="startDate">
+            <span class="date-separator">~</span>
+            <input type="date" name="end_date" class="date-input" value="{{ end_date|date:'Y-m-d' }}" id="endDate">
+          </div>
+        </div>
+        <div class="form-group" style="flex:2;min-width:220px;">
+          <label class="filter-label">
+            <i class="fas fa-search"></i>
+            검색
+          </label>
+          <div class="search-input-group">
+            <input type="text" name="search" class="search-input" placeholder="제목 및 내용으로 검색..." value="{{ search_query }}">
+            <button type="submit" class="search-btn">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% if posts %}
+    <div class="posts-stats">
+      <span class="stats-text">
+        <i class="fas fa-list"></i>
+        총 {{ posts|length }}개의 게시물
+      </span>
     </div>
-
-    <div class="community-main">
-    <!-- 검색 및 필터 섹션 -->
-    <div class="search-section">
-        <form method="get" class="search-form">
-            <div class="search-grid">
-                <!-- 기간 필터 -->
-                <div class="form-group">
-                    <label class="filter-label">
-                        <i class="fas fa-calendar-alt"></i>
-                        기간
-                    </label>
-                    <select name="period" class="filter-select" id="periodSelect">
-                        <option value="">전체 기간</option>
-                        <option value="1d" {% if period == '1d' %}selected{% endif %}>1일</option>
-                        <option value="1w" {% if period == '1w' %}selected{% endif %}>1주일</option>
-                        <option value="1m" {% if period == '1m' %}selected{% endif %}>1개월</option>
-                        <option value="6m" {% if period == '6m' %}selected{% endif %}>6개월</option>
-                        <option value="1y" {% if period == '1y' %}selected{% endif %}>1년</option>
-                    </select>
-                </div>
-
-                <!-- 날짜 범위 -->
-                <div class="form-group date-range">
-                    <label class="filter-label">
-                        <i class="fas fa-calendar-range"></i>
-                        날짜 범위
-                    </label>
-                    <div class="date-inputs">
-                        <input type="date" name="start_date" class="date-input" value="{{ start_date|date:'Y-m-d' }}" id="startDate">
-                        <span class="date-separator">~</span>
-                        <input type="date" name="end_date" class="date-input" value="{{ end_date|date:'Y-m-d' }}" id="endDate">
-                    </div>
-                </div>
-
-                <!-- 검색어 -->
-                <div class="form-group">
-                    <label class="filter-label">
-                        <i class="fas fa-search"></i>
-                        검색
-                    </label>
-                    <div class="search-input-group">
-                        <input type="text" name="search" class="search-input" placeholder="제목 및 내용으로 검색..." value="{{ search_query }}">
-                        <button type="submit" class="search-btn">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </form>
+    <div class="posts-grid">
+      {% for post in posts %}
+      <div class="card community-card" onclick="window.location.href='{% url 'community_app:detail' post.id %}'">
+        <div class="card-body">
+          <h3 class="heading-3">{{ post.title|truncatechars:30 }}</h3>
+          <div class="post-meta">
+            <span><i class="fas fa-user"></i> {{ post.get_author_name }}</span>
+            <span><i class="fas fa-clock"></i> {{ post.created_at|timesince }} 전</span>
+            <span><i class="fas fa-hashtag"></i> #{{ post.id }}</span>
+          </div>
+          <div class="post-excerpt">{{ post.content|truncatechars:80 }}</div>
+          {% if post.image %}
+          <div class="post-image">
+            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+          </div>
+          {% endif %}
+        </div>
+        <div class="card-footer">
+          <div class="post-stats">
+            <span class="stat-item"><i class="fas fa-eye"></i> {{ post.views|default:0 }}</span>
+            <span class="stat-item"><i class="fas fa-heart"></i> {{ post.likes.count|default:0 }}</span>
+            <span class="stat-item"><i class="fas fa-comment"></i> {{ post.comments.count|default:0 }}</span>
+          </div>
+          <div class="read-more">
+            자세히 보기 <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
-
-    <!-- 게시물 목록 -->
-        {% if posts %}
-            <div class="posts-stats">
-                <span class="stats-text">
-                    <i class="fas fa-list"></i>
-                    총 {{ posts|length }}개의 게시물
-                </span>
-            </div>
-            
-            <div class="posts-grid">
-                {% for post in posts %}
-                <article class="post-card" data-url="{% url 'community_app:detail' post.id %}">
-                    <div class="post-header">
-                        <div class="post-author">
-                            <div class="author-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="author-info">
-                                <span class="author-name">{{ post.get_author_name }}</span>
-                                <span class="post-date">{{ post.created_at|timesince }} 전</span>
-                            </div>
-                        </div>
-                        <div class="post-id">#{{ post.id }}</div>
-                    </div>
-                    
-                    <div class="post-content">
-                        <h3 class="post-title">{{ post.title }}</h3>
-                        <p class="post-excerpt">{{ post.content|truncatechars:100 }}</p>
-                        
-                        {% if post.image %}
-                        <div class="post-image">
-                            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="post-footer">
-                        <div class="post-stats">
-                            <span class="stat-item">
-                                <i class="fas fa-eye"></i>
-                                {{ post.views|default:0 }}
-                            </span>
-                            <span class="stat-item">
-                                <i class="fas fa-heart"></i>
-                                {{ post.likes.count|default:0 }}
-                            </span>
-                            <span class="stat-item">
-                                <i class="fas fa-comment"></i>
-                                {{ post.comments.count|default:0 }}
-                            </span>
-                        </div>
-                        <div class="read-more">
-                            자세히 보기
-                            <i class="fas fa-arrow-right"></i>
-                        </div>
-                    </div>
-                </article>
-                {% endfor %}
-            </div>
-
-            <!-- 페이지네이션 -->
-            {% if is_paginated %}
-            <nav aria-label="페이지 네비게이션" class="pagination-nav">
-                <ul class="custom-pagination">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
-                            <i class="fas fa-angle-double-left"></i>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
-                            <i class="fas fa-angle-left"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-
-                    {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
-                    </li>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-        {% else %}
-            <div class="empty-state">
-                <div class="empty-icon">💬</div>
-                <h3>아직 게시물이 없어요</h3>
-                <p>커뮤니티의 첫 번째 글을 작성해보세요!</p>
-                {% if user.is_authenticated %}
-                <a href="{% url 'community_app:create' %}" class="btn-empty-action">
-                    <i class="fas fa-pen"></i>
-                    첫 글 쓰기
-                </a>
-                {% else %}
-                <a href="{% url 'login' %}" class="btn-empty-action">
-                    <i class="fas fa-sign-in-alt"></i>
-                    로그인하여 글쓰기
-                </a>
-                {% endif %}
-            </div>
+    {% if is_paginated %}
+    <nav aria-label="페이지 네비게이션" class="pagination-nav">
+      <ul class="custom-pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+            <i class="fas fa-angle-double-left"></i>
+          </a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+            <i class="fas fa-angle-left"></i>
+          </a>
+        </li>
         {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <li class="page-item active">
+          <span class="page-link">{{ num }}</span>
+        </li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+            <i class="fas fa-angle-right"></i>
+          </a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if period %}&period={{ period }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+            <i class="fas fa-angle-double-right"></i>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">💬</div>
+      <h3>아직 게시물이 없어요</h3>
+      <p>커뮤니티의 첫 번째 글을 작성해보세요!</p>
+      {% if user.is_authenticated %}
+      <a href="{% url 'community_app:create' %}" class="btn-empty-action">
+        <i class="fas fa-pen"></i> 첫 글 쓰기
+      </a>
+      {% else %}
+      <a href="{% url 'login' %}" class="btn-empty-action">
+        <i class="fas fa-sign-in-alt"></i> 로그인하여 글쓰기
+      </a>
+      {% endif %}
     </div>
+  {% endif %}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 게시물 카드 클릭 이벤트
-    const postCards = document.querySelectorAll('.post-card');
-    postCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const url = this.dataset.url;
-            if (url) {
-                window.location.href = url;
-            }
-        });
-    });
-
-    // 기간 선택과 날짜 입력 연동
-    const periodSelect = document.getElementById('periodSelect');
-    const startDate = document.getElementById('startDate');
-    const endDate = document.getElementById('endDate');
-
-    function formatDate(date) {
-        return date.getFullYear() + '-' + 
-               String(date.getMonth() + 1).padStart(2, '0') + '-' + 
-               String(date.getDate()).padStart(2, '0');
-    }
-
-    if (periodSelect && startDate && endDate) {
+  // 기간 선택과 날짜 입력 연동
+  const periodSelect = document.getElementById('periodSelect');
+  const startDate = document.getElementById('startDate');
+  const endDate = document.getElementById('endDate');
+  function formatDate(date) {
+    return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+  }
+  if (periodSelect && startDate && endDate) {
     periodSelect.addEventListener('change', function() {
+      const today = new Date();
+      let startCalc = new Date(today);
+      if (this.value === '1d') {
+        startDate.value = formatDate(today);
+        endDate.value = formatDate(today);
+      } else if (this.value === '1w') {
+        startCalc.setDate(today.getDate() - 7);
+        startDate.value = formatDate(startCalc);
+        endDate.value = formatDate(today);
+      } else if (this.value === '1m') {
+        startCalc.setMonth(today.getMonth() - 1);
+        startDate.value = formatDate(startCalc);
+        endDate.value = formatDate(today);
+      } else if (this.value === '6m') {
+        startCalc.setMonth(today.getMonth() - 6);
+        startDate.value = formatDate(startCalc);
+        endDate.value = formatDate(today);
+      } else if (this.value === '1y') {
+        startCalc.setFullYear(today.getFullYear() - 1);
+        startDate.value = formatDate(startCalc);
+        endDate.value = formatDate(today);
+      } else {
+        startDate.value = '';
+        endDate.value = '';
+      }
+    });
+    [startDate, endDate].forEach(function(input) {
+      input.addEventListener('change', function() {
         if (this.value) {
-            const today = new Date();
-            let startCalc = new Date(today);
-            
-            switch(this.value) {
-                case '1d':
-                    startCalc = new Date(today);
-                    break;
-                case '1w':
-                    startCalc.setDate(today.getDate() - 7);
-                    break;
-                case '1m':
-                    startCalc.setMonth(today.getMonth() - 1);
-                    break;
-                case '6m':
-                    startCalc.setMonth(today.getMonth() - 6);
-                    break;
-                case '1y':
-                    startCalc.setFullYear(today.getFullYear() - 1);
-                    break;
-            }
-            
-            startDate.value = formatDate(startCalc);
-            endDate.value = formatDate(today);
-        } else {
-            startDate.value = '';
-            endDate.value = '';
+          periodSelect.value = '';
         }
+      });
     });
-
-    [startDate, endDate].forEach(input => {
-        input.addEventListener('change', function() {
-            if (this.value) {
-                periodSelect.value = '';
-            }
-        });
-    });
-    }
+  }
 });
 </script>
 {% endblock %} 
