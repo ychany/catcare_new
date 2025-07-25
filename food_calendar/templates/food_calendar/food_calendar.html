@@ -1,5 +1,6 @@
 {% extends 'common_app/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}급여관리 - 냥이 집사{% endblock %}
 
@@ -73,23 +74,31 @@
 
     <!-- 필터 섹션 -->
     <div class="filter-section">
-        <div class="filter-card">
-            <div class="filter-group">
-                <label class="filter-label">고양이</label>
-                <select class="filter-select" id="petFilter">
-                    <option value="all">전체 고양이</option>
-                    {% for pet in pets %}
-                    <option value="{{ pet.id }}">{{ pet.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="filter-group">
-                <label class="filter-label">타입</label>
-                <div class="filter-tabs">
-                    <button class="filter-tab active" data-type="all">전체</button>
-                    <button class="filter-tab" data-type="feed">사료</button>
-                    <button class="filter-tab" data-type="snack">간식</button>
+        <div class="filter-card" style="display:flex; align-items:center; justify-content:space-between; gap:32px;">
+            <div style="display:flex; align-items:center; gap:32px;">
+                <div class="filter-group">
+                    <label class="filter-label">고양이</label>
+                    <select class="filter-select" id="petFilter">
+                        <option value="all">전체 고양이</option>
+                        {% for pet in pets %}
+                        <option value="{{ pet.id }}">{{ pet.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+                <div class="filter-group">
+                    <label class="filter-label">타입</label>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-type="all">전체</button>
+                        <button class="filter-tab" data-type="feed">사료</button>
+                        <button class="filter-tab" data-type="snack">간식</button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-primary" id="addFoodBtn" style="min-width:120px;">
+                    <i class="fas fa-plus"></i>
+                    급여 추가하기
+                </button>
             </div>
         </div>
     </div>
@@ -103,7 +112,7 @@
                     <i class="fas fa-bowl-food"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-number">{{ total_feeds|default:0 }}</div>
+                    <div class="stat-number stat-feed">{{ total_feeds|default:0 }}</div>
                     <div class="stat-label">총 사료 종류</div>
                 </div>
             </div>
@@ -112,7 +121,7 @@
                     <i class="fas fa-cookie"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-number">{{ total_snacks|default:0 }}</div>
+                    <div class="stat-number stat-snack">{{ total_snacks|default:0 }}</div>
                     <div class="stat-label">총 간식 종류</div>
                 </div>
             </div>
@@ -121,7 +130,7 @@
                     <i class="fas fa-calendar-check"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-number">{{ this_month_count|default:0 }}</div>
+                    <div class="stat-number stat-month">{{ this_month_count|default:0 }}</div>
                     <div class="stat-label">이번 달 급여</div>
                 </div>
             </div>
@@ -130,7 +139,7 @@
                     <i class="fas fa-won-sign"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-number">{{ total_cost|default:0|floatformat:0 }}원</div>
+                    <div class="stat-number stat-cost">{{ total_cost|default:0|floatformat:0|intcomma }}원</div>
                     <div class="stat-label">이번 달 비용</div>
                 </div>
             </div>
@@ -186,7 +195,7 @@
                             </div>
                             <div class="detail-item">
                                 <i class="fas fa-won-sign"></i>
-                                <span>{{ food.price|floatformat:0 }}원</span>
+                                <span>{{ food.price|floatformat:0|intcomma }}원</span>
                             </div>
                         </div>
                         
@@ -940,8 +949,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // 펫 필터 변경
-    document.getElementById('petFilter').addEventListener('change', filterFeeds);
+    function updateStats() {
+        const petId = document.getElementById('petFilter').value;
+        const type = document.querySelector('.filter-tab.active').dataset.type;
+        let url = `/food/stats/?pet_id=${petId}`;
+        if (type && type !== 'all') url += `&type=${type}`;
+        fetch(url)
+          .then(res => res.json())
+          .then(data => {
+            document.querySelector('.stat-feed').textContent = data.total_feeds;
+            document.querySelector('.stat-snack').textContent = data.total_snacks;
+            document.querySelector('.stat-month').textContent = data.this_month_count;
+            document.querySelector('.stat-cost').textContent = data.total_cost.toLocaleString() + '원';
+          });
+    }
+    document.getElementById('petFilter').addEventListener('change', updateStats);
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            setTimeout(updateStats, 10); // active 클래스 적용 후 실행
+        });
+    });
     
     // 급여 추가 버튼들
     document.getElementById('addFoodBtn').addEventListener('click', openFoodModal);
@@ -979,6 +1006,9 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         saveFoodRecord();
     });
+
+    // 페이지 로드시 전체 고양이 통계 로드
+    updateStats();
 });
 
 // 필터링 함수

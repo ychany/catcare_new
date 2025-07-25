@@ -429,7 +429,7 @@
             <!-- 기존 테이블 삭제 및 가로 스크롤 카드형으로 변경 -->
             <div class="horizontal-scroll-section">
                 <div class="horizontal-cards">
-                    {% for product, sure_index in products %}
+                            {% for product, sure_index in products %}
                     <div class="horizontal-card">
                         <div class="product-header">
                             <div class="product-name">{{ product.name }}</div>
@@ -453,19 +453,19 @@
                         <div class="info-row">
                             <span class="info-label">갱신 주기</span>
                             <span class="info-value">{{ product.renewal_cycle }}년</span>
-                        </div>
+                                </div>
                         {% for key in coverage_keys %}
                         <div class="info-row">
                             <span class="info-label">{{ key }}</span>
                             <span class="info-value">
-                                {% if product.coverage_details_verbose|get_item:key %}
-                                    {% for v in product.coverage_details_verbose|get_item:key %}
-                                        {{ v }}{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                {% else %}-{% endif %}
+                                        {% if product.coverage_details_verbose|get_item:key %}
+                                            {% for v in product.coverage_details_verbose|get_item:key %}
+                                                {{ v }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        {% else %}-{% endif %}
                                 <span class="coverage-badge">{{ product.coverage_limits|get_item:key }}</span>
-                            </span>
-                        </div>
+                                    </span>
+                                </div>
                         {% endfor %}
                         <div class="info-row">
                             <span class="info-label">특별 보장</span>
@@ -479,16 +479,16 @@
                                     {% endfor %}
                                 </ul>
                             </span>
-                        </div>
+            </div>
                         <div class="action-buttons">
                             <a href="{% url 'insurance:product_detail' product.id %}" class="action-btn detail">
                                 <i class="fas fa-info-circle"></i>
-                                상세 정보
-                            </a>
+                            상세 정보
+                        </a>
                             <a href="{% url 'insurance:inquiry' product.id %}" class="action-btn inquiry">
                                 <i class="fas fa-envelope"></i>
-                                문의하기
-                            </a>
+                            문의하기
+                        </a>
                         </div>
                     </div>
                     {% endfor %}

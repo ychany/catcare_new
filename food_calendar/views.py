@@ -562,3 +562,24 @@ def create_other_purchase_api(request):
         memo=data.get('memo', ''),
     )
     return JsonResponse({'id': purchase.id})
+
+@login_required
+def food_stats(request):
+    pet_id = request.GET.get('pet_id')
+    type_param = request.GET.get('type')
+    foods = FoodEvent.objects.filter(user=request.user)
+    if pet_id and pet_id != 'all':
+        foods = foods.filter(pet_id=pet_id)
+    if type_param and type_param != 'all':
+        foods = foods.filter(type=type_param)
+    today = date.today()
+    total_feeds = foods.filter(type='feed').count()
+    total_snacks = foods.filter(type='snack').count()
+    this_month_count = foods.filter(start_time__year=today.year, start_time__month=today.month).count()
+    total_cost = foods.filter(purchase_date__year=today.year, purchase_date__month=today.month).aggregate(total=Sum('price'))['total'] or 0
+    return JsonResponse({
+        'total_feeds': total_feeds,
+        'total_snacks': total_snacks,
+        'this_month_count': this_month_count,
+        'total_cost': int(total_cost),
+    })
