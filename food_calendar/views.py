@@ -69,6 +69,11 @@ def food_calendar(request):
             food.days_since_open = (food.end_time.date() - food.start_time.date()).days + 1
         else:
             food.days_since_open = (today - food.start_time.date()).days + 1
+        # 하루평균 섭취량(정수 g) 계산
+        if food.type == 'feed' and food.end_time and food.quantity_kg and food.days_since_open > 0:
+            food.avg_gram = int(round(food.quantity_kg / food.days_since_open * 1000))
+        else:
+            food.avg_gram = ''
 
     return render(request, 'food_calendar/food_calendar.html', {
         'pets': pets,

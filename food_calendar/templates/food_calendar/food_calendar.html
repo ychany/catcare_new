@@ -206,6 +206,7 @@
                             {% if food.end_date %}
                                 <span class="status-badge completed">섭취 완료</span>
                                 <span class="status-date">{{ food.end_date|date:"Y.m.d" }}</span>
+                                <span class="status-avg" style="margin-left:8px; color:#888;">(하루 평균 {{ food.avg_gram }}g)</span>
                             {% else %}
                                 <span class="status-badge ongoing">섭취 중</span>
                                 <span class="status-days">{{ food.days_since_open }}일째</span>
@@ -318,11 +319,11 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">용량 (kg)</label>
-                            <input type="number" class="form-input" name="quantity_kg" step="0.01" placeholder="0.00" required>
+                            <input type="text" class="form-input" name="quantity_kg" step="0.01" placeholder="0.00" required id="quantityKgInput">
                         </div>
                         <div class="form-group">
                             <label class="form-label">가격 (원)</label>
-                            <input type="number" class="form-input" name="price" placeholder="0" required>
+                            <input type="text" class="form-input" name="price" placeholder="0" required id="priceInput">
                         </div>
                     </div>
                     
@@ -1007,14 +1008,68 @@ document.addEventListener('DOMContentLoaded', function() {
     updateStats();
 
     // 가격 input에 intcomma 적용 (JS)
-    document.querySelector('input[name="price"]').addEventListener('input', function(e) {
-        let val = this.value.replace(/[^\d]/g, '');
-        if (val) {
-            this.value = Number(val).toLocaleString();
-        } else {
-            this.value = '';
+    const priceInput = document.getElementById('priceInput');
+    if (priceInput) {
+        priceInput.addEventListener('input', function() {
+            // 숫자만 추출
+            let val = this.value.replace(/[^\d]/g, '');
+            if (val) {
+                this.value = Number(val).toLocaleString();
+            } else {
+                this.value = '';
+            }
+        });
+        // 페이지 진입 시 값이 있으면 콤마 표시
+        if (priceInput.value) {
+            priceInput.value = Number(priceInput.value).toLocaleString();
         }
-    });
+    }
+    // 폼 제출 시 콤마 제거
+    if (foodForm) {
+        foodForm.addEventListener('submit', function(e) {
+            const priceInput = document.getElementById('priceInput');
+            if (priceInput) {
+                priceInput.value = priceInput.value.replace(/,/g, '');
+            }
+        });
+    }
+
+    const quantityKgInput = document.getElementById('quantityKgInput');
+    if (quantityKgInput) {
+        quantityKgInput.addEventListener('input', function() {
+            // 숫자와 소수점만 추출
+            let val = this.value.replace(/[^\d.]/g, '');
+            // 소수점 2자리까지만 허용
+            if (val) {
+                // 소수점이 여러 개 들어가는 것 방지
+                let parts = val.split('.');
+                if (parts.length > 2) {
+                    val = parts[0] + '.' + parts.slice(1).join('');
+                }
+                // 소수점 2자리 제한
+                if (val.includes('.')) {
+                    let [intPart, decPart] = val.split('.');
+                    decPart = decPart.slice(0,2);
+                    val = intPart + '.' + decPart;
+                }
+                // 콤마 적용 (정수부만)
+                let [intPart, decPart] = val.split('.');
+                intPart = Number(intPart).toLocaleString();
+                this.value = decPart !== undefined ? intPart + '.' + decPart : intPart;
+            } else {
+                this.value = '';
+            }
+        });
+    }
+    // 폼 제출 시 콤마 제거
+    if (foodForm) {
+        foodForm.addEventListener('submit', function(e) {
+            const quantityKgInput = document.getElementById('quantityKgInput');
+            if (quantityKgInput) {
+                quantityKgInput.value = quantityKgInput.value.replace(/,/g, '');
+            }
+        });
+    }
 });
 
 // 필터링 함수
@@ -1155,6 +1210,15 @@ function deleteFood(id) {
 // 저장 함수 보완: 수정 모드일 때 update API 호출
 function saveFoodRecord() {
     const form = document.getElementById('foodForm');
+    // price, quantity_kg 콤마 제거 후 값 세팅
+    const priceInput = document.getElementById('priceInput');
+    if (priceInput) {
+        priceInput.value = priceInput.value.replace(/,/g, '');
+    }
+    const quantityKgInput = document.getElementById('quantityKgInput');
+    if (quantityKgInput) {
+        quantityKgInput.value = quantityKgInput.value.replace(/,/g, '');
+    }
     const formData = new FormData(form);
     const editId = form.getAttribute('data-edit-id');
     let url = '/food/event/create/';
@@ -1166,6 +1230,9 @@ function saveFoodRecord() {
     }
     if (method === 'PUT') {
         let obj = Object.fromEntries(formData);
+        // price, quantity_kg 콤마 제거 (혹시 모를 잔여 콤마)
+        if (obj.price) obj.price = obj.price.replace(/,/g, '');
+        if (obj.quantity_kg) obj.quantity_kg = obj.quantity_kg.replace(/,/g, '');
         obj.pet_id = obj.pet; // pet → pet_id
         obj.start = obj.open_date; // open_date → start
         // 필요시 brand 삭제: delete obj.brand;
