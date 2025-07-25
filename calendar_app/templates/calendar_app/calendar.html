@@ -31,6 +31,7 @@
   max-width: 1200px;
   margin: 0 auto;
   margin-bottom: 0;
+  padding: 0 20px;
 }
 .nav-left {
   display: flex;
@@ -145,23 +146,42 @@
         </div>
     </div>
 
+    <!-- 캘린더 섹션 -->
+    <div class="calendar-section-outer">
+        <div class="calendar-section-wrapper">
+        <div class="calendar-section-header">
+            <h2 class="calendar-section-title">
+                <i class="fas fa-calendar-alt"></i>
+                의료 기록 캘린더
+            </h2>
+            <div class="calendar-view-controls">
+                <button class="calendar-view-btn active" data-view="month">
+                    <i class="fas fa-calendar"></i>
+                    월간
+                </button>
+                <button class="calendar-view-btn" data-view="week">
+                    <i class="fas fa-calendar-week"></i>
+                    주간
+                </button>
+                <button class="calendar-view-btn" data-view="list">
+                    <i class="fas fa-list"></i>
+                    목록
+                </button>
+            </div>
+        </div>
+        <div class="calendar-container">
+            <div id="medical-calendar"></div>
+        </div>
+        </div>
+    </div>
+
     <!-- 메인 콘텐츠 -->
     <div class="main-content">
         <!-- 의료 기록 리스트 -->
         <div class="records-section">
             <div class="section-header">
-                <h2 class="section-title">의료 기록</h2>
-                <div class="view-controls">
-                    <button class="view-control active" data-view="timeline">
-                        <i class="fas fa-list"></i>
-                        타임라인
-                    </button>
-                    <button class="view-control" data-view="calendar">
-                        <i class="fas fa-calendar-alt"></i>
-                        캘린더
-                    </button>
-                </div>
-                <button class="btn btn-primary btn-sm" id="addRecordBtn" style="margin-left:12px;">
+                <h2 class="section-title">의료 기록 목록</h2>
+                <button class="btn btn-primary btn-sm" id="addRecordBtn">
                     <i class="fas fa-plus"></i> 기록 추가
                 </button>
             </div>
@@ -249,12 +269,6 @@
                 </div>
             </div>
 
-            <!-- 캘린더 뷰 -->
-            <div class="calendar-view" id="calendarView" style="display: none;">
-                <div class="calendar-container">
-                    <div id="calendar"></div>
-                </div>
-            </div>
         </div>
 
         <!-- 예방접종 일정 사이드바 -->
@@ -394,6 +408,12 @@
     margin: 0 auto;
 }
 
+/* 메인 콘텐츠 컨테이너 */
+body .content {
+    max-width: none;
+    padding: 0 20px;
+}
+
 /* 페이지 헤더 */
 .page-header {
     margin-bottom: var(--spacing-3xl);
@@ -428,6 +448,10 @@
 /* 대시보드 섹션 */
 .dashboard-section {
     margin-bottom: var(--spacing-4xl);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 20px;
 }
 
 /* 필터 카드 */
@@ -563,6 +587,9 @@
     display: flex;
     gap: var(--spacing-3xl);
     align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
     }
     
 .records-section {
@@ -1017,48 +1044,25 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 필터 탭 기능
-    const filterTabs = document.querySelectorAll('.filter-tab');
-    filterTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            filterTabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            filterRecords();
-        });
-    });
+    console.log('DOM loaded, medical records count:', document.querySelectorAll('.timeline-item').length);
     
-    // 펫 및 기간 필터 변경
-    document.getElementById('petFilter').addEventListener('change', filterRecords);
-    document.getElementById('periodFilter').addEventListener('change', filterRecords);
+    // 캘린더 초기화
+    initMedicalCalendar();
     
-    // 뷰 컨트롤
-    const viewControls = document.querySelectorAll('.view-control');
-    viewControls.forEach(control => {
-        control.addEventListener('click', function() {
-            viewControls.forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            
-            const view = this.dataset.view;
-            if (view === 'timeline') {
-                document.getElementById('timelineView').style.display = 'block';
-                document.getElementById('calendarView').style.display = 'none';
-            } else {
-                document.getElementById('timelineView').style.display = 'none';
-                document.getElementById('calendarView').style.display = 'block';
-                // 캘린더 초기화 (필요시)
-            }
-        });
-    });
+    // 필터 및 이벤트 리스너 설정
+    updateFiltersAndCalendar();
     
     // 기록 추가 버튼들
     document.getElementById('addRecordBtn').addEventListener('click', openRecordModal);
     document.getElementById('addFirstRecordBtn')?.addEventListener('click', openRecordModal);
     
     // 예방접종 일정 버튼
-    document.getElementById('vaccinationScheduleBtn').addEventListener('click', function() {
-        // 사이드바로 스크롤 또는 모달 열기
-        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
-    });
+    const vaccinationScheduleBtn = document.getElementById('vaccinationScheduleBtn');
+    if (vaccinationScheduleBtn) {
+        vaccinationScheduleBtn.addEventListener('click', function() {
+            document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
     
     // 라디오 버튼 변경 감지
     const typeRadios = document.querySelectorAll('input[name="event_type"]');
@@ -1079,17 +1083,8 @@ document.addEventListener('DOMContentLoaded', function() {
         saveRecord();
     });
 
-    document.getElementById('petFilter').addEventListener('change', function() {
-        const petId = this.value;
-        fetch(`/calendar/stats/?pet_id=${petId}`)
-            .then(response => response.json())
-            .then(data => {
-                document.querySelector('.stat-card.health .stat-number').textContent = data.total_medical;
-                document.querySelector('.stat-card.vaccination .stat-number').textContent = data.total_vaccination;
-                document.querySelector('.stat-card.upcoming .stat-number').textContent = data.upcoming_vacc;
-                document.querySelector('.stat-card.cost .stat-number').textContent = data.total_cost.toLocaleString() + '원';
-            });
-    });
+    // 펫 및 기간 필터 변경
+    document.getElementById('periodFilter').addEventListener('change', filterRecords);
 });
 
 // 필터링 함수
@@ -1151,10 +1146,10 @@ function saveRecord() {
     const form = document.getElementById('recordForm');
     const formData = new FormData(form);
     const editId = form.getAttribute('data-edit-id');
-    let url = '/calendar/api/events/';
+    let url = 'api/events/';
     let method = 'POST';
     if (editId) {
-        url = `/calendar/api/events/${editId}/`;
+        url = `api/events/${editId}/`;
         method = 'PATCH';
         form.removeAttribute('data-edit-id');
     }
@@ -1186,7 +1181,7 @@ function saveRecord() {
 
 // 기록 수정
 function editRecord(recordId) {
-    fetch(`/calendar/api/events/${recordId}/`)
+    fetch(`api/events/${recordId}/`)
         .then(response => response.json())
         .then(data => {
             openRecordModal();
@@ -1210,7 +1205,7 @@ function editRecord(recordId) {
 // 기록 삭제
 function deleteRecord(recordId) {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-    fetch(`/calendar/api/events/${recordId}/`, {
+    fetch(`api/events/${recordId}/`, {
         method: 'DELETE',
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -1233,4 +1228,313 @@ document.getElementById('recordModal').addEventListener('click', function(e) {
     }
 });
     </script>
+{% endblock %}
+
+{% block extra_js %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet'/>
+
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/ko.js'></script>
+
+<style>
+/* 캘린더 섹션 스타일 */
+.calendar-section-outer {
+    padding: 0 20px;
+    margin-bottom: var(--spacing-3xl);
+}
+
+.calendar-section-wrapper {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.calendar-section-header {
+    padding: var(--spacing-xl);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calendar-section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.calendar-section-title i {
+    color: var(--primary-color);
+}
+
+.calendar-view-controls {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.calendar-view-btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.calendar-view-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.calendar-view-btn.active {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+.calendar-container {
+    padding: var(--spacing-xl);
+    background: var(--bg-primary);
+}
+
+#medical-calendar {
+    height: 600px;
+    width: 100%;
+}
+
+/* FullCalendar 커스텀 스타일 */
+.fc-event {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin: 1px 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.fc-event:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* 의료기록 타입별 색상 */
+.fc-event-med {
+    background-color: #e53e3e !important;
+    border-color: #e53e3e !important;
+    color: white !important;
+}
+
+.fc-event-vacc {
+    background-color: #3182ce !important;
+    border-color: #3182ce !important;
+    color: white !important;
+}
+
+.fc-event-next {
+    background-color: #d69e2e !important;
+    border-color: #d69e2e !important;
+    color: white !important;
+}
+</style>
+
+<script>
+// 의료기록 캘린더 초기화
+let medicalCalendar = null;
+let currentPetFilter = 'all';
+let currentTypeFilter = 'all';
+
+// 필터 변경 시 캘린더와 타임라인 업데이트
+function updateFiltersAndCalendar() {
+    // 필터 탭 기능
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentTypeFilter = this.dataset.type;
+            filterRecords();
+            if (medicalCalendar) {
+                medicalCalendar.refetchEvents();
+            }
+        });
+    });
+    
+    // 펫 필터 변경 시 캘린더와 통계 업데이트
+    document.getElementById('petFilter').addEventListener('change', function() {
+        currentPetFilter = this.value;
+        filterRecords();
+        if (medicalCalendar) {
+            medicalCalendar.refetchEvents();
+        }
+        // 통계 업데이트
+        const petId = this.value;
+        fetch(`stats/?pet_id=${petId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.stat-card.health .stat-number').textContent = data.total_medical;
+                document.querySelector('.stat-card.vaccination .stat-number').textContent = data.total_vaccination;
+                document.querySelector('.stat-card.upcoming .stat-number').textContent = data.upcoming_vacc;
+                document.querySelector('.stat-card.cost .stat-number').textContent = data.total_cost.toLocaleString() + '원';
+            });
+    });
+    
+    // 캘린더 뷰 컨트롤
+    const calendarViewBtns = document.querySelectorAll('.calendar-view-btn');
+    calendarViewBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            calendarViewBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const view = this.dataset.view;
+            if (medicalCalendar) {
+                let calendarView = 'dayGridMonth';
+                if (view === 'week') {
+                    calendarView = 'timeGridWeek';
+                } else if (view === 'list') {
+                    calendarView = 'listWeek';
+                }
+                medicalCalendar.changeView(calendarView);
+            }
+        });
+    });
+}
+
+function initMedicalCalendar() {
+    const calendarEl = document.getElementById('medical-calendar');
+    console.log('Initializing medical calendar...', calendarEl);
+    
+    medicalCalendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ko',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        },
+        views: {
+            timeGrid: {
+                dayMaxEvents: 3,
+                eventMaxStack: 2
+            }
+        },
+        eventDidMount: function(info) {
+            const eventType = info.event.extendedProps.event_type;
+            const petName = info.event.extendedProps.pet_name;
+            const description = info.event.extendedProps.description || '';
+            const hospital = info.event.extendedProps.hospital || '';
+            
+            let tooltipText = `${petName}`;
+            if (hospital) tooltipText += `\n병원: ${hospital}`;
+            if (description) tooltipText += `\n내용: ${description}`;
+            
+            info.el.title = tooltipText;
+        },
+        events: function(info, successCallback, failureCallback) {
+            console.log('Fetching calendar events...')
+            fetch('api/events/')
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Fetched calendar data:', data);
+                    let filteredEvents = data;
+                    
+                    // 펫 필터 적용
+                    if (currentPetFilter !== 'all') {
+                        filteredEvents = filteredEvents.filter(event => event.pet == currentPetFilter);
+                    }
+                    
+                    // 타입 필터 적용
+                    if (currentTypeFilter !== 'all') {
+                        filteredEvents = filteredEvents.filter(event => event.event_type === currentTypeFilter);
+                    }
+                    
+                    const events = [];
+                    
+                    filteredEvents.forEach(event => {
+                        // 주요 이벤트 (진료/예방접종)
+                        events.push({
+                            id: event.id,
+                            title: `${event.event_type === 'med' ? '진료' : '예방접종'} (${event.pet_name})`,
+                            start: event.date,
+                            className: `fc-event-${event.event_type}`,
+                            extendedProps: {
+                                event_type: event.event_type,
+                                pet_name: event.pet_name,
+                                description: event.description,
+                                hospital: event.hospital,
+                                pet_id: event.pet,
+                                cost: event.cost,
+                                notes: event.notes
+                            }
+                        });
+                        
+                        // 다음 예방접종 일정 (예방접종인 경우)
+                        if (event.event_type === 'vacc' && event.next_date) {
+                            events.push({
+                                id: `next_${event.id}`,
+                                title: `예정: ${event.pet_name} 예방접종`,
+                                start: event.next_date,
+                                className: 'fc-event-next',
+                                extendedProps: {
+                                    event_type: 'next',
+                                    pet_name: event.pet_name,
+                                    description: '예정된 예방접종',
+                                    original_id: event.id
+                                }
+                            });
+                        }
+                    });
+                    
+                    successCallback(events);
+                })
+                .catch(error => {
+                    console.error('Error fetching events:', error);
+                    failureCallback(error);
+                });
+        },
+        eventClick: function(info) {
+            const props = info.event.extendedProps;
+            
+            if (props.event_type === 'next') {
+                // 예정된 접종은 클릭해도 편집하지 않고 정보만 표시
+                alert(`${props.pet_name}의 예정된 예방접종입니다.\n날짜: ${info.event.startStr}`);
+                return;
+            }
+            
+            // 기존 기록 편집
+            editRecord(info.event.id);
+            info.jsEvent.preventDefault();
+        },
+        dateClick: function(info) {
+            // 날짜 클릭 시 새 기록 추가 모달 열기
+            openRecordModal();
+            // 클릭한 날짜로 설정
+            document.querySelector('input[name="date"]').value = info.dateStr;
+        }
+    });
+    
+    console.log('Rendering medical calendar...');
+    medicalCalendar.render();
+}
+</script>
 {% endblock %} 
