@@ -143,6 +143,15 @@
                     <div class="stat-label">이번 달 비용</div>
                 </div>
             </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number stat-avg">{{ overall_avg|default:0 }}</div>
+                    <div class="stat-label">하루평균 섭취량(kg)</div>
+                </div>
+            </div>
         </div>
 
         <!-- 급여 기록 리스트 -->
@@ -187,7 +196,7 @@
                             </div>
                             <div class="detail-item">
                                 <i class="fas fa-calendar"></i>
-                                <span>개봉일: {{ food.open_date|date:"Y.m.d" }}</span>
+                                <span>개봉일: {{ food.start_time|date:"Y.m.d" }}</span>
                             </div>
                             <div class="detail-item">
                                 <i class="fas fa-weight-hanging"></i>
@@ -207,6 +216,7 @@
                         </div>
                         {% endif %}
                         
+                        {% if food.type == 'feed' %}
                         <div class="feed-status">
                             {% if food.end_date %}
                                 <span class="status-badge completed">섭취 완료</span>
@@ -216,6 +226,7 @@
                                 <span class="status-days">{{ food.days_since_open }}일째</span>
                             {% endif %}
                         </div>
+                        {% endif %}
                     </div>
                     
                     <div class="feed-actions">
@@ -1041,6 +1052,13 @@ function filterFeeds() {
 function openFoodModal() {
     document.getElementById('foodModal').classList.add('active');
     document.body.style.overflow = 'hidden';
+    const form = document.getElementById('foodForm');
+    form.reset();
+    form.removeAttribute('data-edit-id');
+    // 별점 UI 초기화
+    document.querySelectorAll('.rating-star').forEach(star => star.classList.remove('active'));
+    // brand input도 빈 값으로
+    document.querySelector('input[name="brand"]').value = '';
 }
 
 function closeFoodModal() {
@@ -1052,24 +1070,46 @@ function closeFoodModal() {
 // 급여 수정
 function editFood(id) {
     fetch(`/food/event/${id}/`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                console.error('응답 에러:', response.status, response.statusText);
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('받은 데이터:', data);
             // 모달 열기
             openFoodModal();
             // 폼 값 채우기
-            document.getElementById('modalPetSelect').value = data.pet_id;
-            document.querySelector(`input[name="type"][value="${data.type}"]`).checked = true;
-            document.querySelector('input[name="product_name"]').value = data.product_name;
-            document.querySelector('input[name="brand"]').value = data.brand || '';
-            document.querySelector('input[name="purchase_date"]').value = data.purchase_date || '';
+            document.getElementById('modalPetSelect').value = data.pet_id ?? '';
+            const typeInput = document.querySelector(`input[name="type"][value="${data.type}"]`);
+            if (typeInput) typeInput.checked = true;
+            document.querySelector('input[name="product_name"]').value = data.product_name ?? '';
+            document.querySelector('input[name="brand"]').value = '';
+            document.querySelector('input[name="purchase_date"]').value = data.purchase_date ?? '';
             document.querySelector('input[name="open_date"]').value = data.start ? data.start.substr(0,10) : '';
-            document.querySelector('input[name="quantity_kg"]').value = data.quantity_kg;
-            document.querySelector('input[name="price"]').value = data.price;
-            document.querySelector('input[name="purchase_link"]').value = data.purchase_link;
-            document.querySelector('input[name="rating"]').value = data.rating;
-            document.querySelector('textarea[name="description"]').value = data.description;
+            document.querySelector('input[name="quantity_kg"]').value = data.quantity_kg ?? '';
+            document.querySelector('input[name="price"]').value = data.price ?? '';
+            document.querySelector('input[name="purchase_link"]').value = data.purchase_link ?? '';
+            document.querySelector('input[name="rating"]').value = data.rating ?? '';
+            // 별점 UI 갱신
+            const ratingValue = data.rating ?? '';
+            const ratingStars = document.querySelectorAll('.rating-star');
+            ratingStars.forEach((star, idx) => {
+                if (idx < ratingValue) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            document.querySelector('textarea[name="description"]').value = data.description ?? '';
             // 수정 모드 표시
             document.getElementById('foodForm').setAttribute('data-edit-id', id);
+        })
+        .catch(error => {
+            console.error('fetch 에러:', error);
+            alert('데이터를 불러오지 못했습니다: ' + (error.error || error));
         });
 }
 
@@ -1123,14 +1163,39 @@ function saveFoodRecord() {
         method = 'PUT';
         form.removeAttribute('data-edit-id');
     }
+    if (method === 'PUT') {
+        let obj = Object.fromEntries(formData);
+        obj.pet_id = obj.pet; // pet → pet_id
+        obj.start = obj.open_date; // open_date → start
+        // 필요시 brand 삭제: delete obj.brand;
+        fetch(url, {
+            method: method,
+            body: JSON.stringify(obj),
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || data.id) {
+                closeFoodModal();
+                location.reload();
+            } else {
+                alert('저장 중 오류가 발생했습니다.\n' + (data.error || ''));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('저장 중 오류가 발생했습니다.');
+        });
+        return;
+    }
     fetch(url, {
         method: method,
-        body: method === 'POST' ? formData : JSON.stringify(Object.fromEntries(formData)),
-        headers: method === 'POST' ? {
+        body: formData,
+        headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-        } : {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            'Content-Type': 'application/json',
         },
     })
     .then(response => response.json())

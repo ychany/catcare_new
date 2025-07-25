@@ -5,9 +5,9 @@ app_name = 'food_calendar'
 
 urlpatterns = [
     path('', food_calendar, name='food_calendar'),
+    path('event/<int:event_id>/', get_event_details, name='get_event_details'),
     path('event/<int:pet_id>/', get_events, name='get_events'),
     path('event/create/', create_event, name='create_event'),
-    path('event/<int:event_id>/', get_event_details, name='get_event_details'),
     path('event/<int:event_id>/delete/', delete_event, name='delete_event'),
     path('event/<int:event_id>/update/', update_food_event, name='update_food_event'),
     path('event/<int:event_id>/end/', end_event, name='end_event'),
