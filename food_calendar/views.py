@@ -32,6 +32,7 @@ def food_calendar(request):
             avg = food.quantity_kg / days
             avg_list.append(avg)
     overall_avg = round(sum(avg_list) / len(avg_list), 3) if avg_list else 0
+    overall_avg_gram = int(overall_avg * 1000)
 
     today = date.today()
     total_feeds = foods.filter(type='feed').count()
@@ -74,8 +75,8 @@ def food_calendar(request):
         'foods': foods,
         'total_feeds': total_feeds,
         'total_snacks': total_snacks,
-        'this_month_count': this_month_count,
         'total_cost': total_cost,
+        'overall_avg_gram': overall_avg_gram,
         'overall_avg': overall_avg,
     })
 
@@ -273,7 +274,7 @@ def update_food_event(request, event_id):
             event.pet_id = data['pet_id']
         if 'start' in data:
             if data['start']:
-                dt = datetime.strptime(data['start'], '%Y-%m-%d')
+                dt = datetime.strptime(data['start'] + ' 12:00:00', '%Y-%m-%d %H:%M:%S')
                 event.start_time = timezone.make_aware(dt)
             else:
                 event.start_time = None
@@ -289,9 +290,9 @@ def update_food_event(request, event_id):
             'duration_days': event.duration_days,
             'purchase_date': event.purchase_date.isoformat() if event.purchase_date else None,
             'price': event.price,
-            'start_time': event.start_time.isoformat(),
-            'end_time': event.end_time.isoformat(),
-            'pet_id': event.pet_id
+            'start_time': event.start_time.isoformat() if event.start_time else None,
+            'end_time': event.end_time.isoformat() if event.end_time else None,
+            'pet_id': event.pet_id,
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)

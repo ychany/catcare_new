@@ -125,15 +125,7 @@
                     <div class="stat-label">총 간식 종류</div>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-number stat-month">{{ this_month_count|default:0 }}</div>
-                    <div class="stat-label">이번 달 급여</div>
-                </div>
-            </div>
+            <!-- 이번 달 급여 카드 삭제됨 -->
             <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-won-sign"></i>
@@ -148,8 +140,8 @@
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-number stat-avg">{{ overall_avg|default:0 }}</div>
-                    <div class="stat-label">하루평균 섭취량(kg)</div>
+                    <div class="stat-number stat-avg">{{ overall_avg_gram|default:0|intcomma }}</div>
+                    <div class="stat-label">하루평균 섭취량(g)</div>
                 </div>
             </div>
         </div>
@@ -158,14 +150,7 @@
         <div class="feed-list-section">
             <div class="section-header">
                 <h2 class="section-title">급여 기록</h2>
-                <div class="view-controls">
-                    <button class="view-control active" data-view="list">
-                        <i class="fas fa-list"></i>
-                    </button>
-                    <button class="view-control" data-view="grid">
-                        <i class="fas fa-th-large"></i>
-                    </button>
-                </div>
+                <!-- view-controls 버튼 삭제 -->
             </div>
 
             <div class="feed-list" id="feedList">
@@ -968,9 +953,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(url)
           .then(res => res.json())
           .then(data => {
-            document.querySelector('.stat-feed').textContent = data.total_feeds;
-            document.querySelector('.stat-snack').textContent = data.total_snacks;
-            document.querySelector('.stat-month').textContent = data.this_month_count;
             document.querySelector('.stat-cost').textContent = data.total_cost.toLocaleString() + '원';
           });
     }
@@ -1013,13 +995,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // 폼 제출 처리
-    document.getElementById('foodForm').addEventListener('submit', function(e) {
+    function handleFoodFormSubmit(e) {
         e.preventDefault();
         saveFoodRecord();
-    });
+    }
+    const foodForm = document.getElementById('foodForm');
+    foodForm.removeEventListener('submit', handleFoodFormSubmit);
+    foodForm.addEventListener('submit', handleFoodFormSubmit);
 
     // 페이지 로드시 전체 고양이 통계 로드
     updateStats();
+
+    // 가격 input에 intcomma 적용 (JS)
+    document.querySelector('input[name="price"]').addEventListener('input', function(e) {
+        let val = this.value.replace(/[^\d]/g, '');
+        if (val) {
+            this.value = Number(val).toLocaleString();
+        } else {
+            this.value = '';
+        }
+    });
 });
 
 // 필터링 함수
@@ -1088,7 +1083,13 @@ function editFood(id) {
             document.querySelector('input[name="product_name"]').value = data.product_name ?? '';
             document.querySelector('input[name="brand"]').value = '';
             document.querySelector('input[name="purchase_date"]').value = data.purchase_date ?? '';
-            document.querySelector('input[name="open_date"]').value = data.start ? data.start.substr(0,10) : '';
+            const openDateInput = document.querySelector('input[name="open_date"]');
+            if (data.start) {
+                const dateStr = data.start.split('T')[0];
+                openDateInput.value = dateStr;
+            } else {
+                openDateInput.value = '';
+            }
             document.querySelector('input[name="quantity_kg"]').value = data.quantity_kg ?? '';
             document.querySelector('input[name="price"]').value = data.price ?? '';
             document.querySelector('input[name="purchase_link"]').value = data.purchase_link ?? '';
