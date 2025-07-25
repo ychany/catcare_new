@@ -18,12 +18,21 @@ from django.db.models.functions import Coalesce
 @require_http_methods(['GET'])
 def other_purchase_management(request):
     # 기타 구매 관리 뷰
-    # 월별 필터링
+    # 날짜/월별 필터링
     month = request.GET.get('month')
     if month:
-        year, mon = map(int, month.split('-'))
-        start_date = datetime(year, mon, 1)
-        end_date = datetime(year if mon<12 else year+1, mon%12+1, 1)
+        if len(month) == 10:  # YYYY-MM-DD 형식
+            selected_date = datetime.strptime(month, '%Y-%m-%d')
+            start_date = datetime(selected_date.year, selected_date.month, 1)
+            end_date = datetime(selected_date.year if selected_date.month<12 else selected_date.year+1, selected_date.month%12+1, 1)
+        elif len(month) == 7:  # YYYY-MM 형식
+            year, mon = map(int, month.split('-'))
+            start_date = datetime(year, mon, 1)
+            end_date = datetime(year if mon<12 else year+1, mon%12+1, 1)
+        else:
+            today = datetime.now()
+            start_date = datetime(today.year, today.month, 1)
+            end_date = datetime(today.year if today.month<12 else today.year+1, today.month%12+1, 1)
     else:
         today = datetime.now()
         start_date = datetime(today.year, today.month, 1)
@@ -33,14 +42,17 @@ def other_purchase_management(request):
     selected_pet_id = request.GET.get('pet')
     pets = Pet.objects.filter(owner=request.user)
     
-    # 검색 필터링
+    # 검색 및 카테고리 필터링
     search = request.GET.get('search', '')
+    category = request.GET.get('category', '')
     qs = OtherPurchase.objects.filter(user=request.user, purchase_date__gte=start_date, purchase_date__lt=end_date)
     
     if selected_pet_id:
         qs = qs.filter(cat_id=selected_pet_id)
     if search:
         qs = qs.filter(product_name__icontains=search)
+    if category:
+        qs = qs.filter(type=category)
     
     # 총 합계
     total_price = qs.aggregate(total_price=Coalesce(Sum('price'), Value(0), output_field=DecimalField()))['total_price']
@@ -58,10 +70,22 @@ def other_purchase_management(request):
     largest = qs.order_by('-price').first()
     largest_expense = largest.price if largest else 0
     largest_category = largest.type if largest else ''
+    # 선택된 월 설정 (파라미터로 전달된 월 또는 현재 월)
+    if month:
+        if len(month) == 10:  # YYYY-MM-DD 형식으로 전달된 경우
+            selected_month_str = month[:7]  # YYYY-MM 형식으로 변환
+        elif len(month) == 7:  # YYYY-MM 형식
+            selected_month_str = month
+        else:
+            selected_month_str = datetime.now().strftime('%Y-%m')
+    else:
+        selected_month_str = datetime.now().strftime('%Y-%m')
+    
     context = {
         'purchases': qs.order_by('-purchase_date'),
-        'current_month': start_date.strftime('%Y-%m'),
+        'current_month': selected_month_str,
         'search': search,
+        'selected_category': category,
         'total_price': total_price,
         'pets': pets,
         'selected_pet_id': selected_pet_id,

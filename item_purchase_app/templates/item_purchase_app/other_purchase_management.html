@@ -30,6 +30,7 @@
   max-width: 1200px;
   margin: 0 auto;
   margin-bottom: 0;
+  padding: 0 20px;
 }
 .nav-left {
   display: flex;
@@ -73,6 +74,7 @@
 
     <!-- 대시보드 카드들 -->
     <div class="dashboard-section">
+        <div class="container">
         <div class="stats-grid">
             <div class="stat-card total">
                 <div class="stat-icon">
@@ -150,9 +152,11 @@
             </div>
             </div>
         </div>
+        </div>
 
     <!-- 필터 및 검색 -->
     <div class="filter-section">
+        <div class="container">
         <div class="filter-card">
             <div class="filter-group">
                 <label class="filter-label">기간</label>
@@ -171,12 +175,12 @@
                 <label class="filter-label">카테고리</label>
                 <select class="filter-input" id="categoryFilter">
                     <option value="">전체 카테고리</option>
-                    <option value="장난감">🧸 장난감</option>
-                    <option value="간식">🍖 간식</option>
-                    <option value="용품">🏠 용품</option>
-                    <option value="의료">🏥 의료</option>
-                    <option value="미용">✂️ 미용</option>
-                    <option value="기타">📦 기타</option>
+                    <option value="장난감" {% if selected_category == "장난감" %}selected{% endif %}>🧸 장난감</option>
+                    <option value="간식" {% if selected_category == "간식" %}selected{% endif %}>🍖 간식</option>
+                    <option value="용품" {% if selected_category == "용품" %}selected{% endif %}>🏠 용품</option>
+                    <option value="의료" {% if selected_category == "의료" %}selected{% endif %}>🏥 의료</option>
+                    <option value="미용" {% if selected_category == "미용" %}selected{% endif %}>✂️ 미용</option>
+                    <option value="기타" {% if selected_category == "기타" %}selected{% endif %}>📦 기타</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -186,11 +190,21 @@
                     <i class="fas fa-search search-icon"></i>
                 </div>
             </div>
+            <div class="filter-group">
+                <label class="filter-label">&nbsp;</label>
+                <button type="button" class="btn btn-primary btn-search" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                    조회
+                </button>
+            </div>
                         </div>
                     </div>
+        </div>
+    </div>
                     
     <!-- 지출 내역 -->
     <div class="expenses-section">
+        <div class="container">
         <div class="section-header">
             <h2 class="section-title">지출 내역</h2>
             <div class="view-controls">
@@ -344,6 +358,7 @@
                 {% endfor %}
             </div>
         </div>
+        </div>
     </div>
 </div>
 
@@ -442,6 +457,13 @@
 .expense-management {
     max-width: 1200px;
     margin: 0 auto;
+}
+
+/* 컨테이너 스타일 */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 /* 페이지 헤더 */
@@ -643,6 +665,28 @@
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
+}
+
+.btn-search {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    min-width: 100px;
+    justify-content: center;
+}
+
+.btn-search:hover {
+    background: var(--primary-color-dark);
+    transform: translateY(-1px);
 }
 
 /* 지출 섹션 */
@@ -1113,6 +1157,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('searchFilter').addEventListener('input', debounce(applyFilters, 300));
     
+    // 조회 버튼 클릭 이벤트
+    document.getElementById('searchBtn').addEventListener('click', performSearch);
+    
+    // 검색 입력에서 엔터 키 이벤트
+    document.getElementById('searchFilter').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+    
     // 지출 추가 버튼들
     document.getElementById('addExpenseBtn').addEventListener('click', openExpenseModal);
     document.getElementById('addFirstExpenseBtn')?.addEventListener('click', openExpenseModal);
@@ -1171,7 +1225,29 @@ function initializeChart() {
     });
 }
 
-// 필터 적용
+// 서버 사이드 검색/필터링 수행
+function performSearch() {
+    const monthFilter = document.getElementById('monthFilter').value;
+    const petFilter = document.getElementById('petFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const searchFilter = document.getElementById('searchFilter').value;
+    
+    // URL 파라미터 구성
+    const params = new URLSearchParams();
+    
+    if (monthFilter) params.set('month', monthFilter);
+    if (petFilter) params.set('pet', petFilter);
+    if (categoryFilter) params.set('category', categoryFilter);
+    if (searchFilter) params.set('search', searchFilter);
+    
+    // 페이지 새로고침으로 서버에서 필터링된 데이터 가져오기
+    const currentUrl = window.location.pathname;
+    const newUrl = params.toString() ? `${currentUrl}?${params.toString()}` : currentUrl;
+    
+    window.location.href = newUrl;
+}
+
+// 클라이언트 사이드 필터 적용 (기존 기능 유지)
 function applyFilters() {
     const monthFilter = document.getElementById('monthFilter').value;
     const petFilter = document.getElementById('petFilter').value;
