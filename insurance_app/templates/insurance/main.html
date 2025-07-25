@@ -489,10 +489,7 @@
           <option value="{% url 'insurance:recommend' pet.id %}" data-pet-id="{{ pet.id }}">{{ pet.name }} ({{ pet.species }})</option>
           {% endfor %}
         </select>
-        <button type="button" class="preference-btn" data-bs-toggle="modal" data-bs-target="#preferenceModal">
-          <i class="fas fa-sliders-h"></i>
-          보장 선호도 설정
-        </button>
+        
       </div>
       <div class="insurance-tip">
         <strong>💡 Tip!</strong> 보장 선호도를 설정하면 더 정확한 보험 추천을 받을 수 있습니다.<br>

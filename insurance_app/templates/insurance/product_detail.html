@@ -60,20 +60,43 @@
     gap: var(--spacing-md);
 }
 .card-section {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
 }
 .card-section h5, .card-section h4 {
     font-size: 16px;
     font-weight: 600;
     color: var(--primary-color);
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 .card-section ul, .card-section table {
     margin-bottom: 0;
 }
 .card-section li, .card-section td {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 4px;
+}
+.card-section ul {
+    padding-left: 18px;
+    margin-bottom: 0;
+}
+.card-section ul ul {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+.card-section table {
+    margin-bottom: 12px;
+}
+.card-section td, .card-section th {
+    vertical-align: top;
+    padding: 8px 12px;
+}
+.card-section th {
+    background: var(--bg-tertiary);
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 15px;
 }
 .card-footer {
     padding: var(--spacing-md) var(--spacing-xl);

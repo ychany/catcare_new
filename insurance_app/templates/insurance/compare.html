@@ -1,119 +1,500 @@
 {% extends 'common_app/base.html' %}
 {% load insurance_tags %}
+{% load humanize %}
 
 {% block title %}보험 상품 비교 - 냐옹노트{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">보험 상품 비교</h1>
-    
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>항목</th>
-                            {% for product, sure_index in products %}
-                            <th class="text-center">
-                                <div class="d-flex flex-column align-items-center">
-                                    <h5 class="mb-2">{{ product.name }}</h5>
-                                    <span class="badge bg-primary mb-2">{{ product.company.name }}</span>
-                                    <span class="badge bg-success">SURE 지수: {{ sure_index|floatformat:2 }}</span>
-                                </div>
-                            </th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th>기본 보험료</th>
-                            {% for product, sure_index in products %}
-                            <td class="text-center">{{ product.base_price|floatformat:0 }}원</td>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            <th>가입 가능 연령</th>
-                            {% for product, sure_index in products %}
-                            <td class="text-center">{{ product.min_age }}세 ~ {{ product.max_age }}세</td>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            <th>보장 기간</th>
-                            {% for product, sure_index in products %}
-                            <td class="text-center">{{ product.coverage_period }}년</td>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            <th>갱신 주기</th>
-                            {% for product, sure_index in products %}
-                            <td class="text-center">{{ product.renewal_cycle }}년</td>
-                            {% endfor %}
-                        </tr>
-                        
+<style>
+.page-hide-nav {
+    display: none !important;
+}
+.main-container {
+    padding: 0 !important;
+    max-width: none !important;
+    background: var(--color-background) !important;
+}
+.insurance-compare-bg {
+    min-height: 100vh;
+    background: var(--color-background);
+    font-family: var(--font-primary);
+    padding-bottom: 60px;
+}
+.insurance-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-light);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+.insurance-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+.insurance-main-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+.compare-table-section {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+}
+.product-cards-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-xl);
+}
+.product-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 320px;
+    transition: all 0.2s;
+}
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+.product-card .card-header {
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: 100%;
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+.product-card .btn {
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+}
+.product-card .btn:last-child {
+    margin-bottom: 0;
+}
+.product-card .badge {
+    border-radius: var(--radius-md);
+    font-size: 13px;
+}
+.compare-table {
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+.compare-table .table {
+    margin-bottom: 0;
+    border: none;
+}
+.compare-table thead th {
+    background: var(--bg-tertiary);
+    border: none;
+    padding: var(--spacing-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+.compare-table thead th:first-child {
+    background: var(--primary-color);
+    color: white;
+    font-size: 16px;
+    width: 150px;
+}
+.compare-table .product-header {
+    padding: var(--spacing-lg);
+    text-align: center;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+    color: white;
+    border: none;
+}
+.compare-table .product-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.2;
+}
+.compare-table .company-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+    display: inline-block;
+}
+.compare-table .sure-badge {
+    background: var(--success-color);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+.compare-table tbody tr:nth-child(odd) {
+    background: var(--bg-secondary);
+}
+.compare-table tbody tr:nth-child(even) {
+    background: white;
+}
+.compare-table tbody tr:hover {
+    background: var(--primary-color-lightest);
+    transition: all 0.2s;
+}
+.compare-table tbody th {
+    background: var(--bg-tertiary);
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-right: 2px solid var(--border-light);
+    width: 150px;
+    vertical-align: middle;
+}
+.compare-table tbody td {
+    padding: var(--spacing-md) var(--spacing-lg);
+    vertical-align: middle;
+    border: 1px solid var(--border-light);
+}
+.compare-table .price-cell {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 16px;
+}
+.compare-table .coverage-cell {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+.compare-table .coverage-detail {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+}
+.compare-table .coverage-badge {
+    background: var(--info-color);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.compare-table .benefit-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.compare-table .benefit-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+    font-size: 14px;
+    line-height: 1.4;
+}
+.compare-table .benefit-item:last-child {
+    margin-bottom: 0;
+}
+.compare-table .benefit-icon {
+    color: var(--warning-color);
+    font-size: 12px;
+}
+/* 가로 스크롤 카드 레이아웃 */
+.horizontal-scroll-section {
+    overflow-x: auto;
+    padding-bottom: 16px;
+}
+.horizontal-cards {
+    display: flex;
+    gap: var(--spacing-xl);
+    min-width: 900px;
+}
+.horizontal-card {
+    min-width: 340px;
+    max-width: 400px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: all 0.2s;
+    margin-bottom: var(--spacing-xl);
+}
+.horizontal-card .product-header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    color: white;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+    min-height: 90px;
+}
+.horizontal-card .product-name {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--radius-md);
+    padding: 4px 12px;
+    display: inline-block;
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.3);
+    min-height: 32px;
+}
+.horizontal-card .header-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.horizontal-card .company-badge {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    min-height: 22px;
+    margin-bottom: 0;
+}
+.horizontal-card .sure-badge {
+    background: var(--success-color);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    min-height: 22px;
+    margin-bottom: 0;
+}
+.horizontal-card .info-row {
+    margin-bottom: var(--spacing-md);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+.horizontal-card .info-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 90px;
+    flex-shrink: 0;
+}
+.horizontal-card .info-value {
+    flex: 1;
+    color: var(--text-primary);
+    word-break: break-word;
+    font-size: 15px;
+}
+.horizontal-card .price-cell {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 16px;
+}
+.horizontal-card .coverage-badge {
+    background: var(--info-color);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    margin-left: var(--spacing-xs);
+}
+.horizontal-card .benefit-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.horizontal-card .benefit-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+    font-size: 14px;
+    line-height: 1.4;
+}
+.horizontal-card .benefit-item:last-child {
+    margin-bottom: 0;
+}
+.horizontal-card .benefit-icon {
+    color: var(--warning-color);
+    font-size: 12px;
+}
+.horizontal-card .action-buttons {
+    margin-top: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-lg);
+}
+.horizontal-card .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.horizontal-card .action-btn.detail {
+    background: var(--primary-color);
+    color: white;
+}
+.horizontal-card .action-btn.detail:hover {
+    background: var(--accent-color);
+}
+.horizontal-card .action-btn.inquiry {
+    background: var(--info-color);
+    color: white;
+}
+.horizontal-card .action-btn.inquiry:hover {
+    background: #2980b9;
+}
+@media (max-width: 768px) {
+    .insurance-header {
+        padding: var(--spacing-md);
+    }
+    .insurance-title {
+        font-size: 20px;
+    }
+    .insurance-main-section {
+        padding: var(--spacing-md);
+    }
+    .compare-table-section {
+        padding: var(--spacing-md);
+    }
+    .compare-table .product-name {
+        font-size: 16px;
+    }
+    .compare-table thead th,
+    .compare-table tbody th,
+    .compare-table tbody td {
+        padding: var(--spacing-sm);
+    }
+    .horizontal-card {
+        min-width: 260px;
+        max-width: 95vw;
+        padding: var(--spacing-md);
+    }
+}
+</style>
+<div class="insurance-compare-bg">
+    <div class="insurance-header">
+        <div class="insurance-title">
+            <i class="fas fa-balance-scale" style="color: var(--primary-color);"></i>
+            보험 상품 비교
+        </div>
+    </div>
+    <div class="insurance-main-section">
+        <div class="compare-table-section">
+            <!-- 기존 테이블 삭제 및 가로 스크롤 카드형으로 변경 -->
+            <div class="horizontal-scroll-section">
+                <div class="horizontal-cards">
+                    {% for product, sure_index in products %}
+                    <div class="horizontal-card">
+                        <div class="product-header">
+                            <div class="product-name">{{ product.name }}</div>
+                            <div class="header-row">
+                                <div class="company-badge">{{ product.company.name }}</div>
+                                <div class="sure-badge">SURE 지수: {{ sure_index|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">기본 보험료</span>
+                            <span class="info-value price-cell">{{ product.base_price|floatformat:0|intcomma }}원</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">가입 가능 연령</span>
+                            <span class="info-value">{{ product.min_age }}세 ~ {{ product.max_age }}세</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">보장 기간</span>
+                            <span class="info-value">{{ product.coverage_period }}년</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">갱신 주기</span>
+                            <span class="info-value">{{ product.renewal_cycle }}년</span>
+                        </div>
                         {% for key in coverage_keys %}
-                        <tr>
-                            <th>{{ key }}</th>
-                            {% for product, sure_index in products %}
-                            <td>
-                                <div class="d-flex justify-content-between">
-                                    <span>
-                                        {% if product.coverage_details_verbose|get_item:key %}
-                                            {% for v in product.coverage_details_verbose|get_item:key %}
-                                                {{ v }}{% if not forloop.last %}, {% endif %}
-                                            {% endfor %}
-                                        {% else %}-{% endif %}
-                                    </span>
-                                    <span class="badge bg-info">{{ product.coverage_limits|get_item:key }}</span>
-                                </div>
-                            </td>
-                            {% endfor %}
-                        </tr>
+                        <div class="info-row">
+                            <span class="info-label">{{ key }}</span>
+                            <span class="info-value">
+                                {% if product.coverage_details_verbose|get_item:key %}
+                                    {% for v in product.coverage_details_verbose|get_item:key %}
+                                        {{ v }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% else %}-{% endif %}
+                                <span class="coverage-badge">{{ product.coverage_limits|get_item:key }}</span>
+                            </span>
+                        </div>
                         {% endfor %}
-                        
-                        <tr>
-                            <th>특별 보장</th>
-                            {% for product, sure_index in products %}
-                            <td>
-                                <ul class="list-unstyled mb-0">
+                        <div class="info-row">
+                            <span class="info-label">특별 보장</span>
+                            <span class="info-value">
+                                <ul class="benefit-list">
                                     {% for benefit in product.special_benefits %}
-                                    <li>
-                                        <i class="fas fa-star text-warning me-2"></i>
-                                        {{ benefit }}
+                                    <li class="benefit-item">
+                                        <i class="fas fa-star benefit-icon"></i>
+                                        <span>{{ benefit }}</span>
                                     </li>
                                     {% endfor %}
                                 </ul>
-                            </td>
-                            {% endfor %}
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row">
-        {% for product, sure_index in products %}
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">{{ product.name }}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'insurance:product_detail' product.id %}" class="btn btn-outline-primary">
-                            <i class="fas fa-info-circle me-2"></i>
-                            상세 정보
-                        </a>
-                        <a href="{% url 'insurance:inquiry' product.id %}" class="btn btn-outline-success">
-                            <i class="fas fa-envelope me-2"></i>
-                            문의하기
-                        </a>
+                            </span>
+                        </div>
+                        <div class="action-buttons">
+                            <a href="{% url 'insurance:product_detail' product.id %}" class="action-btn detail">
+                                <i class="fas fa-info-circle"></i>
+                                상세 정보
+                            </a>
+                            <a href="{% url 'insurance:inquiry' product.id %}" class="action-btn inquiry">
+                                <i class="fas fa-envelope"></i>
+                                문의하기
+                            </a>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock %} 
