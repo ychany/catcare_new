@@ -474,7 +474,7 @@
           <div class="post-meta">
             <span><i class="fas fa-user"></i> {{ post.get_author_name }}</span>
             <span><i class="fas fa-clock"></i> {{ post.created_at|timesince }} 전</span>
-            <span><i class="fas fa-hashtag"></i> #{{ post.id }}</span>
+            <span><i class="fas fa-hashtag"></i> {{ post.id }}</span>
           </div>
           <div class="post-excerpt">{{ post.content|truncatechars:80 }}</div>
           {% if post.image %}
