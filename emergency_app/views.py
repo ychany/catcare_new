@@ -117,24 +117,159 @@ def create_sample_hospitals():
             defaults=data
         )
 
+@login_required
+def add_search_hospital(request):
+    """검색된 병원을 DB에 추가하고 즐겨찾기에 추가"""
+    print("=== DEBUG: add_search_hospital view called ===")
+    print(f"Request method: {request.method}")
+    print(f"Request path: {request.path}")
+    print(f"Request POST data: {request.POST}")
+    print(f"Request user: {request.user}")
+    print(f"User authenticated: {request.user.is_authenticated}")
+    
+    if request.method == 'POST':
+        try:
+            name = request.POST.get('name')
+            address = request.POST.get('address') 
+            phone = request.POST.get('phone', '정보 없음')
+            lat = float(request.POST.get('lat', 0))
+            lng = float(request.POST.get('lng', 0))
+            
+            if not name or not address:
+                return JsonResponse({'error': '병원명과 주소는 필수입니다.'}, status=400)
+            
+            # 이미 존재하는 병원인지 확인 (이름과 주소로)
+            hospital, created = VetHospital.objects.get_or_create(
+                name=name,
+                address=address,
+                defaults={
+                    'phone': phone,
+                    'latitude': lat,
+                    'longitude': lng,
+                    'is_24hours': False,
+                    'is_emergency': False,
+                    'rating': 0.0,
+                    'distance_km': 0.0,
+                    'operating_hours': '정보 없음',
+                    'specialties': '',
+                    'description': '검색을 통해 추가된 병원'
+                }
+            )
+            
+            # 즐겨찾기 추가
+            favorite, fav_created = HospitalFavorite.objects.get_or_create(
+                user=request.user,
+                hospital=hospital
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'hospital_id': hospital.id,
+                'is_favorite': True,
+                'message': '병원이 즐겨찾기에 추가되었습니다.'
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'POST 요청만 허용됩니다.'}, status=405)
+
+def debug_urls(request):
+    """URL 디버깅용 뷰"""
+    from django.urls import reverse
+    from django.conf import settings
+    import sys
+    try:
+        url_info = {
+            'current_path': request.path,
+            'method': request.method,
+            'user': str(request.user),
+            'authenticated': request.user.is_authenticated,
+            'root_urlconf': settings.ROOT_URLCONF,
+            'django_settings_module': getattr(settings, 'DJANGO_SETTINGS_MODULE', 'Not set'),
+            'python_path': sys.path[:3],  # 처음 3개 경로만
+        }
+        
+        # URL reverse 테스트
+        try:
+            url_info['emergency_urls'] = {
+                'hospital_list': reverse('emergency_app:hospital_list'),
+                'add_search_hospital': reverse('emergency_app:add_search_hospital'),
+            }
+        except Exception as e:
+            url_info['emergency_urls_error'] = str(e)
+            
+        return JsonResponse(url_info)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
-@require_POST
 def toggle_favorite(request, hospital_id):
     """병원 즐겨찾기 토글"""
-    hospital = get_object_or_404(VetHospital, id=hospital_id)
-    favorite, created = HospitalFavorite.objects.get_or_create(
-        user=request.user,
-        hospital=hospital
-    )
-    
-    if not created:
-        favorite.delete()
-        is_favorite = False
-    else:
-        is_favorite = True
-    
-    return JsonResponse({
-        'is_favorite': is_favorite,
-        'message': '즐겨찾기에 추가되었습니다.' if is_favorite else '즐겨찾기에서 제거되었습니다.'
-    })
+    if request.method == 'POST':
+        # 검색된 병원 추가 요청인지 확인 (특별한 필드가 있는지)
+        if 'name' in request.POST and 'address' in request.POST:
+            try:
+                name = request.POST.get('name')
+                address = request.POST.get('address') 
+                phone = request.POST.get('phone', '정보 없음')
+                lat = float(request.POST.get('lat', 0))
+                lng = float(request.POST.get('lng', 0))
+                
+                if not name or not address:
+                    return JsonResponse({'error': '병원명과 주소는 필수입니다.'}, status=400)
+                
+                # 이미 존재하는 병원인지 확인 (이름과 주소로)
+                hospital, created = VetHospital.objects.get_or_create(
+                    name=name,
+                    address=address,
+                    defaults={
+                        'phone': phone,
+                        'latitude': lat,
+                        'longitude': lng,
+                        'is_24hours': False,
+                        'is_emergency': False,
+                        'rating': 0.0,
+                        'distance_km': 0.0,
+                        'operating_hours': '정보 없음',
+                        'specialties': '',
+                        'description': '검색을 통해 추가된 병원'
+                    }
+                )
+                
+                # 즐겨찾기 추가
+                favorite, fav_created = HospitalFavorite.objects.get_or_create(
+                    user=request.user,
+                    hospital=hospital
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'hospital_id': hospital.id,
+                    'is_favorite': True,
+                    'message': '병원이 즐겨찾기에 추가되었습니다.'
+                })
+                
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=500)
+        
+        else:
+            # 일반 즐겨찾기 토글
+            hospital = get_object_or_404(VetHospital, id=hospital_id)
+            favorite, created = HospitalFavorite.objects.get_or_create(
+                user=request.user,
+                hospital=hospital
+            )
+            
+            if not created:
+                favorite.delete()
+                is_favorite = False
+            else:
+                is_favorite = True
+            
+            return JsonResponse({
+                'is_favorite': is_favorite,
+                'message': '즐겨찾기에 추가되었습니다.' if is_favorite else '즐겨찾기에서 제거되었습니다.'
+            })
+
+

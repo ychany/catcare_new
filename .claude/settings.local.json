@@ -10,7 +10,8 @@
       "Bash(pip install:*)",
       "Bash(./venv/Scripts/activate)",
       "Bash(find:*)",
-      "Bash(claude-monitor:*)"
+      "Bash(claude-monitor:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }

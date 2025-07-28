@@ -70,7 +70,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
 ]
 
-ROOT_URLCONF = 'animal.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {

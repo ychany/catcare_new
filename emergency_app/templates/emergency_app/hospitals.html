@@ -530,6 +530,32 @@
     
     .emergency-content {
         grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .emergency-section {
+        padding: 24px 20px;
+    }
+    
+    .checklist-section {
+        padding: 20px;
+    }
+    
+    .favorite-hospital-card {
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .favorite-hospital-info {
+        margin-left: 8px;
+        width: 100%;
+    }
+    
+    .favorite-hospital-actions {
+        align-self: flex-end;
+        margin-top: 8px;
     }
     
     .hospital-actions {
@@ -696,45 +722,94 @@
   margin: 0;
 }
 .emergency-section {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 16px;
-  padding: 24px 32px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 32px;
   margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+.emergency-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  border-radius: 20px 20px 0 0;
 }
 .emergency-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  color: #e53e3e;
+  color: #1e293b;
+  margin: 0 0 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.emergency-title i {
+  font-size: 24px;
+  color: #f59e0b;
+}
+.emergency-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.checklist-section {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.checklist-section h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
   margin: 0 0 16px 0;
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.checklist-section h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #222f3e;
-  margin: 0 0 12px 0;
+.checklist-section h4::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  border-radius: 2px;
 }
 .checklist {
   list-style: none;
   padding: 0;
-  margin: 0 0 12px 0;
+  margin: 0;
 }
 .checklist li {
   font-size: 14px;
-  color: #e53e3e;
-  margin-bottom: 6px;
-  padding-left: 16px;
+  color: #374151;
+  margin-bottom: 10px;
+  padding: 8px 16px 8px 32px;
   position: relative;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #cbd5e1;
+  transition: all 0.2s;
+}
+.checklist li:hover {
+  transform: translateX(2px);
+  border-left-color: #f59e0b;
+  background: #fef3c7;
 }
 .checklist li::before {
-  content: "•";
-  color: #e53e3e;
-  font-weight: bold;
+  content: "⚠️";
   position: absolute;
-  left: 0;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
 }
 .emergency-contacts {
   display: flex;
@@ -784,88 +859,165 @@
   background: #a1a1a1;
 }
 .favorite-hospital-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: box-shadow 0.2s;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.favorite-hospital-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transition: width 0.3s;
 }
 .favorite-hospital-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  border-color: #cbd5e1;
+}
+.favorite-hospital-card:hover::before {
+  width: 6px;
 }
 .favorite-hospital-info {
   flex: 1;
+  margin-left: 12px;
 }
 .favorite-hospital-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.favorite-hospital-name::before {
+  content: "🏥";
   font-size: 16px;
-  font-weight: 600;
-  color: #222f3e;
-  margin-bottom: 4px;
 }
 .favorite-hospital-address {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 2px;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.favorite-hospital-address::before {
+  content: "📍";
+  font-size: 12px;
 }
 .favorite-hospital-phone {
   font-size: 14px;
   color: #3182f6;
-  font-weight: 500;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.favorite-hospital-phone::before {
+  content: "📞";
+  font-size: 12px;
 }
 .favorite-hospital-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  align-items: center;
 }
 .favorite-action-btn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border: none;
-  border-radius: 8px;
-  background: #f3f4f6;
-  color: #666;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  color: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
   text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 .favorite-action-btn:hover {
-  background: #e5e7eb;
-  color: #333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  color: #334155;
   text-decoration: none;
+}
+.favorite-action-btn:first-child {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #3182f6;
+}
+.favorite-action-btn:first-child:hover {
+  background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+  color: #1d4ed8;
+}
+.favorite-action-btn:last-child {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #f59e0b;
+}
+.favorite-action-btn:last-child:hover {
+  background: linear-gradient(135deg, #fde68a, #fcd34d);
+  color: #d97706;
 }
 .no-favorites {
   text-align: center;
-  padding: 24px;
-  color: #666;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  padding: 32px 24px;
+  color: #64748b;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.no-favorites i {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 32px;
+  color: #cbd5e1;
 }
 .no-favorites p {
-  margin: 4px 0;
+  margin: 6px 0;
   font-size: 14px;
+  line-height: 1.5;
+}
+.no-favorites p:first-of-type {
+  font-weight: 600;
+  color: #475569;
+  font-size: 16px;
 }
 .login-required {
   text-align: center;
-  padding: 24px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 .login-required p {
   margin: 0;
-  font-size: 14px;
-  color: #666;
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.5;
 }
 .login-required a {
   color: #3182f6;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  background: linear-gradient(135deg, #3182f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 .login-required a:hover {
   text-decoration: underline;
@@ -1062,13 +1214,6 @@ function showInitialMessage() {
     const hospitalListContainer = document.querySelector('.hospital-list');
     if (!hospitalListContainer) return;
     
-    // 테스트를 위해 DB 병원이 있으면 먼저 표시
-    if (hospitals.length > 0) {
-        console.log('DB 병원 표시:', hospitals);
-        displayHospitals(hospitals);
-        return;
-    }
-    
     hospitalListContainer.innerHTML = `
         <div class="hospital-card">
             <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
@@ -1164,6 +1309,8 @@ function searchAnimalHospitals(keyword) {
         hospital.name.toLowerCase().includes(keyword.toLowerCase()) ||
         hospital.address.toLowerCase().includes(keyword.toLowerCase())
     );
+    
+    console.log('DB 검색 결과:', dbResults);
     
     // 카카오 API 검색
     ps.keywordSearch(searchKeyword, function(data, status, pagination) {
@@ -1405,8 +1552,10 @@ function updateHospitalList(hospitalData) {
     // DB 병원인지 확인 (dbId가 있으면 DB 병원)
     const isDbHospital = hospital.dbId !== undefined;
     const isFavorited = isDbHospital && favoriteHospitalIds.includes(hospital.dbId);
-    const favoriteButton = (isDbHospital && isUserAuthenticated) ? 
-        `<button class="favorite-star-btn ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite(${hospital.dbId}, this)" title="${isFavorited ? '즐겨찾기 해제' : '즐겨찾기'}">
+    
+    // 모든 로그인 사용자에게 즐겨찾기 버튼 표시 (DB 병원은 실제 기능, 검색 병원은 새 함수 사용)
+    const favoriteButton = isUserAuthenticated ? 
+        `<button class="favorite-star-btn ${isFavorited ? 'favorited' : ''}" onclick="${isDbHospital ? `toggleFavorite(${hospital.dbId}, this)` : `directAddToFavorites(${idx})`}" title="${isFavorited ? '즐겨찾기 해제' : '즐겨찾기'}">
             <i class="fas fa-star"></i>
          </button>` : '';
          
@@ -1473,29 +1622,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 performSearch();
             }
         });
-        
-        // 실시간 검색 (옵션)
-        let searchTimeout;
-        searchInput.addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            const searchValue = this.value.trim();
-            
-            if (searchValue === '') {
-                // 검색어가 비어있으면 초기 상태로 복원
-                markers.forEach(m => m.setMap(null));
-                markers = [];
-                infowindow.close();
-                showInitialMessage();
-                return;
-            }
-            
-            // 500ms 후에 검색 실행 (디바운싱)
-            searchTimeout = setTimeout(() => {
-                if (searchValue.length >= 2) {
-                    searchAnimalHospitals(searchValue);
-                }
-            }, 500);
-        });
     }
     
     // 조회 버튼 함수는 별도로 정의됨
@@ -1514,18 +1640,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 즐겨찾기 토글 함수
 function toggleFavorite(hospitalId, buttonElement) {
-    console.log('toggleFavorite called with:', hospitalId, buttonElement);
+    console.log('=== DEBUG: toggleFavorite START ===');
+    console.log('hospitalId:', hospitalId);
+    console.log('buttonElement:', buttonElement);
     
     if (!hospitalId) {
+        console.log('ERROR: hospitalId is null/undefined');
         alert('병원 정보를 찾을 수 없습니다.');
         return;
     }
     
     // 버튼 비활성화
     const button = buttonElement || event.target.closest('.favorite-star-btn');
+    console.log('button element:', button);
+    
     if (button) {
+        console.log('button attributes:');
+        for (let attr of button.attributes) {
+            console.log(`  ${attr.name}: ${attr.value}`);
+        }
         button.disabled = true;
     }
+    
+    // 검색된 병원인지 확인
+    const isSearchHospital = button && button.hasAttribute('data-search-hospital');
+    console.log('isSearchHospital:', isSearchHospital);
+    console.log('has data-search-hospital attribute:', button ? button.hasAttribute('data-search-hospital') : 'no button');
+    
+    if (isSearchHospital) {
+        console.log('Calling addSearchHospitalToFavorites...');
+        // 검색된 병원을 DB에 추가하고 즐겨찾기
+        addSearchHospitalToFavorites(hospitalId, button);
+    } else {
+        console.log('Calling toggleExistingHospitalFavorite...');
+        // 기존 DB 병원 즐겨찾기 토글
+        toggleExistingHospitalFavorite(hospitalId, button);
+    }
+}
+
+// 기존 DB 병원 즐겨찾기 토글
+function toggleExistingHospitalFavorite(hospitalId, button) {
+    console.log('Calling toggleExistingHospitalFavorite with hospitalId:', hospitalId);
+    console.log('URL will be:', `/emergency/favorite/${hospitalId}/`);
     
     fetch(`/emergency/favorite/${hospitalId}/`, {
         method: 'POST',
@@ -1566,6 +1722,107 @@ function toggleFavorite(hospitalId, buttonElement) {
     });
 }
 
+// 검색된 병원을 DB에 추가하고 즐겨찾기
+function addSearchHospitalToFavorites(hospitalId, button) {
+    console.log('=== DEBUG: addSearchHospitalToFavorites START ===');
+    console.log('hospitalId:', hospitalId);
+    console.log('button:', button);
+    console.log('Current URL:', window.location.href);
+    console.log('Origin:', window.location.origin);
+    
+    // hospitalId에서 인덱스 추출 (search_0, search_1, ...)
+    const idx = hospitalId.replace('search_', '');
+    console.log('extracted index:', idx);
+    console.log('searchResults:', searchResults);
+    console.log('searchResults length:', searchResults ? searchResults.length : 'undefined');
+    
+    const hospital = searchResults[parseInt(idx)];
+    
+    if (!hospital) {
+        console.log('ERROR: 병원 정보를 찾을 수 없습니다.');
+        console.log('Available searchResults indices:', Object.keys(searchResults || {}));
+        alert('병원 정보를 찾을 수 없습니다.');
+        button.disabled = false;
+        return;
+    }
+    
+    console.log('Adding hospital to favorites:', hospital);
+    console.log('Hospital details:', {
+        name: hospital.name,
+        address: hospital.address,
+        phone: hospital.phone,
+        lat: hospital.lat,
+        lng: hospital.lng
+    });
+    
+    const targetUrl = '/emergency/add-search-hospital/';
+    console.log('Target URL:', targetUrl);
+    console.log('Full URL:', window.location.origin + targetUrl);
+    
+    // 폼 데이터 생성
+    const formData = new FormData();
+    formData.append('name', hospital.name);
+    formData.append('address', hospital.address);
+    formData.append('phone', hospital.phone || '정보 없음');
+    formData.append('lat', hospital.lat);
+    formData.append('lng', hospital.lng);
+    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+    }
+    
+    console.log('About to send fetch request...');
+    
+    fetch(targetUrl, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        console.log('=== FETCH RESPONSE RECEIVED ===');
+        console.log('Response status:', response.status);
+        console.log('Response status text:', response.statusText);
+        console.log('Response headers:', response.headers);
+        console.log('Response URL:', response.url);
+        console.log('Response OK:', response.ok);
+        
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.log('=== ERROR RESPONSE BODY ===');
+                console.log('Error response body:', text);
+                console.log('=== ERROR RESPONSE BODY END ===');
+                throw new Error(`HTTP error! status: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Search hospital added:', data);
+        if (data.success) {
+            // 버튼을 DB 병원 버튼으로 변경
+            button.setAttribute('onclick', `toggleFavorite(${data.hospital_id}, this)`);
+            button.removeAttribute('data-search-hospital');
+            button.classList.add('favorited');
+            button.title = '즐겨찾기 해제';
+            button.disabled = false;
+            
+            alert('즐겨찾기에 추가되었습니다!');
+            
+            // 즐겨찾기 목록 새로고침
+            updateFavoritesList();
+        } else {
+            alert(data.message || '즐겨찾기 추가 중 오류가 발생했습니다.');
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('즐겨찾기 추가 중 오류가 발생했습니다: ' + error.message);
+        button.disabled = false;
+    });
+}
+
 // CSRF 토큰 가져오기
 function getCookie(name) {
     let cookieValue = null;
@@ -1585,6 +1842,104 @@ function getCookie(name) {
 // 즐겨찾기 목록 업데이트
 function updateFavoritesList() {
     location.reload();
+}
+
+// 직접 즐겨찾기 추가 함수 (검색된 병원용)
+function directAddToFavorites(hospitalIdx) {
+    console.log('=== DIRECT ADD TO FAVORITES ===');
+    console.log('hospitalIdx:', hospitalIdx);
+    console.log('searchResults:', searchResults);
+    
+    if (!searchResults || hospitalIdx >= searchResults.length) {
+        alert('병원 정보를 찾을 수 없습니다.');
+        return;
+    }
+    
+    const hospital = searchResults[hospitalIdx];
+    console.log('Hospital to add:', hospital);
+    
+    if (!hospital.name || !hospital.address) {
+        alert('병원 정보가 불완전합니다.');
+        return;
+    }
+    
+    // AJAX 요청으로 병원을 DB에 추가하고 즐겨찾기
+    const formData = new FormData();
+    formData.append('name', hospital.name);
+    formData.append('address', hospital.address);
+    formData.append('phone', hospital.phone || '정보 없음');
+    formData.append('lat', hospital.lat || 0);
+    formData.append('lng', hospital.lng || 0);
+    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    
+    console.log('Sending request to add hospital...');
+    
+    fetch('/emergency/add-search-hospital/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        if (data.success) {
+            alert('즐겨찾기에 추가되었습니다!');
+            location.reload(); // 페이지 새로고침으로 즐겨찾기 목록 업데이트
+        } else {
+            alert(data.message || '즐겨찾기 추가 중 오류가 발생했습니다.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('즐겨찾기 추가 중 오류가 발생했습니다: ' + error.message);
+    });
+}
+
+// 테스트 함수
+function testAddHospital() {
+    console.log('=== TEST FUNCTION CALLED ===');
+    alert('테스트 함수가 호출되었습니다!');
+    
+    // 테스트용 병원 데이터
+    const testHospital = {
+        name: '테스트 동물병원',
+        address: '서울시 테스트구 테스트동',
+        phone: '02-1234-5678',
+        lat: 37.5665,
+        lng: 126.9780
+    };
+    
+    const formData = new FormData();
+    formData.append('name', testHospital.name);
+    formData.append('address', testHospital.address);
+    formData.append('phone', testHospital.phone);
+    formData.append('lat', testHospital.lat);
+    formData.append('lng', testHospital.lng);
+    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    
+    console.log('Sending test request...');
+    
+    fetch('/emergency/add-search-hospital/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        alert('테스트 성공: ' + JSON.stringify(data));
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('테스트 실패: ' + error.message);
+    });
 }
 </script>
 {% endblock %} 

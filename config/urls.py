@@ -9,9 +9,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # 루트 URL을 로그인 페이지로 직접 리다이렉트
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='root_redirect'),
-    # 기존 홈페이지 URL
-    path('home/', include('core.urls')),
-    path('board/', include('board.urls')),
+    # 기존 홈페이지 URL (common_app을 사용)
+    path('home/', include('common_app.urls')),
+    path('board/', include('photo_board_app.urls')),
     path('calendar/', include(('calendar_app.urls', 'calendar_app'), namespace='calendar_app')),
     path('care/', include('care_calendar.urls', namespace='care_calendar')),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='common_app/login.html'), name='login'),

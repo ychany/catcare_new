@@ -22,6 +22,7 @@ from common_app import views
 from django.views.generic import RedirectView
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect
+from emergency_app import views as emergency_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -44,5 +45,8 @@ urlpatterns = [
     path('weight-tracker/', include('weight_tracker_app.urls')),
     path('insurance/', include('insurance_app.urls')),
     path('community/', include('community_app.urls', namespace='community_app')),
-    path('emergency/', include('emergency_app.urls', namespace='emergency_app')),
+    path('emergency/', include('emergency_app.urls')),
+    # 즐겨찾기 기능을 위한 직접 URL 추가
+    path('emergency/add-search-hospital/', emergency_views.add_search_hospital, name='add_search_hospital'),
+    path('emergency/debug-urls/', emergency_views.debug_urls, name='debug_urls'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
