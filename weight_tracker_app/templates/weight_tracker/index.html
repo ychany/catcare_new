@@ -875,7 +875,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 데이터 로드 및 초기화
     function loadData() {
-        fetch('/weight-tracker/api/weights/')
+        fetch('/weight/api/weights/')
             .then(response => response.json())
             .then(data => {
                 allData = data;
@@ -918,7 +918,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pet: parseInt(document.getElementById('pet').value)
         };
         
-        fetch('/weight-tracker/api/weights/', {
+        fetch('/weight/api/weights/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -935,8 +935,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 성공 메시지
                 showNotification('체중 기록이 성공적으로 저장되었습니다!', 'success');
-            } else if (result.status === 400 && result.body && result.body.error && result.body.error.includes('UNIQUE')) {
-                showNotification('이미 해당 날짜에 이 반려동물의 체중 기록이 존재합니다.', 'error');
+            } else if (result.status === 400 && result.body && result.body.error) {
+                showNotification(result.body.error, 'error');
             } else {
                 showNotification('저장 중 오류가 발생했습니다.', 'error');
             }
@@ -967,7 +967,7 @@ function deleteRecord(recordId) {
         return;
     }
     
-    fetch(`/weight-tracker/api/weights/${recordId}/`, {
+    fetch(`/weight/api/weights/${recordId}/`, {
         method: 'DELETE',
         headers: { 'X-CSRFToken': getCookie('csrftoken') }
     })
@@ -975,7 +975,7 @@ function deleteRecord(recordId) {
         if (response.ok) {
             showNotification('기록이 삭제되었습니다.', 'success');
             // 데이터 다시 로드
-            fetch('/weight-tracker/api/weights/')
+            fetch('/weight/api/weights/')
                 .then(response => response.json())
                 .then(data => {
                     allData = data;

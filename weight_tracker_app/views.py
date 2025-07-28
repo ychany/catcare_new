@@ -3,6 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.db import IntegrityError
 from .models import Weight
 from .serializers import WeightSerializer
 from django.db.models import Avg
@@ -48,8 +49,13 @@ def weight_list(request):
     elif request.method == 'POST':
         serializer = WeightSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            try:
+                serializer.save(user=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
+                return Response({
+                    'error': '이미 해당 날짜에 이 반려동물의 체중 기록이 존재합니다.'
+                }, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
