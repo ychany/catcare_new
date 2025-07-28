@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python manage.py:*)"
+      "Bash(python manage.py:*)",
+      "Bash(npm install:*)",
+      "Bash(git clone:*)",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(venv\\Scripts\\activate:*)",
+      "Bash(pip install:*)",
+      "Bash(./venv/Scripts/activate)",
+      "Bash(find:*)",
+      "Bash(claude-monitor:*)"
     ],
     "deny": []
   }
