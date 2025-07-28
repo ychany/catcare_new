@@ -22,7 +22,7 @@
 .weight-header {
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
-  padding: 24px 0 16px 0;
+  padding: 40px 0 16px 0;
 }
 .weight-nav {
   display: flex;
@@ -70,6 +70,11 @@
   align-items: center;
   justify-content: center;
   font-size: 20px;
+}
+
+/* 필터링된 아이템 숨김 */
+.timeline-item.filtered-hidden {
+  display: none !important;
 }
 </style>
 
@@ -188,9 +193,9 @@
 
             <!-- 타임라인 뷰 -->
             <div class="timeline-view" id="timelineView">
-                <div class="timeline">
+                <div class="timeline" id="recordsContainer">
                     {% for record in medical_records %}
-                    <div class="timeline-item {{ record.event_type }}" data-pet="{{ record.pet.id }}" data-type="{{ record.event_type }}">
+                    <div class="timeline-item {{ record.event_type }}" data-pet="{{ record.pet.id }}" data-type="{{ record.event_type }}" style="{% if forloop.counter > 3 %}display: none;{% endif %}">
                         <div class="timeline-marker">
                             <div class="marker-dot {{ record.event_type }}">
                                 <i class="fas fa-{% if record.event_type == 'med' %}stethoscope{% else %}syringe{% endif %}"></i>
@@ -266,6 +271,17 @@
                         </button>
                     </div>
                     {% endfor %}
+                </div>
+                
+                <!-- 페이지네이션 컨트롤 -->
+                <div class="pagination-controls" id="paginationControls" style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-outline-primary" id="prevBtn" onclick="showPreviousRecords()" disabled>
+                        <i class="fas fa-chevron-up"></i> 이전
+                    </button>
+                    <span id="pageInfo" style="margin: 0 15px; color: #666;">1 / 1</span>
+                    <button class="btn btn-outline-primary" id="nextBtn" onclick="showNextRecords()">
+                        <i class="fas fa-chevron-down"></i> 다음
+                    </button>
                 </div>
             </div>
 
@@ -1110,8 +1126,16 @@ function filterRecords() {
             showItem = false;
         }
         
-        item.style.display = showItem ? 'block' : 'none';
+        // 필터링된 아이템에 클래스 추가 (숨김 대신)
+        if (showItem) {
+            item.classList.remove('filtered-hidden');
+        } else {
+            item.classList.add('filtered-hidden');
+        }
     });
+    
+    // 필터링 후 페이지네이션 재설정
+    resetPagination();
 }
 
 // 모달 관련 함수들
@@ -1536,5 +1560,104 @@ function initMedicalCalendar() {
     console.log('Rendering medical calendar...');
     medicalCalendar.render();
 }
+
+// 페이지네이션 변수
+let currentPage = 1;
+const recordsPerPage = 3;
+let totalRecords = 0;
+let totalPages = 1;
+
+// 페이지네이션 초기화
+function initializePagination() {
+    // 필터링되지 않은 기록들만 카운트
+    const visibleRecords = document.querySelectorAll('.timeline-item:not(.filtered-hidden)');
+    totalRecords = visibleRecords.length;
+    totalPages = Math.ceil(totalRecords / recordsPerPage);
+    
+    updatePageInfo();
+    updatePaginationButtons();
+    
+    // 페이지네이션 컨트롤이 필요한지 확인
+    const paginationControls = document.getElementById('paginationControls');
+    if (totalPages <= 1) {
+        paginationControls.style.display = 'none';
+    } else {
+        paginationControls.style.display = 'block';
+    }
+}
+
+// 현재 페이지의 기록들 표시
+function showCurrentPageRecords() {
+    // 필터링되지 않은 기록들만 가져오기
+    const visibleRecords = document.querySelectorAll('.timeline-item:not(.filtered-hidden)');
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    
+    // 모든 기록 숨김
+    document.querySelectorAll('.timeline-item').forEach(record => {
+        record.style.display = 'none';
+    });
+    
+    // 현재 페이지에 해당하는 보이는 기록들만 표시
+    visibleRecords.forEach((record, index) => {
+        if (index >= startIndex && index < endIndex) {
+            record.style.display = 'block';
+        }
+    });
+}
+
+// 이전 페이지 보기
+function showPreviousRecords() {
+    if (currentPage > 1) {
+        currentPage--;
+        showCurrentPageRecords();
+        updatePageInfo();
+        updatePaginationButtons();
+    }
+}
+
+// 다음 페이지 보기
+function showNextRecords() {
+    if (currentPage < totalPages) {
+        currentPage++;
+        showCurrentPageRecords();
+        updatePageInfo();
+        updatePaginationButtons();
+    }
+}
+
+// 페이지 정보 업데이트
+function updatePageInfo() {
+    const pageInfo = document.getElementById('pageInfo');
+    pageInfo.textContent = `${currentPage} / ${totalPages}`;
+}
+
+// 페이지네이션 버튼 상태 업데이트
+function updatePaginationButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+}
+
+// 필터링 시 페이지네이션 재초기화
+function resetPagination() {
+    currentPage = 1;
+    initializePagination();
+    showCurrentPageRecords();
+}
+
+// 페이지 로드 시 페이지네이션 초기화
+document.addEventListener('DOMContentLoaded', function() {
+    initializePagination();
+    showCurrentPageRecords();
+});
+
+// 페이지 로드 후 필터 이벤트 연결
+setTimeout(function() {
+    // 모든 필터링 관련 함수가 로드된 후 실행
+    updateFiltersAndCalendar();
+}, 100);
 </script>
 {% endblock %} 
