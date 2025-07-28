@@ -15,6 +15,7 @@ class Event(models.Model):
     next_date = models.DateField(blank=True, null=True)
     hospital = models.CharField(max_length=100, blank=True, null=True)
     cost = models.FloatField(default=0, blank=True, null=True)
+    is_reservation = models.BooleanField(default=False, help_text="예약 여부")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

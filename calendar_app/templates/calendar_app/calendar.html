@@ -22,7 +22,8 @@
 .weight-header {
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
-  padding: 40px 0 16px 0;
+  padding: 24px 0 16px 0;
+  margin-top: 32px;
 }
 .weight-nav {
   display: flex;
@@ -287,37 +288,24 @@
 
         </div>
 
-        <!-- 예방접종 일정 사이드바 -->
+        <!-- 사이드바 -->
         <div class="sidebar">
+            <!-- 예약 알림 카드 -->
             <div class="sidebar-card">
                 <h3 class="sidebar-title">
-                    <i class="fas fa-bell"></i>
-                    다가오는 예방접종
+                    <i class="fas fa-calendar-check"></i>
+                    다가오는 예약
                 </h3>
                 
-                <div class="vaccination-schedule">
-                    {% for vacc in next_vacc_list %}
-                    <div class="schedule-item {% if vacc.days_left <= 3 %}urgent{% elif vacc.days_left <= 7 %}warning{% else %}normal{% endif %}">
-                        <div class="schedule-pet">{{ vacc.pet_name }}</div>
-                        <div class="schedule-date">{{ vacc.next_date|date:"m.d" }}</div>
-                        <div class="schedule-badge {% if vacc.days_left == 0 %}urgent{% elif vacc.days_left == 1 %}warning{% else %}normal{% endif %}">
-                            {% if vacc.days_left == 0 %}
-                                오늘
-                            {% elif vacc.days_left == 1 %}
-                                내일
-                            {% else %}
-                                {{ vacc.days_left }}일 후
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="no-schedule">
-                        예정된 예방접종이 없습니다.
-                    </div>
-                    {% endfor %}
+                <div class="reservation-schedule" id="reservationSchedule">
+                    <!-- JavaScript로 동적 로드 -->
                 </div>
                 
                 <div class="sidebar-actions">
+                    <button class="btn btn-primary btn-sm" onclick="showReservationModal()">
+                        <i class="fas fa-plus"></i>
+                        예약 관리
+                    </button>
                     <a href="/emergency/" class="btn btn-secondary btn-sm">
                         <i class="fas fa-hospital"></i>
                         병원 찾기
@@ -372,15 +360,9 @@
                         </div>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">진료일</label>
-                            <input type="date" class="form-input" name="date" required>
-                        </div>
-                        <div class="form-group" id="nextDateGroup" style="display: none;">
-                            <label class="form-label">다음 접종일</label>
-                            <input type="date" class="form-input" name="next_date">
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">진료일</label>
+                        <input type="date" class="form-input" name="date" required>
                     </div>
                     
                     <div class="form-group">
@@ -402,14 +384,108 @@
                         <label class="form-label">비용</label>
                         <input type="number" class="form-input" name="cost" placeholder="진료비 (선택사항)">
                     </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="is_reservation" id="reservationCheckbox">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text">
+                                    <i class="fas fa-calendar-check"></i>
+                                    예약으로 등록 (진료일이 예약 날짜가 됩니다)
+                                </span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeRecordModal()">
                         취소
                     </button>
+                    <button type="button" class="btn btn-danger" id="deleteRecordBtn" onclick="deleteCurrentRecord()" style="display: none;">
+                        삭제하기
+                    </button>
                     <button type="submit" class="btn btn-primary">
                         저장하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 예약 관리 모달 -->
+<div class="modal reservation-modal" id="reservationModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">예약 관리</h3>
+                <button class="modal-close" onclick="closeReservationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="reservation-list" id="reservationList">
+                    <!-- JavaScript로 동적 로드 -->
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeReservationModal()">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 예약을 기록으로 변환하는 모달 -->
+<div class="modal convert-modal" id="convertReservationModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">예약을 기록으로 변환</h3>
+                <button class="modal-close" onclick="closeConvertModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="convertForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="reservation-info" id="reservationInfo">
+                        <!-- 예약 정보가 여기에 표시됩니다 -->
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">실제 진료일</label>
+                        <input type="date" class="form-input" name="actual_date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">진료 내용</label>
+                        <textarea class="form-input" name="description" rows="3" placeholder="실제 진료 내용을 입력하세요"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">메모</label>
+                        <textarea class="form-input" name="notes" rows="2" placeholder="추가 메모사항"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">실제 비용</label>
+                        <input type="number" class="form-input" name="actual_cost" placeholder="실제 진료비">
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeConvertModal()">
+                        취소
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        기록으로 변환
                     </button>
                 </div>
             </form>
@@ -920,14 +996,14 @@ body .content {
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    padding: var(--spacing-xl);
+    padding: 20px;
 }
 
 .modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    }
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
     
 .modal-dialog {
     width: 100%;
@@ -1142,13 +1218,18 @@ function filterRecords() {
 function openRecordModal() {
     document.getElementById('recordModal').classList.add('active');
     document.body.style.overflow = 'hidden';
+    // 새 기록 생성 시 삭제 버튼 숨김
+    document.getElementById('deleteRecordBtn').style.display = 'none';
+    // 폼 초기화
+    document.getElementById('recordForm').reset();
+    document.querySelector('input[name="is_reservation"]').checked = false;
 }
 
 function closeRecordModal() {
     document.getElementById('recordModal').classList.remove('active');
     document.body.style.overflow = 'auto';
     document.getElementById('recordForm').reset();
-    document.getElementById('nextDateGroup').style.display = 'none';
+    // nextDateGroup 요소는 이미 제거되었으므로 참조하지 않음
 }
 
 // FormData를 JSON으로 변환 (빈 문자열은 null로)
@@ -1170,11 +1251,18 @@ function saveRecord() {
     const form = document.getElementById('recordForm');
     const formData = new FormData(form);
     const editId = form.getAttribute('data-edit-id');
+    const isReservation = document.querySelector('input[name="is_reservation"]').checked;
+    
     let url = 'api/events/';
     let method = 'POST';
-    if (editId) {
+    
+    // 예약인 경우 항상 새로 생성
+    if (editId && !isReservation) {
         url = `api/events/${editId}/`;
         method = 'PATCH';
+        form.removeAttribute('data-edit-id');
+    } else if (editId && isReservation) {
+        // 예약으로 변경하는 경우 새로 생성하므로 editId 제거
         form.removeAttribute('data-edit-id');
     }
     fetch(url, {
@@ -1215,15 +1303,57 @@ function editRecord(recordId) {
             document.querySelector('input[name="date"]').value = data.date;
             document.querySelector('input[name="hospital"]').value = data.hospital || '';
             document.querySelector('input[name="cost"]').value = data.cost || '';
-            document.querySelector('input[name="next_date"]').value = data.next_date || '';
             document.querySelector('textarea[name="description"]').value = data.description || '';
             document.querySelector('textarea[name="notes"]').value = data.notes || '';
-            if (data.event_type === 'vacc') {
-                document.getElementById('nextDateGroup').style.display = 'block';
-            } else {
-                document.getElementById('nextDateGroup').style.display = 'none';
-            }
+            document.querySelector('input[name="is_reservation"]').checked = data.is_reservation || false;
+            // 편집 모드일 때 삭제 버튼 표시
+            document.getElementById('deleteRecordBtn').style.display = 'inline-block';
         });
+}
+
+// 현재 편집 중인 기록 삭제
+function deleteCurrentRecord() {
+    const form = document.getElementById('recordForm');
+    const editId = form.getAttribute('data-edit-id');
+    
+    if (!editId) {
+        alert('삭제할 기록이 없습니다.');
+        return;
+    }
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+        return;
+    }
+    
+    if (confirm('정말로 이 기록을 삭제하시겠습니까?')) {
+        console.log('삭제 요청 시작, ID:', editId);
+        
+        fetch(`api/events/${editId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken.value
+            }
+        })
+        .then(response => {
+            console.log('삭제 응답 상태:', response.status);
+            if (response.ok) {
+                alert('삭제되었습니다.');
+                closeRecordModal();
+                location.reload();
+            } else {
+                return response.text().then(text => {
+                    console.error('삭제 실패 응답:', text);
+                    alert(`삭제에 실패했습니다. (상태: ${response.status})`);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('삭제 오류:', error);
+            alert(`삭제 중 오류가 발생했습니다: ${error.message}`);
+        });
+    }
 }
 
 // 기록 삭제
@@ -1374,6 +1504,262 @@ document.getElementById('recordModal').addEventListener('click', function(e) {
     border-color: #d69e2e !important;
     color: white !important;
 }
+
+/* 예약 이벤트 스타일 */
+.fc-event-reservation {
+    border-style: dashed !important;
+    border-width: 2px !important;
+    opacity: 0.8 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    position: relative !important;
+}
+
+.fc-event-reservation::before {
+    content: '📅';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    font-size: 10px;
+    background: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* 예약 체크박스 스타일 */
+.checkbox-wrapper {
+    margin: 16px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px;
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+}
+
+.checkbox-label:hover {
+    border-color: #3182ce;
+    background: #ebf8ff;
+}
+
+.checkbox-label input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 4px;
+    margin-right: 12px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+    background: #3182ce;
+    border-color: #3182ce;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: -2px;
+    left: 3px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.checkbox-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.checkbox-text i {
+    color: #3182ce;
+}
+
+.checkbox-label input[type="checkbox"]:checked ~ .checkbox-text {
+    color: #2d3748;
+}
+
+/* 예약 관련 스타일 */
+.reservation-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: #f8fafc;
+}
+
+.reservation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.reservation-pet {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.reservation-type {
+    background: #3182ce;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.reservation-date {
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.reservation-content {
+    margin: 12px 0;
+    font-size: 0.9rem;
+    color: #4a5568;
+}
+
+.reservation-content p {
+    margin: 4px 0;
+}
+
+.reservation-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.reservation-summary {
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.reservation-summary h4 {
+    color: #2c5282;
+    margin-bottom: 12px;
+}
+
+.reservation-summary p {
+    margin: 4px 0;
+    color: #2d3748;
+}
+
+.no-reservations {
+    text-align: center;
+    color: #718096;
+    padding: 20px;
+    font-style: italic;
+}
+
+.schedule-type {
+    font-size: 0.7rem;
+    color: #718096;
+    margin-top: 2px;
+}
+
+/* 다가오는 예약 hover 효과 */
+.schedule-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 4px 0;
+}
+
+.schedule-item:hover {
+    background-color: rgba(49, 130, 206, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-item.urgent:hover {
+    background-color: rgba(229, 62, 62, 0.1);
+}
+
+.schedule-item.warning:hover {
+    background-color: rgba(251, 211, 141, 0.2);
+}
+
+.schedule-item.normal:hover {
+    background-color: rgba(74, 85, 104, 0.05);
+}
+
+/* 예약 변환 모달 특별 스타일 */
+.convert-modal.active {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding-top: 50px !important;
+}
+
+.convert-modal .modal-dialog {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    display: block !important;
+}
+
+.convert-modal .modal-content {
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+}
+
+/* 예약 관리 모달 스타일 */
+.reservation-modal.active {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.reservation-modal .modal-dialog {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    display: block !important;
+}
+
+.reservation-modal .modal-content {
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+}
 </style>
 
 <script>
@@ -1381,6 +1767,48 @@ document.getElementById('recordModal').addEventListener('click', function(e) {
 let medicalCalendar = null;
 let currentPetFilter = 'all';
 let currentTypeFilter = 'all';
+
+// 통계 업데이트 함수
+function updateStatistics() {
+    const petId = currentPetFilter;
+    const eventType = currentTypeFilter;
+    
+    let url = 'stats/?';
+    if (petId !== 'all') {
+        url += `pet_id=${petId}&`;
+    }
+    if (eventType !== 'all') {
+        url += `event_type=${eventType}&`;
+    }
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            // 타입 필터에 따라 통계 표시/숨김 조정
+            if (eventType === 'med') {
+                // 진료만 선택했을 때
+                document.querySelector('.stat-card.health .stat-number').textContent = data.total_medical;
+                document.querySelector('.stat-card.vaccination .stat-number').textContent = '0';
+                document.querySelector('.stat-card.upcoming .stat-number').textContent = '0';
+            } else if (eventType === 'vacc') {
+                // 접종만 선택했을 때
+                document.querySelector('.stat-card.health .stat-number').textContent = '0';
+                document.querySelector('.stat-card.vaccination .stat-number').textContent = data.total_vaccination;
+                document.querySelector('.stat-card.upcoming .stat-number').textContent = data.upcoming_vacc;
+            } else {
+                // 전체 선택했을 때
+                document.querySelector('.stat-card.health .stat-number').textContent = data.total_medical;
+                document.querySelector('.stat-card.vaccination .stat-number').textContent = data.total_vaccination;
+                document.querySelector('.stat-card.upcoming .stat-number').textContent = data.upcoming_vacc;
+            }
+            
+            // 의료비는 항상 표시 (타입에 관계없이)
+            document.querySelector('.stat-card.cost .stat-number').textContent = data.total_cost.toLocaleString() + '원';
+        })
+        .catch(error => {
+            console.error('통계 업데이트 실패:', error);
+        });
+}
 
 // 필터 변경 시 캘린더와 타임라인 업데이트
 function updateFiltersAndCalendar() {
@@ -1395,6 +1823,10 @@ function updateFiltersAndCalendar() {
             if (medicalCalendar) {
                 medicalCalendar.refetchEvents();
             }
+            // 통계 업데이트
+            updateStatistics();
+            // 예약 목록 업데이트
+            loadReservations();
         });
     });
     
@@ -1406,15 +1838,9 @@ function updateFiltersAndCalendar() {
             medicalCalendar.refetchEvents();
         }
         // 통계 업데이트
-        const petId = this.value;
-        fetch(`stats/?pet_id=${petId}`)
-            .then(response => response.json())
-            .then(data => {
-                document.querySelector('.stat-card.health .stat-number').textContent = data.total_medical;
-                document.querySelector('.stat-card.vaccination .stat-number').textContent = data.total_vaccination;
-                document.querySelector('.stat-card.upcoming .stat-number').textContent = data.upcoming_vacc;
-                document.querySelector('.stat-card.cost .stat-number').textContent = data.total_cost.toLocaleString() + '원';
-            });
+        updateStatistics();
+        // 예약 목록 업데이트
+        loadReservations();
     });
     
     // 캘린더 뷰 컨트롤
@@ -1496,11 +1922,19 @@ function initMedicalCalendar() {
                     
                     filteredEvents.forEach(event => {
                         // 주요 이벤트 (진료/예방접종)
+                        const eventTitle = event.is_reservation 
+                            ? `(${event.pet_name}) 예약${event.event_type === 'med' ? '진료' : '접종'}`
+                            : `${event.event_type === 'med' ? '진료' : '예방접종'} (${event.pet_name})`;
+                        
+                        const eventClass = event.is_reservation 
+                            ? `fc-event-${event.event_type} fc-event-reservation`
+                            : `fc-event-${event.event_type}`;
+                        
                         events.push({
                             id: event.id,
-                            title: `${event.event_type === 'med' ? '진료' : '예방접종'} (${event.pet_name})`,
+                            title: eventTitle,
                             start: event.date,
-                            className: `fc-event-${event.event_type}`,
+                            className: eventClass,
                             extendedProps: {
                                 event_type: event.event_type,
                                 pet_name: event.pet_name,
@@ -1508,7 +1942,8 @@ function initMedicalCalendar() {
                                 hospital: event.hospital,
                                 pet_id: event.pet,
                                 cost: event.cost,
-                                notes: event.notes
+                                notes: event.notes,
+                                is_reservation: event.is_reservation
                             }
                         });
                         
@@ -1545,8 +1980,18 @@ function initMedicalCalendar() {
                 return;
             }
             
-            // 기존 기록 편집
-            editRecord(info.event.id);
+            // 예약인 경우 변환 모달 또는 편집 선택
+            if (props.is_reservation) {
+                const choice = confirm(`${props.pet_name}의 예약입니다.\n\n확인: 기록으로 변환\n취소: 예약 편집`);
+                if (choice) {
+                    showConvertModal(info.event.id);
+                } else {
+                    editRecord(info.event.id);
+                }
+            } else {
+                // 기존 기록 편집
+                editRecord(info.event.id);
+            }
             info.jsEvent.preventDefault();
         },
         dateClick: function(info) {
@@ -1658,6 +2103,228 @@ document.addEventListener('DOMContentLoaded', function() {
 setTimeout(function() {
     // 모든 필터링 관련 함수가 로드된 후 실행
     updateFiltersAndCalendar();
+    loadReservations();
 }, 100);
+
+// 예약 관련 함수들
+function loadReservations() {
+    fetch('/calendar/api/events/?is_reservation=true')
+        .then(response => response.json())
+        .then(data => {
+            displayReservations(data.results || data);
+        })
+        .catch(error => {
+            console.error('예약 로드 실패:', error);
+        });
+}
+
+function displayReservations(reservations) {
+    const container = document.getElementById('reservationSchedule');
+    if (!reservations || reservations.length === 0) {
+        container.innerHTML = '<div class="no-schedule">예정된 예약이 없습니다.</div>';
+        return;
+    }
+
+    // 현재 필터 상태 가져오기
+    const petFilter = document.getElementById('petFilter').value;
+    const typeFilter = document.querySelector('.filter-tab.active').dataset.type;
+
+    // 필터링 적용
+    let filteredReservations = reservations;
+    if (petFilter !== 'all') {
+        filteredReservations = filteredReservations.filter(res => res.pet == petFilter);
+    }
+    if (typeFilter !== 'all') {
+        filteredReservations = filteredReservations.filter(res => res.event_type === typeFilter);
+    }
+
+    if (filteredReservations.length === 0) {
+        container.innerHTML = '<div class="no-schedule">필터 조건에 맞는 예약이 없습니다.</div>';
+        return;
+    }
+
+    const today = new Date();
+    const sortedReservations = filteredReservations
+        .map(res => {
+            const resDate = new Date(res.date);
+            const diffTime = resDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return { ...res, days_left: diffDays };
+        })
+        .sort((a, b) => a.days_left - b.days_left)
+        .slice(0, 5); // 최대 5개만 표시
+
+    container.innerHTML = sortedReservations.map(res => {
+        let urgencyClass = 'normal';
+        if (res.days_left <= 0) urgencyClass = 'urgent';
+        else if (res.days_left <= 3) urgencyClass = 'warning';
+
+        let badgeText = '';
+        if (res.days_left === 0) badgeText = '오늘';
+        else if (res.days_left === 1) badgeText = '내일';
+        else if (res.days_left < 0) badgeText = '지난 예약';
+        else badgeText = `${res.days_left}일 후`;
+
+        return `
+            <div class="schedule-item ${urgencyClass}" onclick="showConvertModal(${res.id})">
+                <div class="schedule-pet">${res.pet_name}</div>
+                <div class="schedule-date">${new Date(res.date).toLocaleDateString('ko-KR', {month: 'numeric', day: 'numeric'})}</div>
+                <div class="schedule-badge ${urgencyClass}">${badgeText}</div>
+                <div class="schedule-type">${res.event_type === 'med' ? '진료' : '접종'}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function showReservationModal() {
+    const modal = document.getElementById('reservationModal');
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    loadReservationList();
+}
+
+function closeReservationModal() {
+    const modal = document.getElementById('reservationModal');
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+}
+
+function loadReservationList() {
+    fetch('/calendar/api/events/?is_reservation=true')
+        .then(response => response.json())
+        .then(data => {
+            const reservations = data.results || data;
+            const container = document.getElementById('reservationList');
+            
+            if (!reservations || reservations.length === 0) {
+                container.innerHTML = '<div class="no-reservations">등록된 예약이 없습니다.</div>';
+                return;
+            }
+
+            container.innerHTML = reservations.map(res => `
+                <div class="reservation-item">
+                    <div class="reservation-header">
+                        <span class="reservation-pet">${res.pet_name}</span>
+                        <span class="reservation-type">${res.event_type === 'med' ? '진료' : '접종'}</span>
+                        <span class="reservation-date">${res.date}</span>
+                    </div>
+                    <div class="reservation-content">
+                        <p><strong>병원:</strong> ${res.hospital || '미정'}</p>
+                        <p><strong>내용:</strong> ${res.description || '없음'}</p>
+                        <p><strong>예상 비용:</strong> ${res.cost ? res.cost.toLocaleString() + '원' : '미정'}</p>
+                    </div>
+                    <div class="reservation-actions">
+                        <button class="btn btn-primary btn-sm" onclick="showConvertModal(${res.id})">
+                            기록으로 변환
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteReservation(${res.id})">
+                            삭제
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        })
+        .catch(error => {
+            console.error('예약 목록 로드 실패:', error);
+        });
+}
+
+function showConvertModal(reservationId) {
+    fetch(`/calendar/api/events/${reservationId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = document.getElementById('convertReservationModal');
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+            
+            // 예약 정보 표시
+            const infoContainer = document.getElementById('reservationInfo');
+            infoContainer.innerHTML = `
+                <div class="reservation-summary">
+                    <h4>${data.pet_name}의 ${data.event_type === 'med' ? '진료' : '예방접종'} 예약</h4>
+                    <p><strong>예약일:</strong> ${data.date}</p>
+                    <p><strong>병원:</strong> ${data.hospital || '미정'}</p>
+                    <p><strong>예약 내용:</strong> ${data.description || '없음'}</p>
+                    <p><strong>예상 비용:</strong> ${data.cost ? data.cost.toLocaleString() + '원' : '미정'}</p>
+                </div>
+            `;
+            
+            // 폼 데이터 미리 설정
+            document.querySelector('#convertForm input[name="actual_date"]').value = data.date;
+            document.querySelector('#convertForm textarea[name="description"]').value = data.description || '';
+            document.querySelector('#convertForm textarea[name="notes"]').value = data.notes || '';
+            document.querySelector('#convertForm input[name="actual_cost"]').value = data.cost || '';
+            
+            // 예약 ID 저장
+            document.getElementById('convertForm').dataset.reservationId = reservationId;
+        })
+        .catch(error => {
+            console.error('예약 정보 로드 실패:', error);
+        });
+}
+
+function closeConvertModal() {
+    const modal = document.getElementById('convertReservationModal');
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+}
+
+// 예약을 기록으로 변환
+document.getElementById('convertForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const reservationId = this.dataset.reservationId;
+    const formData = new FormData(this);
+    
+    const data = {
+        date: formData.get('actual_date'),
+        description: formData.get('description'),
+        notes: formData.get('notes'),
+        cost: formData.get('actual_cost') || 0,
+        is_reservation: false
+    };
+    
+    fetch(`/calendar/api/events/${reservationId}/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        closeConvertModal();
+        closeReservationModal();
+        location.reload(); // 페이지 새로고침
+    })
+    .catch(error => {
+        console.error('예약 변환 실패:', error);
+        alert('예약을 기록으로 변환하는데 실패했습니다.');
+    });
+});
+
+function deleteReservation(reservationId) {
+    if (confirm('이 예약을 삭제하시겠습니까?')) {
+        fetch(`/calendar/api/events/${reservationId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                loadReservationList();
+                loadReservations();
+            } else {
+                alert('예약 삭제에 실패했습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('예약 삭제 실패:', error);
+            alert('예약 삭제에 실패했습니다.');
+        });
+    }
+}
 </script>
 {% endblock %} 
