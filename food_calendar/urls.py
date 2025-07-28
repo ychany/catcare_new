@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import food_calendar, get_events, create_event, get_event_details, delete_event, update_food_event, end_event, purchase_management, other_purchase_management, get_events_all, food_stats
+from .views import food_calendar, get_events, create_event, get_event_details, delete_event, update_food_event, end_event, purchase_management, other_purchase_management, get_events_all, food_stats, create_other_purchase_api
 
 app_name = 'food_calendar'
 
@@ -13,6 +13,7 @@ urlpatterns = [
     path('event/<int:event_id>/end/', end_event, name='end_event'),
     path('purchase/', purchase_management, name='purchase_management'),
     path('other_purchase/', other_purchase_management, name='other_purchase_management'),
+    path('api/purchases/other/', create_other_purchase_api, name='api_other_purchase'),
     path('events/all/', get_events_all, name='get_events_all'),
     path('stats/', food_stats, name='food_stats'),
 ] 
