@@ -11,7 +11,10 @@
       "Bash(./venv/Scripts/activate)",
       "Bash(find:*)",
       "Bash(claude-monitor:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)",
+      "Bash(cmd /c:*)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   }
