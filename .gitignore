@@ -43,4 +43,7 @@ coverage.xml
 # Build
 build/
 dist/
-*.egg-info/ 
+*.egg-info/
+
+# Claude Code Usage Monitor
+Claude-Code-Usage-Monitor/ 
