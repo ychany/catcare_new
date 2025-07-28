@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -32,3 +33,18 @@ class VetHospital(models.Model):
         verbose_name = '동물병원'
         verbose_name_plural = '동물병원 목록'
         ordering = ['-rating', 'distance_km']
+
+
+class HospitalFavorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='사용자')
+    hospital = models.ForeignKey(VetHospital, on_delete=models.CASCADE, verbose_name='병원')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='즐겨찾기 추가일')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.hospital.name}"
+    
+    class Meta:
+        verbose_name = '병원 즐겨찾기'
+        verbose_name_plural = '병원 즐겨찾기 목록'
+        unique_together = ['user', 'hospital']
+        ordering = ['-created_at']

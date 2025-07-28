@@ -1,6 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from .models import VetHospital
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from .models import VetHospital, HospitalFavorite
 import json
 from common_app.models import Pet
 from django.db import models
@@ -36,9 +38,18 @@ def hospital_list(request):
     # 로그인한 유저의 펫 정보
     pets = Pet.objects.filter(owner=request.user) if request.user.is_authenticated else []
     
+    # 로그인한 유저의 즐겨찾기 병원 목록
+    favorite_hospitals = []
+    favorite_hospital_ids = []
+    if request.user.is_authenticated:
+        favorite_hospitals = HospitalFavorite.objects.filter(user=request.user).select_related('hospital')
+        favorite_hospital_ids = list(favorite_hospitals.values_list('hospital_id', flat=True))
+    
     return render(request, 'emergency_app/hospitals.html', {
         'hospitals': hospitals,
         'pets': pets,
+        'favorite_hospitals': favorite_hospitals,
+        'favorite_hospital_ids': favorite_hospital_ids,
         'search_query': search_query,
         'hospital_type': hospital_type,
     })
@@ -105,3 +116,25 @@ def create_sample_hospitals():
             name=data['name'],
             defaults=data
         )
+
+
+@login_required
+@require_POST
+def toggle_favorite(request, hospital_id):
+    """병원 즐겨찾기 토글"""
+    hospital = get_object_or_404(VetHospital, id=hospital_id)
+    favorite, created = HospitalFavorite.objects.get_or_create(
+        user=request.user,
+        hospital=hospital
+    )
+    
+    if not created:
+        favorite.delete()
+        is_favorite = False
+    else:
+        is_favorite = True
+    
+    return JsonResponse({
+        'is_favorite': is_favorite,
+        'message': '즐겨찾기에 추가되었습니다.' if is_favorite else '즐겨찾기에서 제거되었습니다.'
+    })

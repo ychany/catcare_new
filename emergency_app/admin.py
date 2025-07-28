@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import VetHospital
+from .models import VetHospital, HospitalFavorite
 
 @admin.register(VetHospital)
 class VetHospitalAdmin(admin.ModelAdmin):
@@ -30,3 +30,11 @@ class VetHospitalAdmin(admin.ModelAdmin):
     def get_specialties_display(self, obj):
         return ', '.join(obj.get_specialties_list())
     get_specialties_display.short_description = '전문분야'
+
+
+@admin.register(HospitalFavorite)
+class HospitalFavoriteAdmin(admin.ModelAdmin):
+    list_display = ['user', 'hospital', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__username', 'hospital__name']
+    readonly_fields = ['created_at']

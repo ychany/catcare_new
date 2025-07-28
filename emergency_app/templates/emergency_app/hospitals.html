@@ -759,6 +759,150 @@
   color: #3182f6;
   font-weight: 600;
 }
+
+/* 즐겨찾기 병원 스타일 */
+.favorite-hospitals-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.favorite-hospitals-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.favorite-hospitals-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.favorite-hospitals-grid::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+.favorite-hospitals-grid::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+.favorite-hospital-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: box-shadow 0.2s;
+}
+.favorite-hospital-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.favorite-hospital-info {
+  flex: 1;
+}
+.favorite-hospital-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222f3e;
+  margin-bottom: 4px;
+}
+.favorite-hospital-address {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 2px;
+}
+.favorite-hospital-phone {
+  font-size: 14px;
+  color: #3182f6;
+  font-weight: 500;
+}
+.favorite-hospital-actions {
+  display: flex;
+  gap: 8px;
+}
+.favorite-action-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.favorite-action-btn:hover {
+  background: #e5e7eb;
+  color: #333;
+  text-decoration: none;
+}
+.no-favorites {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+.no-favorites p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+.login-required {
+  text-align: center;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+.login-required p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+.login-required a {
+  color: #3182f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+.login-required a:hover {
+  text-decoration: underline;
+}
+
+/* 즐겨찾기 별표 버튼 스타일 */
+.favorite-star-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  margin: 0;
+}
+.favorite-star-btn:hover {
+  background: rgba(251, 191, 36, 0.2);
+  transform: scale(1.1);
+}
+.favorite-star-btn.favorited {
+  background: #fbbf24;
+  color: white;
+}
+.favorite-star-btn.favorited:hover {
+  background: #f59e0b;
+}
+.favorite-star-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
 </style>
 
 <div class="hospital-main-narrow">
@@ -816,28 +960,63 @@
         </ul>
       </div>
       <div class="checklist-section">
-        <h4>24시간 응급 연락처</h4>
-        <div class="emergency-contacts">
-          <div class="contact-item">
-            <span class="contact-name">24시 우리동물병원</span>
-            <span class="contact-phone">02-1234-5678</span>
+        <h4>나의 즐겨찾기 병원</h4>
+        {% if user.is_authenticated %}
+          <div class="favorite-hospitals-table" id="favorite-hospitals-container">
+            {% if favorite_hospitals %}
+              <div class="favorite-hospitals-grid">
+                {% for favorite in favorite_hospitals %}
+                  <div class="favorite-hospital-card" data-hospital-id="{{ favorite.hospital.id }}">
+                    <div class="favorite-hospital-info">
+                      <div class="favorite-hospital-name">{{ favorite.hospital.name }}</div>
+                      <div class="favorite-hospital-address">{{ favorite.hospital.address }}</div>
+                      <div class="favorite-hospital-phone">{{ favorite.hospital.phone }}</div>
+                    </div>
+                    <div class="favorite-hospital-actions">
+                      <a href="tel:{{ favorite.hospital.phone }}" class="favorite-action-btn">
+                        <i class="fas fa-phone"></i>
+                      </a>
+                      <button class="favorite-action-btn remove-favorite" onclick="toggleFavorite({{ favorite.hospital.id }})" title="즐겨찾기 해제">
+                        <i class="fas fa-star" style="color: #fbbf24;"></i>
+                      </button>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="no-favorites">
+                <i class="fas fa-star" style="color: #ccc; font-size: 24px; margin-bottom: 8px;"></i>
+                <p>즐겨찾기한 병원이 없습니다.</p>
+                <p>병원 검색 후 별표 버튼을 눌러 즐겨찾기에 추가해보세요.</p>
+              </div>
+            {% endif %}
           </div>
-          <div class="contact-item">
-            <span class="contact-name">응급동물의료센터</span>
-            <span class="contact-phone">02-4567-8901</span>
+        {% else %}
+          <div class="login-required">
+            <p>즐겨찾기 기능을 사용하려면 <a href="{% url 'common_app:login' %}">로그인</a>이 필요합니다.</p>
           </div>
-          <div class="contact-item">
-            <span class="contact-name">야간응급동물병원</span>
-            <span class="contact-phone">02-7890-1234</span>
-          </div>
-        </div>
+        {% endif %}
       </div>
     </div>
   </div>
 </div>
 
 <script id="hospital-data" type="application/json">
-[]
+[
+{% for hospital in hospitals %}
+{
+    "dbId": {{ hospital.id }},
+    "name": "{{ hospital.name|escapejs }}",
+    "lat": {{ hospital.latitude }},
+    "lng": {{ hospital.longitude }},
+    "address": "{{ hospital.address|escapejs }}",
+    "phone": "{{ hospital.phone|escapejs }}",
+    "distance": "{{ hospital.distance_km }}",
+    "isEmergency": {{ hospital.is_emergency|yesno:"true,false" }},
+    "rating": {{ hospital.rating }}
+}{% if not forloop.last %},{% endif %}
+{% endfor %}
+]
 </script>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=679cb0dcbdbd689c815830cfcb681150&libraries=services"></script>
 <script>
@@ -847,6 +1026,8 @@ function openDirections(address) {
 }
 
 const hospitals = JSON.parse(document.getElementById('hospital-data').textContent);
+const isUserAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+const favoriteHospitalIds = {{ favorite_hospital_ids|safe }};
 
 // 카카오 API 검색 변수들
 const ps = new kakao.maps.services.Places();
@@ -876,10 +1057,17 @@ function initMap() {
     showInitialMessage();
 }
 
-// 초기 안내 메시지 표시 함수
+// 초기 안내 메시지 표시 함수  
 function showInitialMessage() {
     const hospitalListContainer = document.querySelector('.hospital-list');
     if (!hospitalListContainer) return;
+    
+    // 테스트를 위해 DB 병원이 있으면 먼저 표시
+    if (hospitals.length > 0) {
+        console.log('DB 병원 표시:', hospitals);
+        displayHospitals(hospitals);
+        return;
+    }
     
     hospitalListContainer.innerHTML = `
         <div class="hospital-card">
@@ -965,12 +1153,22 @@ function searchAnimalHospitals(keyword) {
         markers.forEach(m => m.setMap(null));
         markers = [];
         infowindow.close();
-        updateHospitalList([]);
+        showInitialMessage();
         return;
     }
     
     const searchKeyword = keyword.trim() + ' 동물병원';
+    
+    // DB 병원에서 먼저 검색
+    const dbResults = hospitals.filter(hospital => 
+        hospital.name.toLowerCase().includes(keyword.toLowerCase()) ||
+        hospital.address.toLowerCase().includes(keyword.toLowerCase())
+    );
+    
+    // 카카오 API 검색
     ps.keywordSearch(searchKeyword, function(data, status, pagination) {
+        let allResults = [...dbResults]; // DB 결과를 먼저 추가
+        
         if (status === kakao.maps.services.Status.OK) {
             console.log('카카오 API 응답 데이터:', data); // 디버그용
             
@@ -984,24 +1182,33 @@ function searchAnimalHospitals(keyword) {
             const promises = filtered.map(place => getHospitalDetails(place));
             
             Promise.all(promises).then(convertedResults => {
-                searchResults = convertedResults;
-                displayHospitals(convertedResults);
-                updateHospitalList(convertedResults);
+                // DB 결과와 API 결과 합치기
+                allResults = [...dbResults, ...convertedResults];
+                searchResults = allResults;
+                displayHospitals(allResults);
+                updateHospitalList(allResults);
             });
         } else {
-            // 검색 결과가 없을 때 안내 메시지 표시
-            const hospitalListContainer = document.querySelector('.hospital-list');
-            if (hospitalListContainer) {
-                hospitalListContainer.innerHTML = `
-                    <div class="hospital-card">
-                        <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
-                            <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3; color: #f59e0b;"></i>
-                            <h4 style="margin-bottom: var(--spacing-sm); color: var(--color-text);">검색 결과가 없습니다</h4>
-                            <p style="margin-bottom: 0;">다른 검색어로 시도해보세요.</p>
-                            <p style="margin: 0;">예: "서울 동물병원", "강남구", "24시간" 등</p>
+            // 카카오 API 결과가 없어도 DB 결과가 있으면 표시
+            if (dbResults.length > 0) {
+                searchResults = dbResults;
+                displayHospitals(dbResults);
+                updateHospitalList(dbResults);
+            } else {
+                // 완전히 검색 결과가 없을 때만 안내 메시지 표시
+                const hospitalListContainer = document.querySelector('.hospital-list');
+                if (hospitalListContainer) {
+                    hospitalListContainer.innerHTML = `
+                        <div class="hospital-card">
+                            <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
+                                <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3; color: #f59e0b;"></i>
+                                <h4 style="margin-bottom: var(--spacing-sm); color: var(--color-text);">검색 결과가 없습니다</h4>
+                                <p style="margin-bottom: 0;">다른 검색어로 시도해보세요.</p>
+                                <p style="margin: 0;">예: "서울 동물병원", "강남구", "24시간" 등</p>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
         }
     });
@@ -1170,7 +1377,7 @@ function addHospitalListClickHandlers(hospitalData) {
   });
 }
 
-// 병원 리스트 업데이트 함수 수정 (data-place-id 추가)
+// 병원 리스트 업데이트 함수 수정
 function updateHospitalList(hospitalData) {
   const hospitalListContainer = document.querySelector('.hospital-list');
   if (!hospitalListContainer) return;
@@ -1194,6 +1401,17 @@ function updateHospitalList(hospitalData) {
     const emergencyBadge = hospital.isEmergency ? 
         '<span class="emergency-badge">응급</span>' : '';
     const placeIdAttr = hospital.placeId ? `data-place-id="${hospital.placeId}"` : '';
+    
+    // DB 병원인지 확인 (dbId가 있으면 DB 병원)
+    const isDbHospital = hospital.dbId !== undefined;
+    const isFavorited = isDbHospital && favoriteHospitalIds.includes(hospital.dbId);
+    const favoriteButton = (isDbHospital && isUserAuthenticated) ? 
+        `<button class="favorite-star-btn ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite(${hospital.dbId}, this)" title="${isFavorited ? '즐겨찾기 해제' : '즐겨찾기'}">
+            <i class="fas fa-star"></i>
+         </button>` : '';
+         
+    console.log('Hospital:', hospital.name, 'isDbHospital:', isDbHospital, 'isAuthenticated:', isUserAuthenticated, 'favoriteButton:', favoriteButton);
+    
     listHtml += `
         <div class="hospital-card" data-lat="${hospital.lat}" data-lng="${hospital.lng}" ${placeIdAttr}>
             <div class="hospital-header">
@@ -1203,7 +1421,10 @@ function updateHospitalList(hospitalData) {
                 <div class="hospital-info">
                     <div class="hospital-name-row">
                         <h3 class="hospital-name">${hospital.name}</h3>
-                        ${emergencyBadge}
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            ${emergencyBadge}
+                            ${favoriteButton}
+                        </div>
                     </div>
                     <div class="hospital-rating">
                         <span class="rating-text">${hospital.distance}km</span>
@@ -1290,5 +1511,80 @@ document.addEventListener('DOMContentLoaded', function() {
         requestUserLocation();
     }
 });
+
+// 즐겨찾기 토글 함수
+function toggleFavorite(hospitalId, buttonElement) {
+    console.log('toggleFavorite called with:', hospitalId, buttonElement);
+    
+    if (!hospitalId) {
+        alert('병원 정보를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 버튼 비활성화
+    const button = buttonElement || event.target.closest('.favorite-star-btn');
+    if (button) {
+        button.disabled = true;
+    }
+    
+    fetch(`/emergency/favorite/${hospitalId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        // 버튼 상태 업데이트
+        if (button) {
+            if (data.is_favorite) {
+                button.classList.add('favorited');
+                button.title = '즐겨찾기 해제';
+            } else {
+                button.classList.remove('favorited');
+                button.title = '즐겨찾기';
+            }
+            button.disabled = false;
+        }
+        
+        // 즐겨찾기 목록 새로고침
+        updateFavoritesList();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('즐겨찾기 처리 중 오류가 발생했습니다: ' + error.message);
+        if (button) {
+            button.disabled = false;
+        }
+    });
+}
+
+// CSRF 토큰 가져오기
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// 즐겨찾기 목록 업데이트
+function updateFavoritesList() {
+    location.reload();
+}
 </script>
 {% endblock %} 
