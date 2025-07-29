@@ -307,11 +307,12 @@
 .records-container {
     padding: var(--spacing-xl);
 }
-.records-pagination-wrapper {
+.pagination-controls {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--spacing-lg);
-    position: relative;
+    margin-top: var(--spacing-lg);
 }
 .pagination-btn {
     background: var(--bg-primary);
@@ -343,14 +344,13 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-lg);
-    flex: 1;
     min-height: 400px;
 }
 .pagination-info {
     text-align: center;
-    margin-top: var(--spacing-lg);
     font-size: 14px;
     color: var(--text-secondary);
+    min-width: 80px;
 }
 .record-item {
     background: var(--bg-tertiary);
@@ -358,6 +358,7 @@
     padding: var(--spacing-xl);
     border-left: 4px solid var(--primary-color);
     transition: all 0.2s;
+    align-self: start;
 }
 .record-item:hover {
     background: #f0f0f0;
@@ -609,7 +610,7 @@
     .section-filters { justify-content: center; }
     .nav-right { flex-direction: column; width: 100%; }
     .nav-btn { justify-content: center; }
-    .records-pagination-wrapper { flex-direction: column; gap: var(--spacing-md); }
+    .pagination-controls { flex-direction: row; gap: var(--spacing-md); }
     .pagination-btn { width: 40px; height: 40px; font-size: 14px; }
 }
 @media (max-width: 480px) {
@@ -748,19 +749,19 @@
             </div>
 
             <div class="records-container">
-                <div class="records-pagination-wrapper">
+                <div class="records-grid" id="recordsGrid">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+                <div class="pagination-controls">
                     <button type="button" class="pagination-btn prev-btn" id="prevBtn" onclick="changePage(-1)">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <div class="records-grid" id="recordsGrid">
+                    <div class="pagination-info" id="paginationInfo">
                         <!-- JavaScript로 동적 생성 -->
                     </div>
                     <button type="button" class="pagination-btn next-btn" id="nextBtn" onclick="changePage(1)">
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                </div>
-                <div class="pagination-info" id="paginationInfo">
-                    <!-- JavaScript로 동적 생성 -->
                 </div>
                 <div class="no-records" id="noRecords" style="display: none;">
                     <div class="no-records-icon">⚖️</div>
