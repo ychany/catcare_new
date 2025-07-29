@@ -3,13 +3,13 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from .models import OtherPurchase
 from common_app.models import Pet
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from .serializers import OtherPurchaseSerializer
-from django.db.models import Sum, Value, DecimalField
+from django.db.models import Sum, Value, DecimalField, Count
 from django.db.models.functions import Coalesce
 
 # Create your views here.
@@ -57,6 +57,71 @@ def other_purchase_management(request):
     # 총 합계
     total_price = qs.aggregate(total_price=Coalesce(Sum('price'), Value(0), output_field=DecimalField()))['total_price']
     
+    # 지난달 데이터 계산
+    last_month_start = start_date - timedelta(days=30)
+    last_month_end = start_date
+    last_month_qs = OtherPurchase.objects.filter(user=request.user, purchase_date__gte=last_month_start, purchase_date__lt=last_month_end)
+    if selected_pet_id:
+        last_month_qs = last_month_qs.filter(cat_id=selected_pet_id)
+    last_month_total = last_month_qs.aggregate(total_price=Coalesce(Sum('price'), Value(0), output_field=DecimalField()))['total_price']
+    
+    # 지난달 대비 변화율 계산
+    if last_month_total and last_month_total > 0:
+        change_percentage = ((total_price - last_month_total) / last_month_total) * 100
+        if change_percentage > 0:
+            trend_text = f"지난달 대비 +{change_percentage:.1f}%"
+            trend_icon = "fas fa-arrow-up"
+        elif change_percentage < 0:
+            trend_text = f"지난달 대비 {change_percentage:.1f}%"
+            trend_icon = "fas fa-arrow-down"
+        else:
+            trend_text = "지난달과 동일"
+            trend_icon = "fas fa-minus"
+    else:
+        trend_text = "지난달 데이터 없음"
+        trend_icon = "fas fa-minus"
+    
+    # 평소와의 비교 (최근 3개월 평균 대비)
+    three_months_ago = start_date - timedelta(days=90)
+    three_months_qs = OtherPurchase.objects.filter(user=request.user, purchase_date__gte=three_months_ago, purchase_date__lt=start_date)
+    if selected_pet_id:
+        three_months_qs = three_months_qs.filter(cat_id=selected_pet_id)
+    three_months_total = three_months_qs.aggregate(total_price=Coalesce(Sum('price'), Value(0), output_field=DecimalField()))['total_price']
+    
+    if three_months_total and three_months_total > 0:
+        avg_monthly = three_months_total / 3
+        current_vs_avg = ((total_price - avg_monthly) / avg_monthly) * 100
+        if abs(current_vs_avg) < 10:  # 10% 이내면 평소와 비슷
+            daily_trend_text = "평소와 비슷"
+            daily_trend_icon = "fas fa-minus"
+        elif current_vs_avg > 10:
+            daily_trend_text = f"평소 대비 +{current_vs_avg:.1f}%"
+            daily_trend_icon = "fas fa-arrow-up"
+        else:
+            daily_trend_text = f"평소 대비 {current_vs_avg:.1f}%"
+            daily_trend_icon = "fas fa-arrow-down"
+    else:
+        daily_trend_text = "평소 데이터 없음"
+        daily_trend_icon = "fas fa-minus"
+    
+    # 구매 건수 변화
+    current_count = qs.count()
+    last_month_count = last_month_qs.count()
+    if last_month_count > 0:
+        count_change = current_count - last_month_count
+        if count_change > 0:
+            count_trend_text = f"+{count_change}건"
+            count_trend_icon = "fas fa-arrow-up"
+        elif count_change < 0:
+            count_trend_text = f"{count_change}건"
+            count_trend_icon = "fas fa-arrow-down"
+        else:
+            count_trend_text = "변화없음"
+            count_trend_icon = "fas fa-minus"
+    else:
+        count_trend_text = "지난달 데이터 없음"
+        count_trend_icon = "fas fa-minus"
+    
     category_labels = ['장난감', '간식', '용품', '의료', '미용', '기타']
     category_totals = []
     for label in category_labels:
@@ -89,6 +154,12 @@ def other_purchase_management(request):
         'total_price': total_price,
         'pets': pets,
         'selected_pet_id': selected_pet_id,
+        'trend_text': trend_text,
+        'trend_icon': trend_icon,
+        'daily_trend_text': daily_trend_text,
+        'daily_trend_icon': daily_trend_icon,
+        'count_trend_text': count_trend_text,
+        'count_trend_icon': count_trend_icon,
     }
     context.update({
         'category_labels': category_labels,

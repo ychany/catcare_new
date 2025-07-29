@@ -85,8 +85,8 @@
                     <div class="stat-label">이번 달 총 지출</div>
                 </div>
                 <div class="stat-trend">
-                    <i class="fas fa-arrow-up"></i>
-                    <span>지난달 대비 +12%</span>
+                    <i class="{{ trend_icon }}"></i>
+                    <span>{{ trend_text }}</span>
         </div>
     </div>
 
@@ -99,8 +99,8 @@
                     <div class="stat-label">일 평균 지출</div>
                 </div>
                 <div class="stat-trend">
-                    <i class="fas fa-minus"></i>
-                    <span>평소와 비슷</span>
+                    <i class="{{ daily_trend_icon }}"></i>
+                    <span>{{ daily_trend_text }}</span>
         </div>
     </div>
 
@@ -113,8 +113,8 @@
                     <div class="stat-label">이번 달 구매</div>
                         </div>
                 <div class="stat-trend">
-                    <i class="fas fa-arrow-up"></i>
-                    <span>+3건</span>
+                    <i class="{{ count_trend_icon }}"></i>
+                    <span>{{ count_trend_text }}</span>
                         </div>
                         </div>
             
