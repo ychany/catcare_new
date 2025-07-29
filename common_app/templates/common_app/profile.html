@@ -1,0 +1,153 @@
+{% extends 'common_app/base.html' %}
+
+{% block title %}프로필 수정 - 냥이 집사{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="heading-2">사용자 정보 수정</h2>
+        <p class="body-text">계정 정보를 업데이트하세요.</p>
+    </div>
+    
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- 사용자 기본 정보 -->
+            <div class="form-group">
+                <label class="form-label" for="username">사용자명</label>
+                <input type="text" id="username" name="username" class="form-input" 
+                       value="{{ user.username }}" readonly>
+                <small class="body-text-sm">사용자명은 변경할 수 없습니다.</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="email">이메일</label>
+                <input type="email" id="email" name="email" class="form-input" 
+                       value="{{ user.email }}" placeholder="이메일을 입력하세요">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="first_name">이름</label>
+                <input type="text" id="first_name" name="first_name" class="form-input" 
+                       value="{{ user.first_name }}" placeholder="이름을 입력하세요">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="last_name">성</label>
+                <input type="text" id="last_name" name="last_name" class="form-input" 
+                       value="{{ user.last_name }}" placeholder="성을 입력하세요">
+            </div>
+            
+            <!-- 비밀번호 변경 섹션 -->
+            <div style="margin-top: var(--spacing-3xl); padding-top: var(--spacing-2xl); border-top: 1px solid var(--border-light);">
+                <h3 class="heading-3">비밀번호 변경</h3>
+                <p class="body-text mb-lg">비밀번호를 변경하려면 아래 필드를 입력하세요. 변경하지 않으려면 비워두세요.</p>
+                
+                <div class="form-group">
+                    <label class="form-label" for="current_password">현재 비밀번호</label>
+                    <input type="password" id="current_password" name="current_password" class="form-input" 
+                           placeholder="현재 비밀번호를 입력하세요">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new_password1">새 비밀번호</label>
+                    <input type="password" id="new_password1" name="new_password1" class="form-input" 
+                           placeholder="새 비밀번호를 입력하세요">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new_password2">새 비밀번호 확인</label>
+                    <input type="password" id="new_password2" name="new_password2" class="form-input" 
+                           placeholder="새 비밀번호를 다시 입력하세요">
+                </div>
+            </div>
+            
+            <!-- 버튼 -->
+            <div class="flex gap-md" style="margin-top: var(--spacing-2xl);">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    변경사항 저장
+                </button>
+                <a href="{% url 'index' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    취소
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 계정 정보 -->
+<div class="card" style="max-width: 600px; margin: var(--spacing-2xl) auto 0;">
+    <div class="card-header">
+        <h3 class="heading-3">계정 정보</h3>
+    </div>
+    <div class="card-body">
+        <div class="flex-between mb-md">
+            <span class="body-text">가입일:</span>
+            <span class="body-text">{{ user.date_joined|date:"Y년 m월 d일" }}</span>
+        </div>
+        <div class="flex-between mb-md">
+            <span class="body-text">마지막 로그인:</span>
+            <span class="body-text">
+                {% if user.last_login %}
+                    {{ user.last_login|date:"Y년 m월 d일 H:i" }}
+                {% else %}
+                    처음 로그인
+                {% endif %}
+            </span>
+        </div>
+        <div class="flex-between">
+            <span class="body-text">등록된 반려동물:</span>
+            <span class="body-text">{{ user.pets.count }}마리</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 비밀번호 확인 일치 체크
+    const newPassword1 = document.getElementById('new_password1');
+    const newPassword2 = document.getElementById('new_password2');
+    
+    function checkPasswordMatch() {
+        if (newPassword1.value && newPassword2.value) {
+            if (newPassword1.value !== newPassword2.value) {
+                newPassword2.setCustomValidity('비밀번호가 일치하지 않습니다.');
+            } else {
+                newPassword2.setCustomValidity('');
+            }
+        }
+    }
+    
+    newPassword1.addEventListener('input', checkPasswordMatch);
+    newPassword2.addEventListener('input', checkPasswordMatch);
+    
+    // 폼 제출 시 비밀번호 유효성 검사
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const currentPassword = document.getElementById('current_password').value;
+        const newPassword1Value = newPassword1.value;
+        const newPassword2Value = newPassword2.value;
+        
+        // 새 비밀번호를 입력했지만 현재 비밀번호를 입력하지 않은 경우
+        if ((newPassword1Value || newPassword2Value) && !currentPassword) {
+            e.preventDefault();
+            alert('비밀번호를 변경하려면 현재 비밀번호를 입력해야 합니다.');
+            document.getElementById('current_password').focus();
+            return;
+        }
+        
+        // 새 비밀번호가 일치하지 않는 경우
+        if (newPassword1Value !== newPassword2Value) {
+            e.preventDefault();
+            alert('새 비밀번호가 일치하지 않습니다.');
+            newPassword2.focus();
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

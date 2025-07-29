@@ -5,7 +5,8 @@ from .forms import UserRegisterForm, PetForm
 from .models import Pet
 from photo_board_app.models import Post
 from weight_tracker_app.models import Weight
-from django.contrib.auth import logout
+from django.contrib.auth import logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from insurance_app.models import PetProfile
 
 # Create your views here.
@@ -159,6 +160,49 @@ def pet_delete(request, pet_id):
         pet.delete()
         return redirect('index')
     return render(request, 'common_app/pet_confirm_delete.html', {'pet': pet})
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        user = request.user
+        
+        # 기본 정보 업데이트
+        user.email = request.POST.get('email', user.email)
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        
+        # 비밀번호 변경 처리
+        current_password = request.POST.get('current_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+        
+        password_changed = False
+        
+        if current_password and new_password1 and new_password2:
+            if new_password1 == new_password2:
+                if user.check_password(current_password):
+                    user.set_password(new_password1)
+                    password_changed = True
+                else:
+                    messages.error(request, '현재 비밀번호가 올바르지 않습니다.')
+                    return render(request, 'common_app/profile.html')
+            else:
+                messages.error(request, '새 비밀번호가 일치하지 않습니다.')
+                return render(request, 'common_app/profile.html')
+        
+        try:
+            user.save()
+            if password_changed:
+                update_session_auth_hash(request, user)
+                messages.success(request, '프로필 정보와 비밀번호가 성공적으로 변경되었습니다.')
+            else:
+                messages.success(request, '프로필 정보가 성공적으로 변경되었습니다.')
+        except Exception as e:
+            messages.error(request, '정보 저장 중 오류가 발생했습니다.')
+        
+        return redirect('common_app:profile')
+    
+    return render(request, 'common_app/profile.html')
 
 # 로그아웃 후 로그인 페이지로 리다이렉트하는 커스텀 뷰
 def custom_logout_view(request):

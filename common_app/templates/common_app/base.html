@@ -585,7 +585,7 @@
                 <!-- User Actions -->
                 <div class="nav-actions">
                     {% if user.is_authenticated %}
-                        <a href="#" class="nav-user">
+                        <a href="{% url 'common_app:profile' %}" class="nav-user">
                             <div class="user-avatar">
                                 {{ user.username|first|upper }}
                             </div>
