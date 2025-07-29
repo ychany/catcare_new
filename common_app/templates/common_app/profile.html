@@ -3,106 +3,415 @@
 {% block title %}프로필 수정 - 냥이 집사{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 600px; margin: 0 auto;">
-    <div class="card-header">
-        <h2 class="heading-2">사용자 정보 수정</h2>
-        <p class="body-text">계정 정보를 업데이트하세요.</p>
+<style>
+.profile-header {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 24px 0 16px 0;
+  margin-bottom: 32px;
+}
+
+.profile-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 800px;
+  margin: 0 auto;
+  margin-bottom: 0;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #222f3e;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+  background: #f3f4f6;
+}
+
+.profile-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222f3e;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-title i {
+  color: #222f3e;
+  background: #f3f4f6;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.profile-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px 0 rgb(0 0 0 / 4%);
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+.profile-card-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222f3e;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-card-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  color: #222f3e;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3182f6;
+  box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1);
+}
+
+.form-input:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+.form-note {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.password-section {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222f3e;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 24px 0;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.btn-primary {
+  background: #FF6B35;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+}
+
+.btn-primary:hover {
+  background: #e55a2b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  color: #fff;
+  text-decoration: none;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #374151;
+  text-decoration: none;
+}
+
+.account-info-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-container {
+    padding: 0 16px;
+  }
+  
+  .profile-card {
+    padding: 24px 20px;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+</style>
+
+<div class="profile-header">
+  <div class="profile-nav">
+    <div class="nav-left">
+      <button class="back-btn" onclick="history.back()">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <span class="profile-title">
+        <i class="fas fa-user-edit"></i>
+        프로필 수정
+      </span>
     </div>
-    
-    <div class="card-body">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <!-- 사용자 기본 정보 -->
-            <div class="form-group">
-                <label class="form-label" for="username">사용자명</label>
-                <input type="text" id="username" name="username" class="form-input" 
-                       value="{{ user.username }}" readonly>
-                <small class="body-text-sm">사용자명은 변경할 수 없습니다.</small>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="email">이메일</label>
-                <input type="email" id="email" name="email" class="form-input" 
-                       value="{{ user.email }}" placeholder="이메일을 입력하세요">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="first_name">이름</label>
-                <input type="text" id="first_name" name="first_name" class="form-input" 
-                       value="{{ user.first_name }}" placeholder="이름을 입력하세요">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="last_name">성</label>
-                <input type="text" id="last_name" name="last_name" class="form-input" 
-                       value="{{ user.last_name }}" placeholder="성을 입력하세요">
-            </div>
-            
-            <!-- 비밀번호 변경 섹션 -->
-            <div style="margin-top: var(--spacing-3xl); padding-top: var(--spacing-2xl); border-top: 1px solid var(--border-light);">
-                <h3 class="heading-3">비밀번호 변경</h3>
-                <p class="body-text mb-lg">비밀번호를 변경하려면 아래 필드를 입력하세요. 변경하지 않으려면 비워두세요.</p>
-                
-                <div class="form-group">
-                    <label class="form-label" for="current_password">현재 비밀번호</label>
-                    <input type="password" id="current_password" name="current_password" class="form-input" 
-                           placeholder="현재 비밀번호를 입력하세요">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="new_password1">새 비밀번호</label>
-                    <input type="password" id="new_password1" name="new_password1" class="form-input" 
-                           placeholder="새 비밀번호를 입력하세요">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="new_password2">새 비밀번호 확인</label>
-                    <input type="password" id="new_password2" name="new_password2" class="form-input" 
-                           placeholder="새 비밀번호를 다시 입력하세요">
-                </div>
-            </div>
-            
-            <!-- 버튼 -->
-            <div class="flex gap-md" style="margin-top: var(--spacing-2xl);">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i>
-                    변경사항 저장
-                </button>
-                <a href="{% url 'index' %}" class="btn btn-secondary">
-                    <i class="fas fa-times"></i>
-                    취소
-                </a>
-            </div>
-        </form>
-    </div>
+  </div>
 </div>
 
-<!-- 계정 정보 -->
-<div class="card" style="max-width: 600px; margin: var(--spacing-2xl) auto 0;">
-    <div class="card-header">
-        <h3 class="heading-3">계정 정보</h3>
+<div class="profile-container">
+  <!-- 사용자 정보 수정 카드 -->
+  <div class="profile-card">
+    <div class="profile-card-header">
+      <h2 class="profile-card-title">
+        <i class="fas fa-edit" style="color: #FF6B35;"></i>
+        기본 정보 수정
+      </h2>
+      <p class="profile-card-description">계정의 기본 정보를 수정할 수 있습니다.</p>
     </div>
-    <div class="card-body">
-        <div class="flex-between mb-md">
-            <span class="body-text">가입일:</span>
-            <span class="body-text">{{ user.date_joined|date:"Y년 m월 d일" }}</span>
+    
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <!-- 사용자 기본 정보 -->
+      <div class="form-group">
+        <label class="form-label" for="username">
+          <i class="fas fa-user" style="color: #9ca3af; margin-right: 4px;"></i>
+          사용자명
+        </label>
+        <input type="text" id="username" name="username" class="form-input" 
+               value="{{ user.username }}" disabled>
+        <div class="form-note">사용자명은 변경할 수 없습니다.</div>
+      </div>
+      
+      
+      <div class="form-group">
+        <label class="form-label" for="email">
+          <i class="fas fa-envelope" style="color: #9ca3af; margin-right: 4px;"></i>
+          이메일
+        </label>
+        <input type="email" id="email" name="email" class="form-input" 
+               value="{{ user.email }}" placeholder="이메일을 입력하세요">
+      </div>
+      
+      <!-- 비밀번호 변경 섹션 -->
+      <div class="password-section">
+        <h3 class="section-title">
+          <i class="fas fa-lock" style="color: #FF6B35;"></i>
+          비밀번호 변경
+        </h3>
+        <p class="section-description">보안을 위해 정기적으로 비밀번호를 변경하는 것을 권장합니다.</p>
+        
+        <div class="form-group">
+          <label class="form-label" for="current_password">현재 비밀번호</label>
+          <input type="password" id="current_password" name="current_password" class="form-input" 
+                 placeholder="현재 비밀번호를 입력하세요">
         </div>
-        <div class="flex-between mb-md">
-            <span class="body-text">마지막 로그인:</span>
-            <span class="body-text">
-                {% if user.last_login %}
-                    {{ user.last_login|date:"Y년 m월 d일 H:i" }}
-                {% else %}
-                    처음 로그인
-                {% endif %}
-            </span>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="new_password1">새 비밀번호</label>
+            <input type="password" id="new_password1" name="new_password1" class="form-input" 
+                   placeholder="새 비밀번호를 입력하세요">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="new_password2">새 비밀번호 확인</label>
+            <input type="password" id="new_password2" name="new_password2" class="form-input" 
+                   placeholder="새 비밀번호를 다시 입력하세요">
+          </div>
         </div>
-        <div class="flex-between">
-            <span class="body-text">등록된 반려동물:</span>
-            <span class="body-text">{{ user.pets.count }}마리</span>
-        </div>
+      </div>
+      
+      <!-- 버튼 -->
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i>
+          변경사항 저장
+        </button>
+        <a href="{% url 'index' %}" class="btn btn-secondary">
+          <i class="fas fa-times"></i>
+          취소
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- 계정 정보 카드 -->
+  <div class="profile-card">
+    <div class="profile-card-header">
+      <h3 class="profile-card-title">
+        <i class="fas fa-info-circle" style="color: #FF6B35;"></i>
+        계정 정보
+      </h3>
+      <p class="profile-card-description">회원 가입 정보와 활동 현황을 확인할 수 있습니다.</p>
     </div>
+    
+    <div class="account-info-grid">
+      <div class="info-row">
+        <span class="info-label">
+          <i class="fas fa-calendar-plus" style="color: #9ca3af; margin-right: 8px;"></i>
+          가입일
+        </span>
+        <span class="info-value">{{ user.date_joined|date:"Y년 m월 d일" }}</span>
+      </div>
+      
+      <div class="info-row">
+        <span class="info-label">
+          <i class="fas fa-clock" style="color: #9ca3af; margin-right: 8px;"></i>
+          마지막 로그인
+        </span>
+        <span class="info-value">
+          {% if user.last_login %}
+            {{ user.last_login|date:"Y년 m월 d일 H:i" }}
+          {% else %}
+            처음 로그인
+          {% endif %}
+        </span>
+      </div>
+      
+      <div class="info-row">
+        <span class="info-label">
+          <i class="fas fa-cat" style="color: #9ca3af; margin-right: 8px;"></i>
+          등록된 반려동물
+        </span>
+        <span class="info-value">{{ user.pets.count }}마리</span>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

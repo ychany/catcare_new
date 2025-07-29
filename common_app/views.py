@@ -168,8 +168,6 @@ def profile(request):
         
         # 기본 정보 업데이트
         user.email = request.POST.get('email', user.email)
-        user.first_name = request.POST.get('first_name', user.first_name)
-        user.last_name = request.POST.get('last_name', user.last_name)
         
         # 비밀번호 변경 처리
         current_password = request.POST.get('current_password')
