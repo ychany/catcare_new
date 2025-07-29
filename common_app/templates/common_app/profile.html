@@ -327,7 +327,8 @@
                value="{{ user.email }}" placeholder="이메일을 입력하세요">
       </div>
       
-      <!-- 비밀번호 변경 섹션 -->
+      <!-- 비밀번호 변경 섹션 (일반 로그인 사용자만) -->
+      {% if not user.socialaccount_set.exists %}
       <div class="password-section">
         <h3 class="section-title">
           <i class="fas fa-lock" style="color: #FF6B35;"></i>
@@ -355,6 +356,22 @@
           </div>
         </div>
       </div>
+      {% else %}
+      <!-- 카카오 로그인 사용자 안내 -->
+      <div class="password-section">
+        <h3 class="section-title">
+          <i class="fas fa-info-circle" style="color: #FEE500;"></i>
+          소셜 로그인 계정
+        </h3>
+        <p class="section-description">
+          카카오 로그인으로 가입하신 계정입니다. 비밀번호 변경은 카카오에서 관리됩니다.
+          <br>카카오 계정의 보안 설정을 변경하려면 
+          <a href="https://accounts.kakao.com" target="_blank" style="color: #FEE500; text-decoration: underline;">
+            카카오 계정 관리 페이지
+          </a>를 이용해 주세요.
+        </p>
+      </div>
+      {% endif %}
       
       <!-- 버튼 -->
       <div class="btn-group">
@@ -399,6 +416,27 @@
             {{ user.last_login|date:"Y년 m월 d일 H:i" }}
           {% else %}
             처음 로그인
+          {% endif %}
+        </span>
+      </div>
+      
+      <div class="info-row">
+        <span class="info-label">
+          <i class="fas fa-sign-in-alt" style="color: #9ca3af; margin-right: 8px;"></i>
+          로그인 방식
+        </span>
+        <span class="info-value">
+          {% if user.socialaccount_set.exists %}
+            {% for social_account in user.socialaccount_set.all %}
+              {% if social_account.provider == 'kakao' %}
+                <span style="color: #FEE500; font-weight: 600;">
+                  <i class="fas fa-comment" style="margin-right: 4px;"></i>
+                  카카오 로그인
+                </span>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <span style="color: #374151;">일반 로그인</span>
           {% endif %}
         </span>
       </div>

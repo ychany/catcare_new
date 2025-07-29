@@ -17,7 +17,7 @@ urlpatterns = [
     path('calendar/', include(('calendar_app.urls', 'calendar_app'), namespace='calendar_app')),
     path('care/', include('care_calendar.urls', namespace='care_calendar')),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='common_app/login.html'), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='/accounts/login/'), name='logout'),
+    path('accounts/logout/', common_views.custom_logout_view, name='logout'),
     path('register/', common_views.register, name='register'),
     path('index/', common_views.index, name='index'),
     path('kakao/callback/', kakao_callback, name='kakao_callback'),

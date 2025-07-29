@@ -191,10 +191,11 @@ SOCIALACCOUNT_PROVIDERS = {
     'kakao': {
         'APP': {
             'client_id': '60e6a9eaa8547966f54c5db6a27481d9',
-            'secret': '',  # 카카오는 secret이 필요없음
+            'secret': 'NcTLzquKaSmCPaDIug3RHBfpl7iJDhPH',
             'key': ''
         },
         'SCOPE': ['profile_nickname', 'account_email'],
         'AUTH_PARAMS': {'access_type': 'online'},
+        'VERIFIED_EMAIL': True,
     }
 } 
