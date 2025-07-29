@@ -393,6 +393,148 @@
     font-size: 16px;
     margin: 0;
 }
+.pet-changes-section {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--spacing-xl);
+}
+.pet-changes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
+}
+.pet-change-card {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-tertiary) 100%);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.pet-change-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary-color);
+    opacity: 0.8;
+}
+.pet-change-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+.pet-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+.pet-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+.pet-name i {
+    color: var(--primary-color);
+}
+.last-measured {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+}
+.current-weight {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+.weight-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+}
+.weight-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+.weight-changes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+.change-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+}
+.change-period {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+.change-value {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+}
+.change-positive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+.change-negative {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+}
+.change-neutral {
+    background: rgba(156, 163, 175, 0.1);
+    color: #6b7280;
+}
+.no-pet-data {
+    text-align: center;
+    padding: var(--spacing-4xl);
+    color: var(--text-secondary);
+    grid-column: 1 / -1;
+}
+.no-pet-data i {
+    font-size: 48px;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.3;
+}
+.trend-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.trend-arrow {
+    font-size: 14px;
+}
+.trend-up {
+    color: #dc2626;
+}
+.trend-down {
+    color: #16a34a;
+}
+.trend-stable {
+    color: #6b7280;
+}
 .notification {
     position: fixed;
     top: 20px;
@@ -413,12 +555,14 @@
 @media (max-width: 1024px) {
     .dashboard-grid { grid-template-columns: 1fr; }
     .stats-section { grid-template-columns: repeat(2, 1fr); }
+    .pet-changes-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 }
 @media (max-width: 768px) {
     .weight-nav { flex-direction: column; gap: var(--spacing-md); text-align: center; }
     .weight-title { font-size: 20px; }
     .weight-main { padding: var(--spacing-lg); }
     .stats-section { grid-template-columns: 1fr; }
+    .pet-changes-grid { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
     .records-grid { grid-template-columns: 1fr; }
     .section-header { flex-direction: column; gap: var(--spacing-md); align-items: stretch; }
@@ -452,9 +596,17 @@
     </div>
 
     <div class="weight-main">
-        <!-- Stats Section -->
-        <div class="stats-section" id="statsSection">
-            <!-- JavaScript로 동적 생성 -->
+        <!-- Pet-specific Changes Section -->
+        <div class="pet-changes-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-paw"></i>
+                    고양이별 최근 변화
+                </h3>
+            </div>
+            <div class="pet-changes-grid" id="petChangesGrid">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
         </div>
 
         <!-- Dashboard Grid -->
@@ -569,6 +721,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <script>
 let weightChart = null; // 최상단 전역 선언
+let allData = []; // 전역 변수로 선언
 
 document.addEventListener('DOMContentLoaded', function() {
     // 반려동물 목록을 드롭다운에 추가
@@ -599,7 +752,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const weightForm = document.getElementById('weightForm');
     const ctx = document.getElementById('weightChart').getContext('2d');
-    let allData = [];
 
     // 오늘 날짜를 기본값으로 설정
     document.getElementById('date').valueAsDate = new Date();
@@ -677,6 +829,139 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="stat-label">최근 변화</div>
             </div>
         `;
+    }
+
+    function updatePetChangesSection(data) {
+        const petChangesGrid = document.getElementById('petChangesGrid');
+        
+        if (data.length === 0) {
+            petChangesGrid.innerHTML = `
+                <div class="no-pet-data">
+                    <i class="fas fa-paw"></i>
+                    <h3>아직 체중 기록이 없어요</h3>
+                    <p>첫 번째 체중 기록을 추가해보세요!</p>
+                </div>
+            `;
+            return;
+        }
+
+        // 반려동물별로 데이터 그룹화
+        const petData = {};
+        data.forEach(item => {
+            if (!petData[item.pet]) {
+                petData[item.pet] = {
+                    name: item.pet_name,
+                    records: []
+                };
+            }
+            petData[item.pet].records.push(item);
+        });
+
+        // 각 반려동물에 대한 변화 카드 생성
+        let cardsHTML = '';
+        Object.values(petData).forEach(pet => {
+            const records = pet.records.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const latestRecord = records[0];
+            
+            if (!latestRecord) return;
+
+            // 기간별 변화 계산
+            const now = new Date();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            const weekRecords = records.filter(r => new Date(r.date) >= oneWeekAgo);
+            const monthRecords = records.filter(r => new Date(r.date) >= oneMonthAgo);
+            
+            let weekChange = '-';
+            let monthChange = '-';
+            
+            if (weekRecords.length >= 2) {
+                const oldestWeek = weekRecords[weekRecords.length - 1];
+                const weekDiff = latestRecord.weight - oldestWeek.weight;
+                weekChange = formatChange(weekDiff);
+            }
+            
+            if (monthRecords.length >= 2) {
+                const oldestMonth = monthRecords[monthRecords.length - 1];
+                const monthDiff = latestRecord.weight - oldestMonth.weight;
+                monthChange = formatChange(monthDiff);
+            }
+
+            // 트렌드 계산 (최근 3개 기록 기준)
+            let trend = 'stable';
+            let trendIcon = '→';
+            let trendClass = 'trend-stable';
+            
+            if (records.length >= 3) {
+                const recent3 = records.slice(0, 3);
+                const avgChange = (recent3[0].weight - recent3[2].weight) / 2;
+                if (avgChange > 0.1) {
+                    trend = 'up';
+                    trendIcon = '↗';
+                    trendClass = 'trend-up';
+                } else if (avgChange < -0.1) {
+                    trend = 'down';
+                    trendIcon = '↘';
+                    trendClass = 'trend-down';
+                }
+            }
+
+            const daysSinceLastMeasure = Math.floor((now - new Date(latestRecord.date)) / (1000 * 60 * 60 * 24));
+            const lastMeasuredText = daysSinceLastMeasure === 0 ? '오늘' : 
+                                   daysSinceLastMeasure === 1 ? '어제' : 
+                                   `${daysSinceLastMeasure}일 전`;
+
+            cardsHTML += `
+                <div class="pet-change-card">
+                    <div class="pet-card-header">
+                        <div class="pet-name">
+                            <i class="fas fa-cat"></i>
+                            ${pet.name}
+                        </div>
+                        <div class="last-measured">${lastMeasuredText}</div>
+                    </div>
+                    
+                    <div class="current-weight">
+                        <div class="weight-value">${latestRecord.weight.toFixed(1)}</div>
+                        <div class="weight-label">현재 체중 (kg)</div>
+                        <div class="trend-indicator">
+                            <span class="trend-arrow ${trendClass}">${trendIcon}</span>
+                            <span>최근 트렌드</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weight-changes">
+                        <div class="change-item">
+                            <span class="change-period">지난주 대비</span>
+                            <span class="change-value ${getChangeClass(weekChange)}">${weekChange}</span>
+                        </div>
+                        <div class="change-item">
+                            <span class="change-period">지난달 대비</span>
+                            <span class="change-value ${getChangeClass(monthChange)}">${monthChange}</span>
+                        </div>
+                        <div class="change-item">
+                            <span class="change-period">총 기록 수</span>
+                            <span class="change-value change-neutral">${records.length}개</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        petChangesGrid.innerHTML = cardsHTML;
+    }
+
+    function formatChange(change) {
+        if (Math.abs(change) < 0.01) return '변화없음';
+        return change > 0 ? `+${change.toFixed(1)}kg` : `${change.toFixed(1)}kg`;
+    }
+
+    function getChangeClass(changeText) {
+        if (changeText === '-' || changeText === '변화없음') return 'change-neutral';
+        if (changeText.startsWith('+')) return 'change-positive';
+        if (changeText.startsWith('-')) return 'change-negative';
+        return 'change-neutral';
     }
 
     function updateRecordsGrid(data) {
@@ -879,7 +1164,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 allData = data;
-                updateStatsSection(data);
+                updatePetChangesSection(data);
                 updateChart(data);
                 filterAndRenderRecords();
             })
@@ -979,7 +1264,7 @@ function deleteRecord(recordId) {
                 .then(response => response.json())
                 .then(data => {
                     allData = data;
-                    updateStatsSection(data);
+                    updatePetChangesSection(data);
                     updateChart(data);
                     filterAndRenderRecords();
                 });
