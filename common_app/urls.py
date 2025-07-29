@@ -10,4 +10,5 @@ urlpatterns = [
     path('register/', views.pet_register, name='pet_register'),
     path('delete/<int:pet_id>/', views.pet_delete, name='pet_delete'),
     path('profile/', views.profile, name='profile'),
+    path('kakao/callback/', views.kakao_callback, name='kakao_callback'),
 ] 

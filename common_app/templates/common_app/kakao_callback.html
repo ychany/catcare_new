@@ -1,0 +1,35 @@
+{% extends 'common_app/base.html' %}
+
+{% block title %}카카오 로그인 처리 중...{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: center; min-height: 50vh; text-align: center;">
+    <div>
+        <h2>카카오 로그인 처리 중...</h2>
+        <p>잠시만 기다려주세요.</p>
+        <div class="spinner" style="margin: 20px auto;"></div>
+    </div>
+</div>
+
+<script>
+// URL에서 인증 코드 추출
+const urlParams = new URLSearchParams(window.location.search);
+const code = urlParams.get('code');
+const error = urlParams.get('error');
+
+if (error) {
+    alert('카카오 로그인 실패: ' + error);
+    window.location.href = '/accounts/login/';
+} else if (code) {
+    // 인증 코드를 서버로 전송하여 토큰 획득
+    console.log('카카오 인증 코드 수신됨');
+    // 여기서 실제 로그인 처리를 진행
+    alert('카카오 로그인 처리 중입니다...');
+    // 임시로 홈으로 리다이렉트
+    window.location.href = '/home/';
+} else {
+    alert('카카오 로그인 오류가 발생했습니다.');
+    window.location.href = '/accounts/login/';
+}
+</script>
+{% endblock %}

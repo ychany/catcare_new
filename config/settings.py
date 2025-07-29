@@ -38,8 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'rest_framework',
     'django.contrib.humanize',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.kakao',
     'common_app',
     'photo_board_app',
     'calendar_app',
@@ -60,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 # CSRF 설정 (개발용)
@@ -95,7 +101,7 @@ WSGI_APPLICATION = 'animal.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'catcare_new_db',
         'USER': 'animal_user',
         'PASSWORD': '5344', 
@@ -163,4 +169,32 @@ REST_FRAMEWORK = {
 # Login/Logout URLs
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/home/'
-LOGOUT_REDIRECT_URL = '/accounts/login/' 
+LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Django Sites Framework
+SITE_ID = 1
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Allauth settings
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Social account providers
+SOCIALACCOUNT_PROVIDERS = {
+    'kakao': {
+        'APP': {
+            'client_id': '60e6a9eaa8547966f54c5db6a27481d9',
+            'secret': '',  # 카카오는 secret이 필요없음
+            'key': ''
+        },
+        'SCOPE': ['profile_nickname', 'account_email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    }
+} 

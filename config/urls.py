@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from common_app import views as common_views
+from common_app.views import kakao_callback
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -19,6 +20,7 @@ urlpatterns = [
     path('accounts/logout/', auth_views.LogoutView.as_view(next_page='/accounts/login/'), name='logout'),
     path('register/', common_views.register, name='register'),
     path('index/', common_views.index, name='index'),
+    path('kakao/callback/', kakao_callback, name='kakao_callback'),
     path('weight/', include(('weight_tracker_app.urls', 'weight_tracker_app'), namespace='weight_tracker_app')),
     path('insurance/', include('insurance_app.urls', namespace='insurance')),
     path('items/', include('item_purchase_app.urls')),

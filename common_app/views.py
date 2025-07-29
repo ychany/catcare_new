@@ -202,6 +202,69 @@ def profile(request):
     
     return render(request, 'common_app/profile.html')
 
+def kakao_callback(request):
+    import requests
+    from django.contrib.auth import login
+    from django.contrib.auth.models import User
+    from allauth.socialaccount.models import SocialAccount, SocialApp
+    
+    code = request.GET.get('code')
+    if not code:
+        return redirect('login')
+    
+    # 카카오에서 토큰 획득
+    token_url = 'https://kauth.kakao.com/oauth/token'
+    token_data = {
+        'grant_type': 'authorization_code',
+        'client_id': '60e6a9eaa8547966f54c5db6a27481d9',
+        'redirect_uri': 'http://localhost:8000/kakao/callback/',
+        'code': code,
+    }
+    
+    token_response = requests.post(token_url, data=token_data)
+    token_json = token_response.json()
+    
+    if 'access_token' not in token_json:
+        return redirect('login')
+    
+    access_token = token_json['access_token']
+    
+    # 카카오에서 사용자 정보 획득
+    user_info_url = 'https://kapi.kakao.com/v2/user/me'
+    user_info_response = requests.get(
+        user_info_url,
+        headers={'Authorization': f'Bearer {access_token}'}
+    )
+    user_info = user_info_response.json()
+    
+    kakao_id = user_info['id']
+    nickname = user_info.get('properties', {}).get('nickname', f'kakao_user_{kakao_id}')
+    email = user_info.get('kakao_account', {}).get('email', '')
+    
+    # 사용자 확인 또는 생성
+    try:
+        social_account = SocialAccount.objects.get(provider='kakao', uid=str(kakao_id))
+        user = social_account.user
+    except SocialAccount.DoesNotExist:
+        # 새 사용자 생성
+        user = User.objects.create_user(
+            username=f'kakao_{kakao_id}',
+            email=email,
+            first_name=nickname
+        )
+        
+        # SocialAccount 생성
+        SocialAccount.objects.create(
+            user=user,
+            provider='kakao',
+            uid=str(kakao_id),
+            extra_data=user_info
+        )
+    
+    # 로그인 처리
+    login(request, user)
+    return redirect('index')
+
 # 로그아웃 후 로그인 페이지로 리다이렉트하는 커스텀 뷰
 def custom_logout_view(request):
     logout(request)

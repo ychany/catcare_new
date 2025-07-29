@@ -23,6 +23,7 @@ from django.views.generic import RedirectView
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect
 from emergency_app import views as emergency_views
+from common_app.views import kakao_callback
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,10 +34,11 @@ urlpatterns = [
     path('accounts/logout/', auth_views.LogoutView.as_view(
         next_page=settings.LOGIN_URL
     ), name='logout'),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('allauth.urls')),
     path('home/', views.index, name='index'),
     path('register/', views.register, name='register'),
     path('pets/', include('common_app.urls')),
+    path('kakao/callback/', kakao_callback, name='kakao_callback'),
     path('board/', include('photo_board_app.urls')),
     path('calendar/', include('calendar_app.urls')),
     path('care/', include('care_calendar.urls', namespace='care_calendar')),
