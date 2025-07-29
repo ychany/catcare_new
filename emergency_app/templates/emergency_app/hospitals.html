@@ -244,6 +244,7 @@
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-lg);
+    max-height: 600px;
 }
 
 .map-header {
@@ -302,6 +303,13 @@
     box-shadow: var(--shadow-md);
     border-color: var(--color-primary-light);
     transform: translateY(-2px);
+}
+
+.hospital-card.initial-message:hover {
+    box-shadow: none;
+    border-color: var(--color-border);
+    transform: none;
+    cursor: default;
 }
 
 .hospital-header {
@@ -648,7 +656,7 @@
   padding: 14px 16px 14px 44px;
   border: 1.5px solid #e5e7eb;
   border-radius: 12px;
-  background: #f9fafb;
+  background: #fff;
   font-size: 16px;
   color: #222f3e;
 }
@@ -668,7 +676,7 @@
   padding: 12px 28px;
   border: 2px solid #3182f6;
   border-radius: 999px;
-  background: #fff;
+  background: transparent;
   color: #3182f6;
   font-size: 16px;
   font-weight: 700;
@@ -1059,7 +1067,7 @@
 
 <div class="hospital-main-narrow">
   <!-- 검색 카드 -->
-  <div class="hospital-card-style hospital-search-section">
+  <div class="hospital-search-section">
     <div class="search-controls">
       <div class="search-box">
         <i class="fas fa-search search-icon"></i>
@@ -1079,7 +1087,7 @@
         <i class="fas fa-map-marker-alt" style="color: #3182f6;"></i>
         <h3 class="map-title">주변 병원 지도</h3>
       </div>
-      <div class="map-container" id="map" style="height:400px;"></div>
+      <div class="map-container" id="map" style="height:520px;"></div>
     </div>
     <div class="hospital-list-section">
       <div class="hospital-list-header">
@@ -1215,7 +1223,7 @@ function showInitialMessage() {
     if (!hospitalListContainer) return;
     
     hospitalListContainer.innerHTML = `
-        <div class="hospital-card">
+        <div class="hospital-card initial-message">
             <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
                 <i class="fas fa-search" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3; color: #3182f6;"></i>
                 <h4 style="margin-bottom: var(--spacing-sm); color: var(--color-text);">병원을 검색해보세요</h4>
@@ -1346,7 +1354,7 @@ function searchAnimalHospitals(keyword) {
                 const hospitalListContainer = document.querySelector('.hospital-list');
                 if (hospitalListContainer) {
                     hospitalListContainer.innerHTML = `
-                        <div class="hospital-card">
+                        <div class="hospital-card initial-message">
                             <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
                                 <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3; color: #f59e0b;"></i>
                                 <h4 style="margin-bottom: var(--spacing-sm); color: var(--color-text);">검색 결과가 없습니다</h4>
@@ -1531,7 +1539,7 @@ function updateHospitalList(hospitalData) {
 
   if (hospitalData.length === 0) {
     hospitalListContainer.innerHTML = `
-        <div class="hospital-card">
+        <div class="hospital-card initial-message">
             <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-muted);">
                 <i class="fas fa-search" style="font-size: 48px; margin-bottom: var(--spacing-md); opacity: 0.3;"></i>
                 <p>검색 결과가 없습니다.</p>
@@ -1703,9 +1711,18 @@ function toggleExistingHospitalFavorite(hospitalId, button) {
             if (data.is_favorite) {
                 button.classList.add('favorited');
                 button.title = '즐겨찾기 해제';
+                // favoriteHospitalIds 배열에 추가
+                if (!favoriteHospitalIds.includes(hospitalId)) {
+                    favoriteHospitalIds.push(hospitalId);
+                }
             } else {
                 button.classList.remove('favorited');
                 button.title = '즐겨찾기';
+                // favoriteHospitalIds 배열에서 제거
+                const index = favoriteHospitalIds.indexOf(hospitalId);
+                if (index > -1) {
+                    favoriteHospitalIds.splice(index, 1);
+                }
             }
             button.disabled = false;
         }
@@ -1807,7 +1824,11 @@ function addSearchHospitalToFavorites(hospitalId, button) {
             button.title = '즐겨찾기 해제';
             button.disabled = false;
             
-            alert('즐겨찾기에 추가되었습니다!');
+            // favoriteHospitalIds 배열에 추가
+            if (!favoriteHospitalIds.includes(data.hospital_id)) {
+                favoriteHospitalIds.push(data.hospital_id);
+            }
+            
             
             // 즐겨찾기 목록 새로고침
             updateFavoritesList();
@@ -1841,7 +1862,27 @@ function getCookie(name) {
 
 // 즐겨찾기 목록 업데이트
 function updateFavoritesList() {
-    location.reload();
+    fetch('/emergency/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newFavorites = doc.querySelector('#favorite-hospitals-container');
+        const currentFavorites = document.querySelector('#favorite-hospitals-container');
+        
+        if (newFavorites && currentFavorites) {
+            currentFavorites.innerHTML = newFavorites.innerHTML;
+        }
+    })
+    .catch(error => {
+        console.error('Error updating favorites list:', error);
+    });
 }
 
 // 직접 즐겨찾기 추가 함수 (검색된 병원용)
@@ -1888,8 +1929,20 @@ function directAddToFavorites(hospitalIdx) {
     .then(data => {
         console.log('Success:', data);
         if (data.success) {
-            alert('즐겨찾기에 추가되었습니다!');
-            location.reload(); // 페이지 새로고침으로 즐겨찾기 목록 업데이트
+            
+            // 즐겨찾기 목록 업데이트
+            updateFavoritesList();
+            
+            // 해당 버튼 찾아서 상태 업데이트
+            const buttons = document.querySelectorAll('.favorite-star-btn');
+            buttons.forEach(btn => {
+                const onclick = btn.getAttribute('onclick');
+                if (onclick && onclick.includes(`directAddToFavorites(${hospitalIdx})`)) {
+                    btn.setAttribute('onclick', `toggleFavorite(${data.hospital_id}, this)`);
+                    btn.classList.add('favorited');
+                    btn.title = '즐겨찾기 해제';
+                }
+            });
         } else {
             alert(data.message || '즐겨찾기 추가 중 오류가 발생했습니다.');
         }
