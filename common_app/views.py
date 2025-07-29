@@ -218,14 +218,11 @@ def kakao_callback(request):
     # 에러 처리
     error = request.GET.get('error')
     if error:
-        print(f"DEBUG: Kakao login error: {error}")
         return redirect('login')
     
     code = request.GET.get('code')
-    print(f"DEBUG: Received code: {code[:20]}..." if code else "No code")
     
     if not code:
-        print("DEBUG: No code found, redirecting to login")
         return redirect('login')
     
     try:
@@ -239,17 +236,14 @@ def kakao_callback(request):
             'code': code,
         }
         
-        print("DEBUG: Requesting token from Kakao...")
         token_response = requests.post(token_url, data=token_data)
         token_json = token_response.json()
         
         if 'access_token' not in token_json:
             error_msg = token_json.get('error_description', 'Unknown error')
-            print(f"DEBUG: Token error: {error_msg}")
             return redirect('login')
         
         access_token = token_json['access_token']
-        print("DEBUG: Access token obtained successfully")
         
         # 카카오에서 사용자 정보 획득
         user_info_url = 'https://kapi.kakao.com/v2/user/me'
@@ -263,17 +257,13 @@ def kakao_callback(request):
         nickname = user_info.get('properties', {}).get('nickname', f'kakao_user_{kakao_id}')
         email = user_info.get('kakao_account', {}).get('email', '')
         
-        print(f"DEBUG: Kakao user info - ID: {kakao_id}, Nickname: {nickname}, Email: {email}")
-        print(f"DEBUG: Full kakao_account: {user_info.get('kakao_account', {})}")
         
-        print(f"DEBUG: Kakao user - ID: {kakao_id}, Nickname: {nickname}")
         
         # 사용자 확인 또는 생성
         is_new_user = False
         try:
             social_account = SocialAccount.objects.get(provider='kakao', uid=str(kakao_id))
             user = social_account.user
-            print(f"DEBUG: Existing user found: {user.username}")
             
             # 기존 사용자의 정보 업데이트
             updated = False
@@ -290,19 +280,16 @@ def kakao_callback(request):
                 user.username = username
                 user.first_name = nickname
                 updated = True
-                print(f"DEBUG: Updated username to: {username}")
             
             # 이메일이 비어있거나 다르면 업데이트
             if email and user.email != email:
                 user.email = email
                 updated = True
-                print(f"DEBUG: Updated email to: {email}")
             
             if updated:
                 user.save()
                 
         except SocialAccount.DoesNotExist:
-            print(f"DEBUG: Creating new user for kakao_id: {kakao_id}")
             is_new_user = True
             
             # 새 사용자 생성
@@ -327,22 +314,14 @@ def kakao_callback(request):
                 uid=str(kakao_id),
                 extra_data=user_info
             )
-            print(f"DEBUG: New user created: {user.username}")
         
         # 로그인 처리
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        print(f"DEBUG: User logged in: {user.username}")
         
-        # 새 사용자라면 추가 정보 입력 페이지로, 기존 사용자라면 홈으로
-        if is_new_user:
-            return redirect('pet_register')  # 펫 등록 페이지로 리다이렉트
-        else:
-            return redirect('index')
+        # 새 사용자든 기존 사용자든 홈으로
+        return redirect('index')
         
     except Exception as e:
-        print(f"DEBUG: Exception occurred: {str(e)}")
-        import traceback
-        traceback.print_exc()
         return redirect('login')
 
 # 로그아웃 후 로그인 페이지로 리다이렉트하는 커스텀 뷰
