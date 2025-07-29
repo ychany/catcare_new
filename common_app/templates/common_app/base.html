@@ -560,26 +560,6 @@
 
                 <!-- Navigation Menu -->
                 <ul class="nav-menu">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a href="{% url 'photo_board_app:list' %}" class="nav-link">
-                                <i class="fas fa-camera"></i>
-                                추억 저장
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'index' %}" class="nav-link">
-                                <i class="fas fa-home"></i>
-                                홈으로
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'index' %}" class="nav-link">
-                                <i class="fas fa-tachometer-alt"></i>
-                                대시보드
-                            </a>
-                        </li>
-                    {% endif %}
                 </ul>
 
                 <!-- User Actions -->
@@ -590,6 +570,10 @@
                                 {{ user.username|first|upper }}
                             </div>
                             <span>{{ user.username }}</span>
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm">
+                            <i class="fas fa-sign-out-alt"></i>
+                            로그아웃
                         </a>
                     {% else %}
                         <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">
