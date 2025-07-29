@@ -14,7 +14,9 @@
       "Bash(taskkill:*)",
       "Bash(tasklist:*)",
       "Bash(cmd /c:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(dir:*)",
+      "Bash(pip uninstall:*)"
     ],
     "deny": []
   }
