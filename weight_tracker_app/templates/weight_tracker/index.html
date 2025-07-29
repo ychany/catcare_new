@@ -307,10 +307,50 @@
 .records-container {
     padding: var(--spacing-xl);
 }
+.records-pagination-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    position: relative;
+}
+.pagination-btn {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-full);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.pagination-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--bg-tertiary);
+}
 .records-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-lg);
+    flex: 1;
+    min-height: 400px;
+}
+.pagination-info {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+    font-size: 14px;
+    color: var(--text-secondary);
 }
 .record-item {
     background: var(--bg-tertiary);
@@ -564,11 +604,17 @@
     .stats-section { grid-template-columns: 1fr; }
     .pet-changes-grid { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
-    .records-grid { grid-template-columns: 1fr; }
+    .records-grid { grid-template-columns: 1fr; min-height: 300px; }
     .section-header { flex-direction: column; gap: var(--spacing-md); align-items: stretch; }
     .section-filters { justify-content: center; }
     .nav-right { flex-direction: column; width: 100%; }
     .nav-btn { justify-content: center; }
+    .records-pagination-wrapper { flex-direction: column; gap: var(--spacing-md); }
+    .pagination-btn { width: 40px; height: 40px; font-size: 14px; }
+}
+@media (max-width: 480px) {
+    .records-grid { grid-template-columns: 1fr; min-height: 200px; }
+    .pagination-btn { width: 36px; height: 36px; font-size: 12px; }
 }
 </style>
 
@@ -702,7 +748,18 @@
             </div>
 
             <div class="records-container">
-                <div class="records-grid" id="recordsGrid">
+                <div class="records-pagination-wrapper">
+                    <button type="button" class="pagination-btn prev-btn" id="prevBtn" onclick="changePage(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="records-grid" id="recordsGrid">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                    <button type="button" class="pagination-btn next-btn" id="nextBtn" onclick="changePage(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="pagination-info" id="paginationInfo">
                     <!-- JavaScript로 동적 생성 -->
                 </div>
                 <div class="no-records" id="noRecords" style="display: none;">
@@ -722,8 +779,28 @@
 <script>
 let weightChart = null; // 최상단 전역 선언
 let allData = []; // 전역 변수로 선언
+let currentPage = 1; // 현재 페이지
+let recordsPerPage = 9; // 페이지당 레코드 수 (3x3)
+let filteredData = []; // 필터된 데이터
+
+// 화면 크기에 따라 페이지당 레코드 수 설정
+function updateRecordsPerPage() {
+    recordsPerPage = 9; // 모든 화면 크기에서 9개로 고정
+}
 
 document.addEventListener('DOMContentLoaded', function() {
+    // 초기 페이지당 레코드 수 설정
+    updateRecordsPerPage();
+    
+    // 윈도우 리사이즈 시 페이지당 레코드 수 업데이트
+    window.addEventListener('resize', function() {
+        updateRecordsPerPage();
+        // 현재 필터로 다시 렌더링
+        if (allData.length > 0) {
+            filterAndRenderRecords();
+        }
+    });
+    
     // 반려동물 목록을 드롭다운에 추가
     const pets = JSON.parse('{{ user_pets|safe|escapejs }}');
     const petSelect = document.getElementById('pet');
@@ -965,19 +1042,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateRecordsGrid(data) {
+        filteredData = data; // 필터된 데이터 저장
+        
         const recordsGrid = document.getElementById('recordsGrid');
         const noRecords = document.getElementById('noRecords');
         const filterInfo = document.getElementById('filterInfo');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
         
         if (data.length === 0) {
             recordsGrid.style.display = 'none';
             noRecords.style.display = 'block';
             filterInfo.textContent = '';
+            paginationInfo.textContent = '';
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
             return;
         }
 
         recordsGrid.style.display = 'grid';
         noRecords.style.display = 'none';
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
         
         const selectedPet = petFilter.value;
         let infoText = `총 ${data.length}개의 기록`;
@@ -987,8 +1074,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         filterInfo.textContent = infoText;
 
+        // 페이지네이션 계산
+        const totalPages = Math.ceil(data.length / recordsPerPage);
+        
+        // 현재 페이지가 총 페이지 수를 초과하지 않도록 조정
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
+        
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = startIndex + recordsPerPage;
+        const pageData = data.slice(startIndex, endIndex);
+
+        console.log('updateRecordsGrid - totalPages:', totalPages, 'currentPage:', currentPage, 'pageData length:', pageData.length);
+
+        // 페이지네이션 정보 업데이트
+        paginationInfo.textContent = `${currentPage} / ${totalPages} 페이지`;
+        
+        // 버튼 상태 업데이트
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+
         recordsGrid.innerHTML = '';
-        data.forEach(item => {
+        pageData.forEach(item => {
             const recordItem = document.createElement('div');
             recordItem.className = 'record-item';
 
@@ -1160,6 +1268,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 데이터 로드 및 초기화
     function loadData() {
+        currentPage = 1; // 데이터 로드 시 첫 페이지로 초기화
         fetch('/weight/api/weights/')
             .then(response => response.json())
             .then(data => {
@@ -1174,6 +1283,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function filterAndRenderRecords() {
+        console.log('filterAndRenderRecords called, resetting currentPage to 1');
+        currentPage = 1; // 필터 변경 시 첫 페이지로 리셋
         const selectedPet = petFilter.value;
         let filtered = allData;
         
@@ -1181,6 +1292,7 @@ document.addEventListener('DOMContentLoaded', function() {
             filtered = allData.filter(item => String(item.pet) === selectedPet);
         }
         
+        console.log('Calling updateRecordsGrid with', filtered.length, 'records');
         updateRecordsGrid(filtered);
     }
 
@@ -1237,7 +1349,35 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 초기 데이터 로드
+    console.log('Initial currentPage:', currentPage);
     loadData();
+
+    // 페이지 변경 함수
+    window.changePage = function(direction) {
+        console.log('changePage called, direction:', direction);
+        console.log('filteredData length:', filteredData.length);
+        console.log('currentPage before:', currentPage);
+        
+        const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+        const newPage = currentPage + direction;
+        
+        console.log('totalPages:', totalPages, 'newPage:', newPage);
+        
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            console.log('Updated currentPage to:', currentPage);
+            
+            // 현재 필터된 데이터로 다시 렌더링
+            const selectedPet = document.getElementById('petFilter').value;
+            let filtered = allData;
+            if (selectedPet) {
+                filtered = allData.filter(item => String(item.pet) === selectedPet);
+            }
+            updateRecordsGrid(filtered);
+        } else {
+            console.log('Page change rejected - out of bounds');
+        }
+    };
 
     // 기본 필터 설정
     if (pets.length > 0) {
@@ -1266,6 +1406,19 @@ function deleteRecord(recordId) {
                     allData = data;
                     updatePetChangesSection(data);
                     updateChart(data);
+                    
+                    // 삭제 후 현재 페이지 조정
+                    const selectedPet = petFilter.value;
+                    let filtered = allData;
+                    if (selectedPet) {
+                        filtered = allData.filter(item => String(item.pet) === selectedPet);
+                    }
+                    
+                    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+                    if (currentPage > totalPages && totalPages > 0) {
+                        currentPage = totalPages;
+                    }
+                    
                     filterAndRenderRecords();
                 });
         } else {
